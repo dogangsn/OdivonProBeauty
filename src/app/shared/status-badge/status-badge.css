@@ -1,0 +1,6 @@
+.status { display: inline-flex; align-items: center; border: 1px solid; border-radius: 999px; padding: .28rem .65rem; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.status--positive { color: #047857; border-color: #a7f3d0; background: #ecfdf5; }
+.status--warning { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+.status--danger { color: #be123c; border-color: #fecdd3; background: #fff1f2; }
+.status--info { color: #0369a1; border-color: #bae6fd; background: #f0f9ff; }
+:host-context(.dark) .status { filter: saturate(.85) brightness(.9); }

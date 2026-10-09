@@ -1,0 +1,20 @@
+<div class="app-shell">
+  <button class="mobile-toggle" type="button" aria-label="Menuyu ac" (click)="menuOpen.update(value => !value)">☰</button>
+  <aside [class.is-open]="menuOpen()">
+    <a class="brand" routerLink="/dashboard" aria-label="OdivonPro Beauty ana sayfa">
+      <span class="brand__mark">O</span><span><strong>OdivonPro</strong><small>Beauty Center</small></span>
+    </a>
+    <div class="branch"><small>AKTIF SUBE</small><strong>Nisantasi Merkez</strong><span><i></i> Operasyon aktif</span></div>
+    <nav aria-label="Ana menu">
+      @for (item of items; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" (click)="menuOpen.set(false)"><span>{{ item.icon }}</span>{{ item.label }}</a>
+      }
+    </nav>
+    <a class="portal-link" routerLink="/portal">Musteri portalini ac <span>↗</span></a>
+    <div class="profile"><div class="avatar">DA</div><div><strong>Dogan Admin</strong><small>{{ auth.role() }}</small></div><button type="button" aria-label="Cikis" (click)="auth.logout()">↪</button></div>
+  </aside>
+  <main>
+    <header class="topbar"><div><small>{{ today() }}</small><strong>Guzellik operasyon merkezi</strong></div><div class="top-actions"><button type="button" aria-label="Tema degistir" (click)="theme.toggle()">{{ theme.dark() ? '☀' : '☾' }}</button><button type="button" aria-label="Bildirimler">♢<i></i></button><span class="sync"><i></i> MainApi bagli</span></div></header>
+    <section class="page"><router-outlet /></section>
+  </main>
+</div>

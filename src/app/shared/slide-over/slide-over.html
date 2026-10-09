@@ -1,0 +1,6 @@
+<button class="backdrop" type="button" aria-label="Paneli kapat" (click)="closed.emit()"></button>
+<aside role="dialog" aria-modal="true" [attr.aria-label]="title()">
+  <header><div><p>Hizli islem</p><h2>{{ title() }}</h2><span>{{ description() }}</span></div><button type="button" aria-label="Kapat" (click)="closed.emit()">×</button></header>
+  <section><ng-content /></section>
+  <footer><ng-content select="[drawer-footer]" /></footer>
+</aside>

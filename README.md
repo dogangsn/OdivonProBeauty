@@ -1,5 +1,39 @@
 # OdivonProBeauty
 
+OdivonProBeauty is the Angular web and PWA client for multi-branch beauty, spa and wellness businesses. It covers appointment planning, CRM, packages and sessions, staff, finance, inventory, campaigns, reports, privacy workflows and the customer portal.
+
+## Local development
+
+```bash
+npm ci
+npm start
+```
+
+The client authenticates with Firebase Authentication and sends the ID token to `MAIN_API_URL/api/v1/beauty`. Firestore and Storage are never accessed directly for business data.
+
+## Verification
+
+```bash
+npm run test
+npm run build
+npm run format:check
+```
+
+Configuration examples live in `src/environments`. Never commit real Firebase credentials, service accounts or `.env` files. External SMS, WhatsApp, payment, e-invoice and AI providers are intentionally represented by `not-configured` ports in this release.
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [API and DTO contracts](docs/api-and-dtos.md)
+- [Firestore model](docs/firestore-model.md)
+- [Roles and permissions](docs/roles-and-permissions.md)
+- [Screens and wireframes](docs/screens-and-wireframes.md)
+- [Business rules](docs/business-rules.md)
+- [Testing, CI and operations](docs/testing-and-operations.md)
+- [Delivery phases](docs/roadmap.md)
+
+No license is granted by this repository.
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.2.
 
 ## Development server

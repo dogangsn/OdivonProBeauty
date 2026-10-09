@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+@import 'fullcalendar/skeleton.css';
+
+:root {
+  --canvas: #f8fafc;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --border: rgb(226 232 240 / .9);
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #4f46e5;
+  --shadow: 0 12px 35px rgb(15 23 42 / .055);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color-scheme: light;
+}
+
+:root.dark {
+  --canvas: #0b1120;
+  --surface: #111827;
+  --surface-soft: #172033;
+  --border: rgb(51 65 85 / .85);
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --shadow: 0 18px 50px rgb(0 0 0 / .2);
+  color-scheme: dark;
+}
+
+html, body { min-height: 100%; margin: 0; background: var(--canvas); }
+body { font-family: 'Plus Jakarta Sans', sans-serif; }
+button, input, select, textarea { font-family: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid rgb(99 102 241 / .35); outline-offset: 2px; }
+.fc { color: var(--text); font-size: .76rem; }
+.fc .fc-button-primary { border-color: #4f46e5 !important; background: #4f46e5 !important; }
+.fc .fc-scrollgrid, .fc td, .fc th { border-color: var(--border) !important; }

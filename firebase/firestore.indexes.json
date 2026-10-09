@@ -1,0 +1,12 @@
+{
+  "indexes": [
+    {"collectionGroup":"beautyAppointments","queryScope":"COLLECTION","fields":[{"fieldPath":"branchId","order":"ASCENDING"},{"fieldPath":"startAt","order":"ASCENDING"}]},
+    {"collectionGroup":"beautyAppointments","queryScope":"COLLECTION","fields":[{"fieldPath":"staffId","order":"ASCENDING"},{"fieldPath":"startAt","order":"ASCENDING"}]},
+    {"collectionGroup":"beautyAppointments","queryScope":"COLLECTION","fields":[{"fieldPath":"customerId","order":"ASCENDING"},{"fieldPath":"startAt","order":"DESCENDING"}]},
+    {"collectionGroup":"beautyCustomerPackages","queryScope":"COLLECTION","fields":[{"fieldPath":"customerId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"}]},
+    {"collectionGroup":"beautySessions","queryScope":"COLLECTION","fields":[{"fieldPath":"customerId","order":"ASCENDING"},{"fieldPath":"performedAt","order":"DESCENDING"}]},
+    {"collectionGroup":"beautyPayments","queryScope":"COLLECTION","fields":[{"fieldPath":"branchId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"}]},
+    {"collectionGroup":"beautyAuditLogs","queryScope":"COLLECTION","fields":[{"fieldPath":"entityType","order":"ASCENDING"},{"fieldPath":"entityId","order":"ASCENDING"},{"fieldPath":"createdAt","order":"DESCENDING"}]}
+  ],
+  "fieldOverrides": []
+}

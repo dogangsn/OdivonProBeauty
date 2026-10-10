@@ -31,6 +31,7 @@ Configuration examples live in `src/environments`. Never commit real Firebase cr
 - [Business rules](docs/business-rules.md)
 - [Testing, CI and operations](docs/testing-and-operations.md)
 - [Delivery phases](docs/roadmap.md)
+- [Cloudflare deployment](docs/cloudflare-deployment.md)
 
 No license is granted by this repository.
 

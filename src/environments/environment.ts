@@ -1,11 +1,12 @@
 export const environment = {
-  apiBaseUrl: 'https://mainapi.odivon.com/api/v1/beauty',
+  apiBaseUrl: 'https://mainapi.odivon.com/api/v1',
   firebase: {
-    apiKey: '',
+    apiKey: 'AIzaSyCwgdM7d6BH7NCOiJvD5AiRUsppDaYGQLw',
     authDomain: 'odivon-main-api-a2095.firebaseapp.com',
     projectId: 'odivon-main-api-a2095',
     storageBucket: 'odivon-main-api-a2095.firebasestorage.app',
-    messagingSenderId: '',
-    appId: '',
+    messagingSenderId: '845036233177',
+    appId: '1:845036233177:web:ba0cbe0dcdb48e197bf9c8',
+    measurementId: 'G-MMS2CRNXQP',
   },
 };

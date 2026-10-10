@@ -17,7 +17,7 @@ export interface ListQuery {
 @Service()
 export class ApiClient {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
+  private readonly baseUrl = `${environment.apiBaseUrl.replace(/\/$/, '')}/beauty`;
 
   list<T extends BeautyRecord>(resource: string, query: ListQuery = {}) {
     let params = new HttpParams();

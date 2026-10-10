@@ -1,7 +1,7 @@
 export const environment = {
   apiBaseUrl: 'https://mainapi.odivon.com/api/v1',
   firebase: {
-    apiKey: 'AIzaSyCwgdM7d6BH7NCOiJvD5AiRUsppDaYGQLw',
+    apiKey: 'AIzaSyAu1u-wKeR9RQBhp6lqUvo64ZbQ5fNDIGg',
     authDomain: 'odivon-main-api-a2095.firebaseapp.com',
     projectId: 'odivon-main-api-a2095',
     storageBucket: 'odivon-main-api-a2095.firebasestorage.app',

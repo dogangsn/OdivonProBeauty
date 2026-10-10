@@ -1,1 +1,79 @@
-<header><div><p>UZMAN DESTEK SISTEMI</p><h1>AI Bakim Onerisi</h1><span>Cilt analizi, gecmis ve kontrendikasyonlardan aciklanabilir bir taslak uretir.</span></div><app-status-badge status="not-configured" /></header><div class="notice"><strong>Guvenli taslak modu</strong><span>Gercek model saglayicisi yapilandirilmadi. Oneriler uzman onayi olmadan randevu veya tedavi olusturmaz.</span></div><section class="grid"><form (submit)="preview(); $event.preventDefault()"><h2>Degerlendirme girdileri</h2><label>Musteri<select [formField]="recommendationForm.customerId"><option value="">Musteri secin</option><option value="cus-001">Elif Kaya</option><option value="cus-002">Ayse Demir</option></select></label><label>Bakim hedefi<input [formField]="recommendationForm.goal" placeholder="Orn. leke gorunumu ve nem dengesi" /></label><label>Cilt tipi<select [formField]="recommendationForm.skinType"><option value="combination">Karma</option><option value="dry">Kuru</option><option value="oily">Yagli</option><option value="sensitive">Hassas</option></select></label><label>Uzman notu<textarea [formField]="recommendationForm.notes" rows="5"></textarea></label><button type="submit" [disabled]="recommendationForm().invalid()">Taslak oneriyi uret</button></form><article>@if (!generated()) {<div class="empty"><span>✺</span><h2>Oneri henuz olusturulmadi</h2><p>Sol taraftaki degerlendirmeyi tamamlayin.</p></div>} @else {<p>ONERI TASLAGI</p><h2>Nem bariyeri odakli 4 haftalik protokol</h2><ul><li><strong>1. hafta:</strong> Hassas cilt uyumlu Hydrafacial</li><li><strong>2-3. hafta:</strong> Bariyer destekleyici ev bakimi</li><li><strong>4. hafta:</strong> Cilt analizi tekrar olcumu</li></ul><div class="risk"><strong>Kontrendikasyon kontrolu gerekli</strong><span>Alerji kaydindaki retinoid hassasiyeti uzman tarafindan dogrulanmali.</span></div><footer><button type="button">Reddet</button><button type="button">Uzman onayina gonder</button></footer>}</article></section>
+<header>
+  <div>
+    <p>UZMAN DESTEK SİSTEMİ</p>
+    <h1>AI Bakım Önerisi</h1>
+    <span>Cilt analizi, geçmiş ve kontrendikasyonlardan açıklanabilir bir taslak üretir.</span>
+  </div>
+  <app-status-badge [status]="result()?.status || 'not-configured'" />
+</header>
+<div class="notice">
+  <strong>Uzman onayı zorunlu</strong
+  ><span
+    >Öneri sağlayıcısının durumu MainApi üzerinden kontrol edilir. Hiçbir taslak uzman onayı olmadan
+    tedaviye dönüşmez.</span
+  >
+</div>
+<section class="grid">
+  <form (submit)="preview(); $event.preventDefault()">
+    <h2>Değerlendirme girdileri</h2>
+    <label
+      >Müşteri<select [formField]="recommendationForm.customerId">
+        <option value="">Müşteri seçin</option>
+        @for (customer of customers.value() ?? []; track customer.id) {
+          <option [value]="customer.id">{{ customerName(customer) }}</option>
+        }
+      </select></label
+    ><label
+      >Bakım hedefi<input
+        [formField]="recommendationForm.goal"
+        placeholder="Bakım hedefini yazın" /></label
+    ><label
+      >Cilt tipi<select [formField]="recommendationForm.skinType">
+        <option value="combination">Karma</option>
+        <option value="dry">Kuru</option>
+        <option value="oily">Yağlı</option>
+        <option value="sensitive">Hassas</option>
+      </select></label
+    ><label>Uzman notu<textarea [formField]="recommendationForm.notes" rows="5"></textarea></label>
+    @if (error()) {
+      <div class="risk">
+        <strong>İstek tamamlanamadı</strong><span>{{ error() }}</span>
+      </div>
+    }
+    <button type="submit" [disabled]="loading() || recommendationForm().invalid()">
+      {{ loading() ? 'Hazırlanıyor…' : 'Taslak öneriyi üret' }}
+    </button>
+  </form>
+  <article>
+    @if (!result()) {
+      <div class="empty">
+        <span>✺</span>
+        <h2>Öneri henüz oluşturulmadı</h2>
+        <p>Canlı müşteri kaydını seçip değerlendirmeyi tamamlayın.</p>
+      </div>
+    } @else {
+      <p>MAINAPI SONUCU</p>
+      <h2>{{ result()?.draft?.title || 'Sağlayıcı yapılandırılmadı' }}</h2>
+      @if (result()?.draft?.steps?.length) {
+        <ul>
+          @for (step of result()?.draft?.steps; track step) {
+            <li>{{ step }}</li>
+          }
+        </ul>
+      }
+      @if (result()?.draft?.warnings?.length) {
+        <div class="risk">
+          <strong>Kontrol gereken noktalar</strong>
+          @for (warning of result()?.draft?.warnings; track warning) {
+            <span>{{ warning }}</span>
+          }
+        </div>
+      }
+      <footer>
+        <span>{{
+          result()?.requiresSpecialistApproval ? 'Uzman onayı bekleniyor' : 'Onay gerekmiyor'
+        }}</span>
+      </footer>
+    }
+  </article>
+</section>

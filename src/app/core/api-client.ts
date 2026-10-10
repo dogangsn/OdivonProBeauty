@@ -17,7 +17,8 @@ export interface ListQuery {
 @Service()
 export class ApiClient {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiBaseUrl.replace(/\/$/, '')}/beauty`;
+  private readonly apiRoot = environment.apiBaseUrl.replace(/\/$/, '');
+  private readonly baseUrl = `${this.apiRoot}/beauty`;
 
   list<T extends BeautyRecord>(resource: string, query: ListQuery = {}) {
     let params = new HttpParams();
@@ -43,6 +44,13 @@ export class ApiClient {
 
   remove(resource: string, id: string) {
     return this.http.delete<ApiSuccess<{ id: string }>>(`${this.baseUrl}/${resource}/${id}`);
+  }
+
+  request<T>(method: 'GET' | 'POST' | 'PATCH', path: string, body?: unknown) {
+    const url = `${this.apiRoot}/${path.replace(/^\//, '')}`;
+    if (method === 'GET') return this.http.get<ApiSuccess<T>>(url);
+    if (method === 'PATCH') return this.http.patch<ApiSuccess<T>>(url, body ?? {});
+    return this.http.post<ApiSuccess<T>>(url, body ?? {});
   }
 
   private message(error: HttpErrorResponse): Error {

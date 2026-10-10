@@ -1,1 +1,115 @@
-<header><div><p>OPERASYON TAKVIMI</p><h1>Randevular</h1><span>Uzman, oda ve cihaz cakismalarini tek gorunumde yonetin.</span></div><button type="button">+ Hizli randevu</button></header><section class="filters"><button type="button" class="active">Tum uzmanlar</button><button type="button">Nisantasi</button><button type="button">Oda / cihaz</button><span><i></i> Canli musaitlik</span></section><section class="calendar-card"><full-calendar [options]="options" /></section>
+<header class="page-head">
+  <div>
+    <p>OPERASYON TAKVİMİ</p>
+    <h1>Randevular</h1>
+    <span>Uzman, oda ve cihaz çakışmalarını canlı takvimde yönetin.</span>
+  </div>
+  <button type="button" (click)="openCreate()"><span>+</span>Hızlı randevu</button>
+</header>
+<section class="filters">
+  <label
+    ><span>Şube</span
+    ><select [value]="branchId()" (change)="changeBranch($event)">
+      <option value="">Tüm şubeler</option>
+      @for (branch of branches.value() ?? []; track branch.id) {
+        <option [value]="branch.id">{{ branch.name }}</option>
+      }
+    </select></label
+  ><span class="live"
+    ><i></i
+    >{{
+      appointments.error()
+        ? 'Bağlantı hatası'
+        : appointments.isLoading()
+          ? 'Yükleniyor'
+          : 'Canlı takvim'
+    }}</span
+  >
+</section>
+<section class="calendar-card">
+  @if (appointments.error()) {
+    <div class="state">
+      <strong>Takvim verileri alınamadı</strong><span>{{ appointments.error() }}</span
+      ><button type="button" (click)="appointments.reload()">Tekrar dene</button>
+    </div>
+  } @else {
+    <full-calendar [options]="options()" />
+  }
+</section>
+@if (drawerOpen()) {
+  <app-slide-over
+    title="Yeni randevu"
+    description="Uygunluk kontrolleri MainApi tarafından otomatik yapılır."
+    (closed)="drawerOpen.set(false)"
+    ><form class="appointment-form" (submit)="save(); $event.preventDefault()">
+      <label
+        >Şube<select [formField]="appointmentForm.branchId">
+          <option value="">Şube seçin</option>
+          @for (item of branches.value() ?? []; track item.id) {
+            <option [value]="item.id">{{ item.name }}</option>
+          }
+        </select></label
+      ><label
+        >Müşteri<select [formField]="appointmentForm.customerId">
+          <option value="">Müşteri seçin</option>
+          @for (item of customers.value() ?? []; track item.id) {
+            <option [value]="item.id">{{ name(item) }}</option>
+          }
+        </select></label
+      >
+      <div class="form-grid">
+        <label
+          >Uzman<select [formField]="appointmentForm.staffId">
+            <option value="">Uzman seçin</option>
+            @for (item of staff.value() ?? []; track item.id) {
+              <option [value]="item.id">{{ name(item) }}</option>
+            }
+          </select></label
+        ><label
+          >Hizmet<select [formField]="appointmentForm.serviceId">
+            <option value="">Hizmet seçin</option>
+            @for (item of services.value() ?? []; track item.id) {
+              <option [value]="item.id">{{ name(item) }}</option>
+            }
+          </select></label
+        >
+      </div>
+      <div class="form-grid">
+        <label>Başlangıç<input type="datetime-local" [formField]="appointmentForm.startAt" /></label
+        ><label>Bitiş<input type="datetime-local" [formField]="appointmentForm.endAt" /></label>
+      </div>
+      <div class="form-grid">
+        <label
+          >Oda<select [formField]="appointmentForm.roomId">
+            <option value="">Oda seçilmedi</option>
+            @for (item of rooms.value() ?? []; track item.id) {
+              <option [value]="item.id">{{ name(item) }}</option>
+            }
+          </select></label
+        ><label
+          >Cihaz<select [formField]="appointmentForm.deviceId">
+            <option value="">Cihaz seçilmedi</option>
+            @for (item of devices.value() ?? []; track item.id) {
+              <option [value]="item.id">{{ name(item) }}</option>
+            }
+          </select></label
+        >
+      </div>
+      <label>Not<textarea rows="4" [formField]="appointmentForm.notes"></textarea></label>
+      @if (error()) {
+        <div class="form-error">{{ error() }}</div>
+      }
+    </form>
+    <div drawer-footer class="drawer-actions">
+      <button type="button" (click)="drawerOpen.set(false)">Vazgeç</button
+      ><button
+        class="primary"
+        type="button"
+        [disabled]="saving() || appointmentForm().invalid()"
+        (click)="save()"
+      >
+        {{ saving() ? 'Oluşturuluyor…' : 'Randevu oluştur' }}
+      </button>
+    </div></app-slide-over
+  >
+}

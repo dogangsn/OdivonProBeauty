@@ -21,9 +21,11 @@ export class Login {
   protected login(): void {
     submit(this.loginForm, async () => {
       this.error.set('');
-      try { await this.auth.login(this.loginModel().email, this.loginModel().password); }
-      catch { this.error.set('Giris tamamlanamadi. Firebase yapilandirmasini kontrol edin.'); }
+      try {
+        await this.auth.login(this.loginModel().email, this.loginModel().password);
+      } catch {
+        this.error.set('Giris tamamlanamadi. Firebase yapilandirmasini kontrol edin.');
+      }
     });
   }
-  protected demo(): void { this.auth.enterDemo('owner'); }
 }

@@ -1,4 +1,94 @@
-<header class="hero"><div><p>OPERASYON OZETI</p><h1>Gunaydin, Dogan 👋</h1><span>Bugun 32 randevu ve 4 kritik aksiyon seni bekliyor.</span></div><div class="hero__actions"><a routerLink="/appointments">Takvimi ac</a><a class="primary" routerLink="/customers">+ Yeni musteri</a></div></header>
-<section class="kpi-grid"><app-kpi-card label="Bugunun randevusu" value="32" detail="%12 gecen haftaya gore" /><app-kpi-card label="Gunluk ciro" value="₺84.6K" detail="Hedefin %78'i" tone="emerald" /><app-kpi-card label="Doluluk" value="%86" detail="3 uygun zaman kaldi" tone="amber" /><app-kpi-card label="Kritik stok" value="4" detail="Siparis aksiyonu gerekli" tone="rose" /></section>
-<section class="dashboard-grid"><article class="panel revenue"><header><div><p>CIRO EGILIMI</p><h2>Son 7 gun performansi</h2></div><strong>₺412.840</strong></header><div class="chart"><canvas baseChart type="line" [data]="chartData" [options]="chartOptions"></canvas></div></article><article class="panel next"><header><div><p>SIRADAKI</p><h2>Yaklasan randevular</h2></div><a routerLink="/appointments">Tumu</a></header>@for (item of [{time:'10:30',name:'Elif Kaya',service:'Hydrafacial bakim',status:'confirmed'},{time:'11:15',name:'Melis Aydin',service:'Lazer - tam bacak',status:'checked-in'},{time:'12:00',name:'Ceren Yilmaz',service:'Lenf drenaj',status:'pending'}]; track item.time) {<div class="appointment"><time>{{ item.time }}</time><div><strong>{{ item.name }}</strong><span>{{ item.service }}</span></div><app-status-badge [status]="item.status" /></div>}</article></section>
-<section class="quick"><article><span>⚡</span><div><strong>Hizli randevu</strong><small>Musaitlik kontroluyle olustur</small></div><a routerLink="/appointments">Baslat →</a></article><article><span>◇</span><div><strong>Paket satisi</strong><small>Seans ve tahsilat akisi</small></div><a routerLink="/sessions">Baslat →</a></article><article><span>✺</span><div><strong>AI bakim onerisi</strong><small>Uzman onayli taslak</small></div><a routerLink="/ai-recommendations">Incele →</a></article></section>
+<header class="hero">
+  <div>
+    <p>OPERASYON ÖZETİ</p>
+    <h1>Merhaba, {{ displayName() }}</h1>
+    <span>Canlı işletme verileriniz tek görünümde.</span>
+  </div>
+  <div class="hero__actions">
+    <a routerLink="/appointments">Takvimi aç</a
+    ><a class="primary" routerLink="/customers" [queryParams]="{ create: 1 }">+ Yeni müşteri</a>
+  </div>
+</header>
+@if (summary.error()) {
+  <div class="dashboard-error">
+    <strong>Özet verileri alınamadı.</strong
+    ><button type="button" (click)="summary.reload()">Tekrar dene</button>
+  </div>
+}
+<section class="kpi-grid">
+  <app-kpi-card
+    label="Randevular"
+    [value]="count(summary.value()?.appointments)"
+    detail="Tenant kapsamındaki toplam"
+  /><app-kpi-card
+    label="Toplam ciro"
+    [value]="currency(summary.value()?.revenue)"
+    detail="Kaydedilmiş ödeme toplamı"
+    tone="emerald"
+  /><app-kpi-card
+    label="Müşteriler"
+    [value]="count(summary.value()?.customers)"
+    detail="Aktif CRM kayıtları"
+    tone="amber"
+  /><app-kpi-card
+    label="Kritik stok"
+    [value]="count(summary.value()?.criticalStock)"
+    detail="Kontrol edilmesi gereken ürün"
+    tone="rose"
+  />
+</section>
+<section class="dashboard-grid">
+  <article class="panel revenue">
+    <header>
+      <div>
+        <p>CİRO EĞİLİMİ</p>
+        <h2>Son 7 gün</h2>
+      </div>
+      <strong>{{ currency(summary.value()?.revenue) }}</strong>
+    </header>
+    <div class="chart">
+      <canvas baseChart type="line" [data]="chartData()" [options]="chartOptions"></canvas>
+    </div>
+  </article>
+  <article class="panel next">
+    <header>
+      <div>
+        <p>SIRADAKİ</p>
+        <h2>Yaklaşan randevular</h2>
+      </div>
+      <a routerLink="/appointments">Tümü</a>
+    </header>
+    @for (item of appointments.value() ?? []; track item.id) {
+      <div class="appointment">
+        <time>{{ time(item) }}</time>
+        <div>
+          <strong>{{ customerName(item) }}</strong
+          ><span>{{ serviceName(item) }}</span>
+        </div>
+        <app-status-badge [status]="item.status || 'pending'" />
+      </div>
+    } @empty {
+      <div class="empty">
+        <span>◇</span><strong>Yaklaşan randevu yok</strong
+        ><small>Yeni kayıtlar burada görünecek.</small>
+      </div>
+    }
+  </article>
+</section>
+<section class="quick">
+  <article>
+    <span>⚡</span>
+    <div><strong>Hızlı randevu</strong><small>Müsaitlik kontrolüyle oluştur</small></div>
+    <a routerLink="/appointments">Başlat →</a>
+  </article>
+  <article>
+    <span>◇</span>
+    <div><strong>Paket ve seans</strong><small>Canlı paket kayıtlarını yönet</small></div>
+    <a routerLink="/sessions" [queryParams]="{ create: 1 }">Başlat →</a>
+  </article>
+  <article>
+    <span>✺</span>
+    <div><strong>AI bakım önerisi</strong><small>Uzman onaylı taslak</small></div>
+    <a routerLink="/ai-recommendations">İncele →</a>
+  </article>
+</section>

@@ -1,1 +1,102 @@
-<div class="portal-shell"><header><a routerLink="/dashboard"><span>O</span><strong>OdivonPro Beauty</strong></a><nav><a href="#packages">Paketlerim</a><a href="#history">Gecmisim</a><button type="button">Bildirimler</button></nav></header><main><section class="welcome"><div><p>MUSTERI PORTALI</p><h1>Merhaba, Elif ✨</h1><span>Bakim yolculugun, randevularin ve avantajlarin burada.</span></div><button type="button">+ Yeni randevu</button></section><section class="next-card"><div class="date"><strong>15</strong><span>EKI</span></div><div><p>SIRADAKI RANDEVUN</p><h2>Lazer Epilasyon · Tam Bacak</h2><span>Nisantasi · Uzm. Derya Aksoy · 14:00</span></div><div class="actions"><button type="button">Ertele</button><button type="button">Yol tarifi</button></div></section><section class="portal-grid" id="packages"><article><header><p>AKTIF PAKET</p><span>5 / 8 seans kaldi</span></header><h2>Lazer Epilasyon</h2><div class="progress"><i></i></div><footer><span>Son seans<br/><strong>01 Eki 2026</strong></span><span>Onerilen tarih<br/><strong>29 Eki 2026</strong></span></footer></article><article><header><p>SADAKAT</p><span>VIP</span></header><h2>1.840 puan</h2><div class="reward">Bir sonraki odul icin 160 puan</div><footer><span>Bu ay kazanilan<br/><strong>+320 puan</strong></span></footer></article></section><section class="privacy"><div><strong>KVKK ve bildirim tercihleri</strong><span>Acik riza, kanal tercihleri ve veri taleplerinizi yonetin.</span></div><button type="button">Tercihleri ac</button></section></main></div>
+<div class="portal-shell">
+  <header>
+    <a href="/"><span>O</span><strong>OdivonPro Beauty</strong></a>
+    @if (signedIn()) {
+      <button type="button" (click)="auth.logout()">Güvenli çıkış</button>
+    }
+  </header>
+  <main>
+    @if (!signedIn()) {
+      <section class="auth-card">
+        <div class="auth-copy">
+          <p>MÜŞTERİ PORTALI</p>
+          <h1>Bakım yolculuğunuz tek yerde.</h1>
+          <span
+            >Randevularınızı ve paketlerinizi görüntülemek için telefon numaranızı doğrulayın.</span
+          >
+        </div>
+        <div class="auth-form">
+          @if (!codeSent()) {
+            <label
+              >Telefon numarası<input
+                type="tel"
+                [value]="phone()"
+                (input)="updatePhone($event)"
+                placeholder="+90 5xx xxx xx xx"
+                autocomplete="tel" /></label
+            ><button type="button" [disabled]="busy()" (click)="sendCode()">
+              {{ busy() ? 'Gönderiliyor…' : 'Doğrulama kodu gönder' }}
+            </button>
+          } @else {
+            <label
+              >Doğrulama kodu<input
+                inputmode="numeric"
+                [value]="code()"
+                (input)="updateCode($event)"
+                placeholder="6 haneli kod"
+                autocomplete="one-time-code" /></label
+            ><button type="button" [disabled]="busy()" (click)="verifyCode()">
+              {{ busy() ? 'Doğrulanıyor…' : 'Portala giriş yap' }}
+            </button>
+          }
+          @if (error()) {
+            <div class="error">{{ error() }}</div>
+          }
+          <div id="recaptcha-container"></div>
+        </div>
+      </section>
+    } @else {
+      <section class="welcome">
+        <div>
+          <p>MÜŞTERİ PORTALI</p>
+          <h1>Hoş geldiniz</h1>
+          <span>{{ auth.currentUser()?.phoneNumber || auth.currentUser()?.email }}</span>
+        </div>
+      </section>
+      @if (records.error()) {
+        <section class="state">
+          <strong>Portal verileri alınamadı</strong>
+          <p>{{ records.error() }}</p>
+          <button type="button" (click)="records.reload()">Tekrar dene</button>
+        </section>
+      } @else {
+        <section class="portal-grid">
+          <article>
+            <header>
+              <p>YAKLAŞAN RANDEVULAR</p>
+              <span>{{ records.value()?.appointments?.length ?? 0 }}</span>
+            </header>
+            @for (item of records.value()?.appointments ?? []; track item.id) {
+              <div class="record">
+                <strong>{{ title(item) }}</strong
+                ><span>{{ date(item) }}</span>
+              </div>
+            } @empty {
+              <div class="empty">Yaklaşan randevunuz bulunmuyor.</div>
+            }
+          </article>
+          <article>
+            <header>
+              <p>AKTİF PAKETLER</p>
+              <span>{{ records.value()?.packages?.length ?? 0 }}</span>
+            </header>
+            @for (item of records.value()?.packages ?? []; track item.id) {
+              <div class="record">
+                <strong>{{ title(item) }}</strong
+                ><span>{{ item['remainingSessions'] ?? 0 }} seans kaldı</span>
+              </div>
+            } @empty {
+              <div class="empty">Aktif paketiniz bulunmuyor.</div>
+            }
+          </article>
+        </section>
+      }
+      <section class="privacy">
+        <div>
+          <strong>KVKK ve bildirim tercihleri</strong
+          ><span>Açık rıza ve veri talepleri güvenli hesabınızla yönetilir.</span>
+        </div>
+      </section>
+    }
+  </main>
+</div>

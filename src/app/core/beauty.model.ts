@@ -37,5 +37,19 @@ export interface WorkspaceDefinition {
   resource: string;
   primaryAction: string;
   columns: readonly string[];
-  demoRows: readonly BeautyRecord[];
+  branchRequired?: boolean;
+  readonly?: boolean;
+}
+
+export interface BranchRecord extends BeautyRecord {
+  name: string;
+  active?: boolean;
+}
+
+export interface IdentityProfile {
+  uid?: string;
+  displayName?: string;
+  email?: string;
+  role?: BeautyRole;
+  tenantId?: string;
 }

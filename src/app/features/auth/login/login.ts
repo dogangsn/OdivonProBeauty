@@ -1,9 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormField, email, form, required, submit } from '@angular/forms/signals';
+import { RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth';
 
 @Component({
-  imports: [FormField],
+  imports: [FormField, RouterLink],
   selector: 'app-login',
   styleUrl: './login.css',
   templateUrl: './login.html',

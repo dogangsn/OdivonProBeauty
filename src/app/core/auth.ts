@@ -22,9 +22,17 @@ export class Auth {
     onAuthStateChanged(this.firebaseAuth, (user) => this.currentUserState.set(user));
   }
 
-  async login(email: string, password: string): Promise<void> {
+  async authenticate(email: string, password: string): Promise<void> {
     this.demoMode.set(false);
     await signInWithEmailAndPassword(this.firebaseAuth, email, password);
+  }
+
+  async login(email: string, password: string): Promise<void> {
+    await this.authenticate(email, password);
+    await this.openDashboard();
+  }
+
+  async openDashboard(): Promise<void> {
     await this.router.navigateByUrl('/dashboard');
   }
 

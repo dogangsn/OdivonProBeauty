@@ -19,6 +19,7 @@ const demo = (prefix: string, statuses: readonly string[]) => statuses.map((stat
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login/login').then((m) => m.Login) },
+  { path: 'register', loadComponent: () => import('./features/auth/register/register').then((m) => m.Register) },
   { path: 'portal', loadComponent: () => import('./features/customer-portal/portal/portal').then((m) => m.Portal) },
   {
     path: '', canActivate: [authGuard],

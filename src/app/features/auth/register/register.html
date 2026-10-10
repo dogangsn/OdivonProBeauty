@@ -1,0 +1,46 @@
+<main>
+  <section class="story">
+    <a class="brand" routerLink="/login"><span>O</span><strong>OdivonPro Beauty</strong></a>
+    <div>
+      <p>14 GÜNLÜK DENEME</p>
+      <h1>Merkezinizi<br /><em>dakikalar içinde</em><br />yönetime açın.</h1>
+      <ul>
+        <li>Şube ve roller otomatik hazırlanır</li>
+        <li>Randevu, CRM ve kasa tek ekranda</li>
+        <li>Kredi kartı gerekmez</li>
+      </ul>
+    </div>
+    <footer>Güvenli Firebase Auth · KVKK-ready</footer>
+  </section>
+
+  <section class="register">
+    <div class="card">
+      <div class="heading">
+        <p>MERKEZ HESABI</p>
+        <a routerLink="/login">Giriş yap</a>
+      </div>
+      <h2>Ücretsiz hesap oluşturun</h2>
+      <span>İlk kullanıcı merkez sahibi olarak atanır.</span>
+
+      <form (submit)="register(); $event.preventDefault()">
+        <div class="grid">
+          <label>Ad soyad<input [formField]="registerForm.ownerName" autocomplete="name" /></label>
+          <label>Telefon <small>(opsiyonel)</small><input type="tel" [formField]="registerForm.phone" autocomplete="tel" /></label>
+        </div>
+        <label>Güzellik merkezi adı<input [formField]="registerForm.businessName" autocomplete="organization" /></label>
+        <label>İlk şube adı<input [formField]="registerForm.branchName" /></label>
+        <label>E-posta<input type="email" [formField]="registerForm.email" autocomplete="email" /></label>
+        <div class="grid">
+          <label>Şifre<input type="password" [formField]="registerForm.password" autocomplete="new-password" /></label>
+          <label>Şifre tekrarı<input type="password" [formField]="registerForm.confirmPassword" autocomplete="new-password" /></label>
+        </div>
+        <label class="consent"><input type="checkbox" [formField]="registerForm.acceptedTerms" /><span>KVKK aydınlatma metnini ve kullanım koşullarını okudum, kabul ediyorum.</span></label>
+        @if (error()) { <div class="error" role="alert">{{ error() }}</div> }
+        <button type="submit" [disabled]="registerForm().invalid() || isSubmitting()">
+          {{ isSubmitting() ? 'Hesap hazırlanıyor…' : 'Hesabımı oluştur' }}
+        </button>
+      </form>
+      <small class="customer-note">Müşteri misiniz? Online randevu için <a routerLink="/portal">müşteri portalını</a> kullanın.</small>
+    </div>
+  </section>
+</main>

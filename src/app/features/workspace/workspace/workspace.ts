@@ -1,5 +1,5 @@
 import { Component, computed, inject, resource, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import {
@@ -23,12 +23,13 @@ type Draft = Record<string, DraftValue>;
 })
 export class Workspace {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly api = inject(ApiClient);
   protected readonly definition = this.route.snapshot.data['definition'] as WorkspaceDefinition;
   protected readonly search = signal('');
   protected readonly statusFilter = signal('');
   protected readonly branchFilter = signal('');
-  protected readonly drawerOpen = signal(this.route.snapshot.queryParamMap.get('create') === '1');
+  protected readonly drawerOpen = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly deletingId = signal<string | null>(null);
@@ -83,6 +84,12 @@ export class Workspace {
       }),
   );
 
+  constructor() {
+    if (this.route.snapshot.queryParamMap.get('create') === '1') {
+      this.openCreate();
+    }
+  }
+
   protected updateSearch(event: Event): void {
     this.search.set((event.target as HTMLInputElement).value);
   }
@@ -114,6 +121,17 @@ export class Workspace {
     this.drawerOpen.set(true);
   }
 
+  protected closeDrawer(): void {
+    this.drawerOpen.set(false);
+    this.feedback.set('');
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { create: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
   protected fieldValue(key: string): DraftValue {
     return this.draft()[key] ?? '';
   }
@@ -126,13 +144,13 @@ export class Workspace {
 
   protected async save(): Promise<void> {
     if (!this.complete()) {
-      this.feedback.set('Zorunlu alanlari tamamlayin.');
+      this.feedback.set('Zorunlu alanları tamamlayın.');
       return;
     }
     const values = this.draft();
     const branchId = String(values['branchId'] ?? '');
     if (this.definition.branchRequired && !branchId) {
-      this.feedback.set('Devam etmek icin bir sube secin.');
+      this.feedback.set('Devam etmek için bir şube seçin.');
       return;
     }
     this.saving.set(true);
@@ -158,10 +176,10 @@ export class Workspace {
           }),
         );
       }
-      this.drawerOpen.set(false);
+      this.closeDrawer();
       this.remote.reload();
     } catch (error) {
-      this.feedback.set(error instanceof Error ? error.message : 'Kayit tamamlanamadi.');
+      this.feedback.set(error instanceof Error ? error.message : 'Kayıt tamamlanamadı.');
     } finally {
       this.saving.set(false);
     }

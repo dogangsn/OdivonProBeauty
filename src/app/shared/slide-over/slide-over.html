@@ -1,6 +1,39 @@
-<button class="backdrop" type="button" aria-label="Paneli kapat" (click)="closed.emit()"></button>
-<aside role="dialog" aria-modal="true" [attr.aria-label]="title()">
-  <header><div><p>Hizli islem</p><h2>{{ title() }}</h2><span>{{ description() }}</span></div><button type="button" aria-label="Kapat" (click)="closed.emit()">×</button></header>
-  <section><ng-content /></section>
+<button
+  class="backdrop"
+  type="button"
+  aria-label="Kayıt panelini kapat"
+  (click)="requestClose()"
+></button>
+<aside
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="slide-over-title"
+  aria-describedby="slide-over-description"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true"
+>
+  <div class="accent" aria-hidden="true"></div>
+  <header>
+    <div class="heading-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M12 3v18M3 12h18" />
+      </svg>
+    </div>
+    <div class="heading-copy">
+      <p><i aria-hidden="true"></i>{{ eyebrow() }}</p>
+      <h2 id="slide-over-title">{{ title() }}</h2>
+      <span id="slide-over-description">{{ description() }}</span>
+      <div class="trust-row" aria-label="Kayıt bilgisi">
+        <span><b aria-hidden="true">✓</b> Güvenli işlem</span>
+        <span><b aria-hidden="true">*</b> Zorunlu alanlar</span>
+      </div>
+    </div>
+    <button class="close" type="button" aria-label="Kapat" (click)="requestClose()">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </svg>
+    </button>
+  </header>
+  <section class="drawer-body"><ng-content /></section>
   <footer><ng-content select="[drawer-footer]" /></footer>
 </aside>

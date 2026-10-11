@@ -309,15 +309,23 @@ td small {
 .record-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.05rem;
 }
 .record-form .full {
   grid-column: 1 / -1;
 }
 .record-form label {
   color: var(--text);
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0 0.48rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
 }
 .record-form label b {
   color: #e11d48;
@@ -328,15 +336,87 @@ td small {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  margin-top: 0.4rem;
-  padding: 0.8rem;
+  min-height: 48px;
+  margin-top: 0;
+  padding: 0.84rem 0.9rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
+  outline: none;
   color: var(--text);
-  background: var(--surface-soft);
+  background: color-mix(in srgb, var(--surface-soft) 84%, var(--surface));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+.record-form textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+.record-form input:hover,
+.record-form select:hover,
+.record-form textarea:hover {
+  border-color: color-mix(in srgb, #8b5cf6 38%, var(--border));
+}
+.record-form input:focus,
+.record-form select:focus,
+.record-form textarea:focus {
+  border-color: #8b5cf6;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 4px rgb(139 92 246 / 0.1),
+    0 8px 24px rgb(76 29 149 / 0.06);
+}
+.record-form input::placeholder,
+.record-form textarea::placeholder {
+  color: color-mix(in srgb, var(--muted) 68%, transparent);
 }
 .record-form small {
   color: #e11d48;
+}
+.form-intro {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, #c4b5fd 55%, var(--border));
+  border-radius: 16px;
+  background: linear-gradient(120deg, rgb(245 243 255 / 0.86), rgb(253 242 248 / 0.64));
+}
+:host-context(.dark) .form-intro {
+  background: linear-gradient(120deg, rgb(76 29 149 / 0.2), rgb(131 24 67 / 0.12));
+}
+.form-intro > span {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #7c3aed;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: 0 7px 18px rgb(109 40 217 / 0.1);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+:host-context(.dark) .form-intro > span {
+  color: #ddd6fe;
+  background: rgb(15 23 42 / 0.65);
+}
+.form-intro strong,
+.form-intro small {
+  display: block;
+}
+.form-intro strong {
+  font-size: 0.75rem;
+}
+.record-form .form-intro small {
+  margin-top: 0.18rem;
+  color: var(--muted);
+  font-size: 0.63rem;
+  line-height: 1.45;
 }
 .form-grid {
   display: grid;
@@ -349,22 +429,63 @@ td small {
 }
 .drawer-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 0.6rem;
 }
+.save-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+.save-hint i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 4px rgb(16 185 129 / 0.1);
+}
 .drawer-actions button {
+  min-height: 44px;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 11px;
+  border-radius: 13px;
   color: var(--text);
   background: var(--surface);
+  font-size: 0.7rem;
   font-weight: 800;
   cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+.drawer-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.drawer-actions .secondary:hover {
+  border-color: #c4b5fd;
 }
 .drawer-actions .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 144px;
+  justify-content: center;
   color: #fff;
   border: 0;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: linear-gradient(135deg, #7c3aed, #c026d3);
+  box-shadow: 0 10px 24px rgb(147 51 234 / 0.24);
+}
+.drawer-actions .primary:hover:not(:disabled) {
+  box-shadow: 0 14px 30px rgb(147 51 234 / 0.32);
+}
+.drawer-actions .primary b {
+  font-size: 1rem;
 }
 .drawer-actions button:disabled {
   opacity: 0.45;
@@ -415,5 +536,11 @@ td small {
   }
   .record-form .full {
     grid-column: auto;
+  }
+  .save-hint {
+    display: none;
+  }
+  .drawer-actions button {
+    flex: 1;
   }
 }

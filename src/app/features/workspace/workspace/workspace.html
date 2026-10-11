@@ -157,20 +157,35 @@
 
 @if (drawerOpen()) {
   <app-slide-over
-    [title]="editingId() ? 'Kaydi duzenle' : definition.primaryAction"
+    [title]="editingId() ? 'Kaydı düzenle' : definition.primaryAction"
     [description]="definition.description"
-    (closed)="drawerOpen.set(false)"
+    [eyebrow]="editingId() ? 'Kayıt güncelleme' : 'Yeni kayıt oluşturma'"
+    (closed)="closeDrawer()"
   >
-    <form class="record-form" (submit)="save(); $event.preventDefault()">
+    <form
+      class="record-form"
+      [attr.aria-busy]="saving()"
+      (submit)="save(); $event.preventDefault()"
+    >
+      <div class="form-intro full">
+        <span aria-hidden="true">01</span>
+        <div>
+          <strong>{{
+            editingId() ? 'Kayıt bilgilerini güncelleyin' : 'Temel bilgileri ekleyin'
+          }}</strong>
+          <small>Alanları kontrol edin; zorunlu bilgiler yıldız ile işaretlenmiştir.</small>
+        </div>
+      </div>
       @if (definition.branchRequired) {
         <label class="full" for="workspace-branch"
-          >Sube <b aria-hidden="true">*</b
+          ><span class="field-label">Şube <b aria-hidden="true">*</b></span
           ><select
             id="workspace-branch"
+            required
             [value]="fieldValue('branchId')"
-            (change)="updateField({ key: 'branchId', label: 'Sube', type: 'select' }, $event)"
+            (change)="updateField({ key: 'branchId', label: 'Şube', type: 'select' }, $event)"
           >
-            <option value="">Sube secin</option>
+            <option value="">Şube seçin</option>
             @for (branch of branches.value() ?? []; track branch.id) {
               <option [value]="branch.id">{{ branch.name }}</option>
             }
@@ -179,10 +194,12 @@
       }
       @for (field of definition.fields ?? []; track field.key) {
         <label [class.full]="field.fullWidth" [for]="fieldId(field)"
-          >{{ field.label }}
-          @if (field.required) {
-            <b aria-hidden="true">*</b>
-          }
+          ><span class="field-label"
+            >{{ field.label }}
+            @if (field.required) {
+              <b aria-hidden="true">*</b>
+            }
+          </span>
           @switch (field.type) {
             @case ('textarea') {
               <textarea
@@ -201,7 +218,7 @@
                 [required]="field.required || false"
                 (change)="updateField(field, $event)"
               >
-                <option value="">Secin</option>
+                <option value="">Seçin</option>
                 @for (option of field.options ?? []; track option.value) {
                   <option [value]="option.value">{{ option.label }}</option>
                 }
@@ -228,9 +245,17 @@
       <button class="hidden-submit" type="submit">Kaydet</button>
     </form>
     <div drawer-footer class="drawer-actions">
-      <button type="button" (click)="drawerOpen.set(false)">Vazgec</button
+      <span class="save-hint"
+        ><i aria-hidden="true"></i> Veriler MainApi üzerinden güvenle kaydedilir</span
+      >
+      <button class="secondary" type="button" (click)="closeDrawer()">Vazgeç</button
       ><button class="primary" type="button" [disabled]="saving() || !complete()" (click)="save()">
-        {{ saving() ? 'Kaydediliyor…' : editingId() ? 'Degisiklikleri kaydet' : 'Kaydi olustur' }}
+        <span>{{
+          saving() ? 'Kaydediliyor…' : editingId() ? 'Değişiklikleri kaydet' : 'Kaydı oluştur'
+        }}</span>
+        @if (!saving()) {
+          <b aria-hidden="true">→</b>
+        }
       </button>
     </div>
   </app-slide-over>

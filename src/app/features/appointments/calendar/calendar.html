@@ -54,17 +54,31 @@
   <app-slide-over
     title="Yeni randevu"
     description="Uygunluk kontrolleri MainApi tarafından otomatik yapılır."
-    (closed)="drawerOpen.set(false)"
-    ><form class="appointment-form" (submit)="save(); $event.preventDefault()">
+    eyebrow="Takvim planlama"
+    (closed)="closeDrawer()"
+    ><form
+      class="appointment-form"
+      [attr.aria-busy]="saving()"
+      (submit)="save(); $event.preventDefault()"
+    >
+      <div class="appointment-intro">
+        <span aria-hidden="true">✦</span>
+        <div>
+          <strong>Randevu akışını planlayın</strong>
+          <small>Uzman, oda ve cihaz uygunluğu kaydetmeden önce kontrol edilir.</small>
+        </div>
+      </div>
       <label
-        >Şube<select [formField]="appointmentForm.branchId">
+        ><span class="field-label">Şube <b aria-hidden="true">*</b></span
+        ><select [formField]="appointmentForm.branchId">
           <option value="">Şube seçin</option>
           @for (item of branches.value() ?? []; track item.id) {
             <option [value]="item.id">{{ item.name }}</option>
           }
         </select></label
       ><label
-        >Müşteri<select [formField]="appointmentForm.customerId">
+        ><span class="field-label">Müşteri <b aria-hidden="true">*</b></span
+        ><select [formField]="appointmentForm.customerId">
           <option value="">Müşteri seçin</option>
           @for (item of customers.value() ?? []; track item.id) {
             <option [value]="item.id">{{ name(item) }}</option>
@@ -73,14 +87,16 @@
       >
       <div class="form-grid">
         <label
-          >Uzman<select [formField]="appointmentForm.staffId">
+          ><span class="field-label">Uzman <b aria-hidden="true">*</b></span
+          ><select [formField]="appointmentForm.staffId">
             <option value="">Uzman seçin</option>
             @for (item of staff.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
             }
           </select></label
         ><label
-          >Hizmet<select [formField]="appointmentForm.serviceId">
+          ><span class="field-label">Hizmet <b aria-hidden="true">*</b></span
+          ><select [formField]="appointmentForm.serviceId">
             <option value="">Hizmet seçin</option>
             @for (item of services.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
@@ -89,19 +105,26 @@
         >
       </div>
       <div class="form-grid">
-        <label>Başlangıç<input type="datetime-local" [formField]="appointmentForm.startAt" /></label
-        ><label>Bitiş<input type="datetime-local" [formField]="appointmentForm.endAt" /></label>
+        <label
+          ><span class="field-label">Başlangıç <b aria-hidden="true">*</b></span
+          ><input type="datetime-local" [formField]="appointmentForm.startAt" /></label
+        ><label
+          ><span class="field-label">Bitiş <b aria-hidden="true">*</b></span
+          ><input type="datetime-local" [formField]="appointmentForm.endAt"
+        /></label>
       </div>
       <div class="form-grid">
         <label
-          >Oda<select [formField]="appointmentForm.roomId">
+          ><span class="field-label">Oda</span
+          ><select [formField]="appointmentForm.roomId">
             <option value="">Oda seçilmedi</option>
             @for (item of rooms.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
             }
           </select></label
         ><label
-          >Cihaz<select [formField]="appointmentForm.deviceId">
+          ><span class="field-label">Cihaz</span
+          ><select [formField]="appointmentForm.deviceId">
             <option value="">Cihaz seçilmedi</option>
             @for (item of devices.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
@@ -109,20 +132,31 @@
           </select></label
         >
       </div>
-      <label>Not<textarea rows="4" [formField]="appointmentForm.notes"></textarea></label>
+      <label
+        ><span class="field-label">Randevu notu</span
+        ><textarea
+          rows="4"
+          placeholder="Hazırlık, müşteri talebi veya uygulama notu ekleyin…"
+          [formField]="appointmentForm.notes"
+        ></textarea>
+      </label>
       @if (error()) {
         <div class="form-error">{{ error() }}</div>
       }
     </form>
     <div drawer-footer class="drawer-actions">
-      <button type="button" (click)="drawerOpen.set(false)">Vazgeç</button
+      <span class="save-hint"><i aria-hidden="true"></i> Çakışmalar otomatik kontrol edilir</span>
+      <button class="secondary" type="button" (click)="closeDrawer()">Vazgeç</button
       ><button
         class="primary"
         type="button"
         [disabled]="saving() || appointmentForm().invalid()"
         (click)="save()"
       >
-        {{ saving() ? 'Oluşturuluyor…' : 'Randevu oluştur' }}
+        <span>{{ saving() ? 'Oluşturuluyor…' : 'Randevu oluştur' }}</span>
+        @if (!saving()) {
+          <b aria-hidden="true">→</b>
+        }
       </button>
     </div></app-slide-over
   >

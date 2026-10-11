@@ -1,7 +1,11 @@
+import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { Component, input, output } from '@angular/core';
 
 @Component({
-  imports: [],
+  host: {
+    '(document:keydown.escape)': 'requestClose()',
+  },
+  imports: [CdkTrapFocus],
   selector: 'app-slide-over',
   styleUrl: './slide-over.css',
   templateUrl: './slide-over.html',
@@ -9,5 +13,10 @@ import { Component, input, output } from '@angular/core';
 export class SlideOver {
   readonly title = input.required<string>();
   readonly description = input('Bilgileri eksiksiz doldurarak kaydedin.');
+  readonly eyebrow = input('Yeni kayıt');
   readonly closed = output<void>();
+
+  protected requestClose(): void {
+    this.closed.emit();
+  }
 }

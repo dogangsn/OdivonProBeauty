@@ -130,6 +130,10 @@ export class Calendar {
   protected changeBranch(event: Event): void {
     this.branchId.set((event.target as HTMLSelectElement).value);
   }
+  protected closeDrawer(): void {
+    this.drawerOpen.set(false);
+    this.error.set('');
+  }
   protected save(): void {
     submit(this.appointmentForm, async () => {
       this.saving.set(true);
@@ -151,7 +155,7 @@ export class Calendar {
             idempotencyKey: crypto.randomUUID(),
           }),
         );
-        this.drawerOpen.set(false);
+        this.closeDrawer();
         this.appointments.reload();
       } catch (error) {
         this.error.set(error instanceof Error ? error.message : 'Randevu oluşturulamadı.');

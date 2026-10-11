@@ -8,6 +8,7 @@ import {
   User,
   getAuth,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPhoneNumber,
   signOut,
@@ -52,6 +53,10 @@ export class Auth {
   async login(email: string, password: string): Promise<void> {
     await this.authenticate(email, password);
     await this.openDashboard();
+  }
+
+  resetPassword(email: string): Promise<void> {
+    return sendPasswordResetEmail(this.firebaseAuth, email);
   }
 
   async openDashboard(): Promise<void> {

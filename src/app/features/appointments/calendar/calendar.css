@@ -38,6 +38,42 @@
 .page-head > button span {
   font-size: 1rem;
 }
+.calendar-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.calendar-stats div {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.calendar-stats span,
+.calendar-stats strong {
+  display: block;
+}
+.calendar-stats span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+.calendar-stats strong {
+  margin-top: 0.3rem;
+  font-size: 1.25rem;
+}
+.calendar-stats .indigo {
+  color: #4f46e5;
+}
+.calendar-stats .amber {
+  color: #d97706;
+}
+.calendar-stats .emerald {
+  color: #059669;
+}
 .filters {
   display: flex;
   align-items: end;
@@ -87,6 +123,11 @@
   border-radius: 20px;
   background: var(--surface);
   box-shadow: var(--shadow);
+  overflow: auto;
+}
+.calendar-card full-calendar {
+  display: block;
+  min-height: 720px;
 }
 .state {
   display: grid;
@@ -182,6 +223,9 @@
   }
   .calendar-card {
     overflow-x: auto;
+  }
+  .calendar-stats {
+    grid-template-columns: repeat(2, 1fr);
   }
   .calendar-card full-calendar {
     display: block;

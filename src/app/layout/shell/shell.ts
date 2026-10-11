@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../core/api-client';
 import { Auth } from '../../core/auth';
-import { BranchRecord, IdentityProfile, NavItem } from '../../core/beauty.model';
+import { BranchRecord, IdentityProfile, NavSection } from '../../core/beauty.model';
 import { Theme } from '../../core/theme';
 
 @Component({
@@ -26,20 +26,65 @@ export class Shell {
     loader: async () =>
       (await firstValueFrom(this.api.request<IdentityProfile>('GET', 'beauty/me'))).data,
   });
-  protected readonly items: readonly NavItem[] = [
-    { label: 'Genel Bakış', icon: '⌂', route: '/dashboard' },
-    { label: 'Randevu Takvimi', icon: '◫', route: '/appointments' },
-    { label: 'Müşteri CRM', icon: '◉', route: '/customers' },
-    { label: 'Paket ve Seans', icon: '◇', route: '/sessions' },
-    { label: 'Hizmetler', icon: '✦', route: '/catalog' },
-    { label: 'Cihaz ve Odalar', icon: '▣', route: '/resources' },
-    { label: 'Personel', icon: '♙', route: '/staff' },
-    { label: 'Kasa ve Finans', icon: '₺', route: '/finance' },
-    { label: 'Stok', icon: '▤', route: '/inventory' },
-    { label: 'Kampanyalar', icon: '✧', route: '/campaigns' },
-    { label: 'Raporlar', icon: '↗', route: '/reports' },
-    { label: 'AI Öneri', icon: '✺', route: '/ai-recommendations' },
-    { label: 'Ayarlar', icon: '⚙', route: '/settings' },
+  protected readonly sections: readonly NavSection[] = [
+    {
+      label: 'OPERASYON',
+      items: [
+        { label: 'Genel Bakis', icon: 'space_dashboard', route: '/dashboard' },
+        { label: 'Randevu Takvimi', icon: 'calendar_month', route: '/appointments' },
+        { label: 'Bekleme Listesi', icon: 'hourglass_top', route: '/waitlist' },
+      ],
+    },
+    {
+      label: 'MUSTERI VE BAKIM',
+      items: [
+        { label: 'Musteri CRM', icon: 'group', route: '/customers' },
+        { label: 'Saglik Beyanlari', icon: 'health_and_safety', route: '/customer-health' },
+        { label: 'Onam ve KVKK', icon: 'verified_user', route: '/consents' },
+        { label: 'Paket Satislari', icon: 'card_membership', route: '/packages' },
+        { label: 'Seans Uygulamalari', icon: 'spa', route: '/sessions' },
+      ],
+    },
+    {
+      label: 'KATALOG VE KAYNAK',
+      items: [
+        { label: 'Hizmetler', icon: 'auto_awesome', route: '/services' },
+        { label: 'Kategoriler', icon: 'category', route: '/service-categories' },
+        { label: 'Paket Tanimlari', icon: 'redeem', route: '/service-packages' },
+        { label: 'Cihazlar', icon: 'developer_board', route: '/devices' },
+        { label: 'Odalar', icon: 'meeting_room', route: '/rooms' },
+      ],
+    },
+    {
+      label: 'EKIP',
+      items: [
+        { label: 'Personel', icon: 'badge', route: '/staff' },
+        { label: 'Vardiya Plani', icon: 'schedule', route: '/shifts' },
+        { label: 'Izin ve Tatiller', icon: 'event_busy', route: '/time-off' },
+        { label: 'Komisyonlar', icon: 'percent', route: '/commissions' },
+      ],
+    },
+    {
+      label: 'FINANS VE STOK',
+      items: [
+        { label: 'Odemeler', icon: 'payments', route: '/payments' },
+        { label: 'Faturalar', icon: 'receipt_long', route: '/invoices' },
+        { label: 'Giderler', icon: 'account_balance_wallet', route: '/expenses' },
+        { label: 'Urun Stogu', icon: 'inventory_2', route: '/products' },
+        { label: 'Stok Hareketleri', icon: 'sync_alt', route: '/inventory-transactions' },
+        { label: 'Tedarikciler', icon: 'local_shipping', route: '/suppliers' },
+      ],
+    },
+    {
+      label: 'BUYUME VE YONETIM',
+      items: [
+        { label: 'Kampanyalar', icon: 'campaign', route: '/campaigns' },
+        { label: 'Rapor Merkezi', icon: 'monitoring', route: '/reports' },
+        { label: 'AI Bakim Onerisi', icon: 'neurology', route: '/ai-recommendations' },
+        { label: 'Denetim Kayitlari', icon: 'manage_search', route: '/audit-logs' },
+        { label: 'Ayarlar', icon: 'settings', route: '/settings' },
+      ],
+    },
   ];
   protected readonly today = computed(() =>
     new Intl.DateTimeFormat('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }).format(

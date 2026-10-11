@@ -1,16 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'fullcalendar/skeleton.css';
+@import 'fullcalendar/themes/breezy/theme.css';
+@import 'fullcalendar/themes/breezy/palettes/indigo.css';
 
 :root {
   --canvas: #f8fafc;
   --surface: #ffffff;
   --surface-soft: #f8fafc;
-  --border: rgb(226 232 240 / .9);
+  --border: rgb(226 232 240 / 0.9);
   --text: #0f172a;
   --muted: #64748b;
   --primary: #4f46e5;
-  --shadow: 0 12px 35px rgb(15 23 42 / .055);
+  --shadow: 0 12px 35px rgb(15 23 42 / 0.055);
   font-family: 'Plus Jakarta Sans', sans-serif;
   color-scheme: light;
 }
@@ -19,17 +21,94 @@
   --canvas: #0b1120;
   --surface: #111827;
   --surface-soft: #172033;
-  --border: rgb(51 65 85 / .85);
+  --border: rgb(51 65 85 / 0.85);
   --text: #f8fafc;
   --muted: #94a3b8;
-  --shadow: 0 18px 50px rgb(0 0 0 / .2);
+  --shadow: 0 18px 50px rgb(0 0 0 / 0.2);
   color-scheme: dark;
 }
 
-html, body { min-height: 100%; margin: 0; background: var(--canvas); }
-body { font-family: 'Plus Jakarta Sans', sans-serif; }
-button, input, select, textarea { font-family: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid rgb(99 102 241 / .35); outline-offset: 2px; }
-.fc { color: var(--text); font-size: .76rem; }
-.fc .fc-button-primary { border-color: #4f46e5 !important; background: #4f46e5 !important; }
-.fc .fc-scrollgrid, .fc td, .fc th { border-color: var(--border) !important; }
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--canvas);
+}
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgb(99 102 241 / 0.35);
+  outline-offset: 2px;
+}
+.beauty-calendar .fc {
+  min-width: 760px;
+  color: var(--text);
+  font-size: 0.76rem;
+}
+.beauty-calendar .fc .fc-toolbar {
+  gap: 1rem;
+  margin: 0 0 1.2rem;
+}
+.beauty-calendar .fc .fc-toolbar-title {
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+.beauty-calendar .fc .fc-button {
+  border-radius: 10px !important;
+  font:
+    700 0.68rem 'Plus Jakarta Sans',
+    sans-serif !important;
+}
+.beauty-calendar .fc .fc-button-primary {
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  background: var(--surface-soft) !important;
+}
+.beauty-calendar .fc .fc-button-primary:not(:disabled).fc-button-active,
+.beauty-calendar .fc .fc-button-primary:not(:disabled):active {
+  border-color: #4f46e5 !important;
+  color: #fff !important;
+  background: #4f46e5 !important;
+}
+.beauty-calendar .fc .fc-scrollgrid,
+.beauty-calendar .fc td,
+.beauty-calendar .fc th {
+  border-color: var(--border) !important;
+}
+.beauty-calendar .fc .fc-col-header-cell {
+  padding: 0.65rem 0.25rem;
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+.beauty-calendar .fc .fc-timegrid-slot {
+  height: 3.2rem;
+}
+.beauty-calendar .fc .fc-timegrid-slot-label {
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+.beauty-calendar .fc .fc-event {
+  padding: 0.28rem 0.38rem;
+  border: 0;
+  border-radius: 7px;
+  box-shadow: 0 4px 12px rgb(15 23 42 / 0.13);
+  font-weight: 700;
+}
+.beauty-calendar .fc .fc-timegrid-now-indicator-line {
+  border-color: #f43f5e;
+}
+.beauty-calendar .fc .fc-timegrid-now-indicator-arrow {
+  border-color: #f43f5e;
+}

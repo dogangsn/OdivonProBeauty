@@ -5,6 +5,7 @@ import { CalendarOptions, EventInput } from 'fullcalendar';
 import dayGridPlugin from 'fullcalendar/daygrid';
 import interactionPlugin from 'fullcalendar/interaction';
 import timeGridPlugin from 'fullcalendar/timegrid';
+import breezyThemePlugin from 'fullcalendar/themes/breezy';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import { BeautyRecord, BranchRecord } from '../../../core/beauty.model';
@@ -68,7 +69,8 @@ export class Calendar {
     required(path.endAt);
   });
   protected readonly options = computed<CalendarOptions>(() => ({
-    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, breezyThemePlugin],
+    themeSystem: 'breezy',
     initialView: 'timeGridWeek',
     locale: 'tr',
     headerToolbar: {
@@ -78,13 +80,31 @@ export class Calendar {
     },
     allDaySlot: false,
     nowIndicator: true,
+    expandRows: true,
+    height: 760,
+    stickyHeaderDates: true,
+    slotDuration: '00:30:00',
+    slotLabelInterval: '01:00:00',
+    slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+    businessHours: { daysOfWeek: [1, 2, 3, 4, 5, 6], startTime: '09:00', endTime: '20:00' },
     selectable: true,
     slotMinTime: '08:00:00',
     slotMaxTime: '22:00:00',
     select: (arg) => this.openCreate(arg),
     datesSet: (arg) => this.changeRange(arg),
     events: this.calendarEvents(),
+    buttonText: { today: 'Bugun', month: 'Ay', week: 'Hafta', day: 'Gun' },
   }));
+
+  protected readonly appointmentStats = computed(() => {
+    const rows = this.appointments.value() ?? [];
+    return {
+      total: rows.length,
+      confirmed: rows.filter((item) => item.status === 'confirmed').length,
+      waiting: rows.filter((item) => item.status === 'pending').length,
+      completed: rows.filter((item) => item.status === 'completed').length,
+    };
+  });
 
   protected calendarEvents(): EventInput[] {
     return (this.appointments.value() ?? []).map((item) => ({

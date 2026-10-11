@@ -6,6 +6,20 @@
   </div>
   <button type="button" (click)="openCreate()"><span>+</span>Hızlı randevu</button>
 </header>
+<section class="calendar-stats" aria-label="Takvim ozeti">
+  <div>
+    <span>GORUNEN RANDEVU</span><strong>{{ appointmentStats().total }}</strong>
+  </div>
+  <div>
+    <span>ONAYLI</span><strong class="indigo">{{ appointmentStats().confirmed }}</strong>
+  </div>
+  <div>
+    <span>BEKLEYEN</span><strong class="amber">{{ appointmentStats().waiting }}</strong>
+  </div>
+  <div>
+    <span>TAMAMLANAN</span><strong class="emerald">{{ appointmentStats().completed }}</strong>
+  </div>
+</section>
 <section class="filters">
   <label
     ><span>Şube</span
@@ -26,7 +40,7 @@
     }}</span
   >
 </section>
-<section class="calendar-card">
+<section class="calendar-card beauty-calendar">
   @if (appointments.error()) {
     <div class="state">
       <strong>Takvim verileri alınamadı</strong><span>{{ appointments.error() }}</span

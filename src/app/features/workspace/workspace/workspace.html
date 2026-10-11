@@ -6,57 +6,86 @@
   </div>
   @if (!definition.readonly) {
     <button type="button" (click)="openCreate()">
-      <span>+</span>{{ definition.primaryAction }}
+      <span aria-hidden="true">+</span>{{ definition.primaryAction }}
     </button>
   }
 </header>
-<section class="toolbar">
+
+<section class="summary-strip" aria-label="Kayit ozeti">
+  <div>
+    <span>Toplam kayit</span><strong>{{ rows().length }}</strong>
+  </div>
+  <div>
+    <span>Gorunum</span><strong>{{ branchFilter() ? 'Secili sube' : 'Tum subeler' }}</strong>
+  </div>
+  <div>
+    <span>Veri kaynagi</span
+    ><strong [class.error-text]="remote.error()">{{
+      remote.error() ? 'Baglanti hatasi' : remote.isLoading() ? 'Yukleniyor' : 'MainApi canli'
+    }}</strong>
+  </div>
+</section>
+
+<section class="toolbar" aria-label="Kayit filtreleri">
   <label class="search"
-    ><span>⌕</span
+    ><span aria-hidden="true">⌕</span><span class="sr-only">Kayitlarda ara</span
     ><input
       type="search"
       [value]="search()"
-      (input)="onSearch($event)"
-      placeholder="İsim, kod veya durum ara"
+      (input)="updateSearch($event)"
+      placeholder="Ad, telefon, kod veya durum ara"
   /></label>
   <div>
     @if (definition.branchRequired) {
       <label class="select-wrap"
-        ><span class="sr-only">Şube</span
-        ><select [value]="branchFilter()" (change)="onBranchFilter($event)">
-          <option value="">Tüm şubeler</option>
+        ><span class="sr-only">Sube</span
+        ><select [value]="branchFilter()" (change)="updateFilter('branch', $event)">
+          <option value="">Tum subeler</option>
           @for (branch of branches.value() ?? []; track branch.id) {
             <option [value]="branch.id">{{ branch.name }}</option>
           }
         </select></label
       >
     }
-    <button class="icon-button" type="button" aria-label="Yenile" (click)="remote.reload()">
+    <label class="select-wrap"
+      ><span class="sr-only">Durum</span
+      ><select [value]="statusFilter()" (change)="updateFilter('status', $event)">
+        <option value="">Tum durumlar</option>
+        <option value="active">Aktif</option>
+        <option value="pending">Bekliyor</option>
+        <option value="completed">Tamamlandi</option>
+        <option value="inactive">Pasif</option>
+      </select></label
+    >
+    <button
+      class="icon-button"
+      type="button"
+      aria-label="Verileri yenile"
+      (click)="remote.reload()"
+    >
       ↻
     </button>
   </div>
 </section>
+
 @if (feedback() && !drawerOpen()) {
-  <div class="alert">{{ feedback() }}</div>
+  <div class="alert" role="alert">{{ feedback() }}</div>
 }
+
 <section class="table-card">
   <header>
     <div>
-      <strong>{{ rows().length }} kayıt</strong
-      ><span>MainApi üzerinden tenant kapsamlı canlı veri</span>
+      <strong>{{ definition.title }}</strong
+      ><span>Tenant ve sube yetkileri sunucu tarafinda uygulanir</span>
     </div>
-    @if (remote.isLoading()) {
-      <em class="loading">Yükleniyor</em>
-    } @else if (remote.error()) {
-      <em class="offline">Bağlantı kurulamadı</em>
-    } @else {
-      <em class="online">Güncel</em>
-    }
+    <span class="live-pill"
+      ><i></i>{{ remote.isLoading() ? 'Senkronize ediliyor' : 'Canli veri' }}</span
+    >
   </header>
   @if (remote.error()) {
     <div class="state">
-      <span>!</span>
-      <h2>Veriler alınamadı</h2>
+      <span aria-hidden="true">!</span>
+      <h2>Veriler alinamadi</h2>
       <p>{{ remote.error() }}</p>
       <button type="button" (click)="remote.reload()">Tekrar dene</button>
     </div>
@@ -65,27 +94,32 @@
       <table>
         <thead>
           <tr>
-            @for (column of definition.columns; track column) {
-              <th>{{ column }}</th>
+            @for (column of definition.columns; track column.key) {
+              <th>{{ column.label }}</th>
             }
             @if (!definition.readonly) {
-              <th><span class="sr-only">İşlemler</span></th>
+              <th><span class="sr-only">Islemler</span></th>
             }
           </tr>
         </thead>
         <tbody>
           @for (row of rows(); track row.id) {
             <tr>
-              <td>
-                <strong>{{ recordName(row) }}</strong
-                ><small>{{ row.id }}</small>
-              </td>
-              <td>{{ secondaryValue(row) }}</td>
-              <td><app-status-badge [status]="row.status || 'active'" /></td>
-              <td>{{ rowDate(row) }}</td>
+              @for (column of definition.columns; track column.key) {
+                <td>
+                  @if (column.format === 'status') {
+                    <app-status-badge [status]="statusValue(row, column)" />
+                  } @else {
+                    <span [class.primary-cell]="$index === 0">{{ cellValue(row, column) }}</span>
+                    @if ($index === 0) {
+                      <small>{{ row.id }}</small>
+                    }
+                  }
+                </td>
+              }
               @if (!definition.readonly) {
                 <td class="row-actions">
-                  <button type="button" (click)="openEdit(row)">Düzenle</button
+                  <button type="button" (click)="openEdit(row)">Duzenle</button
                   ><button
                     class="danger"
                     type="button"
@@ -99,13 +133,17 @@
             </tr>
           } @empty {
             <tr>
-              <td [attr.colspan]="definition.readonly ? 4 : 5">
+              <td [attr.colspan]="definition.columns.length + (definition.readonly ? 0 : 1)">
                 <div class="state">
-                  <span>◇</span>
-                  <h2>Henüz kayıt yok</h2>
-                  <p>Filtrelerinize uygun canlı veri bulunamadı.</p>
+                  <span aria-hidden="true">◇</span>
+                  <h2>{{ definition.emptyTitle || 'Henuz kayit yok' }}</h2>
+                  <p>
+                    {{
+                      definition.emptyDescription || 'Filtrelerinize uygun canli veri bulunamadi.'
+                    }}
+                  </p>
                   @if (!definition.readonly) {
-                    <button type="button" (click)="openCreate()">İlk kaydı oluştur</button>
+                    <button type="button" (click)="openCreate()">Ilk kaydi olustur</button>
                   }
                 </div>
               </td>
@@ -116,84 +154,84 @@
     </div>
   }
 </section>
+
 @if (drawerOpen()) {
   <app-slide-over
-    [title]="editingId() ? 'Kaydı düzenle' : definition.primaryAction"
-    description="Bilgiler MainApi üzerinden güvenle kaydedilir."
+    [title]="editingId() ? 'Kaydi duzenle' : definition.primaryAction"
+    [description]="definition.description"
     (closed)="drawerOpen.set(false)"
-    ><form class="record-form" (submit)="save(); $event.preventDefault()">
-      @if (definition.resource === 'payments') {
-        <label
-          >İşlem açıklaması<input
-            [formField]="recordForm.name"
-            placeholder="Ödeme açıklaması" /></label
-        ><label
-          >Müşteri<select [formField]="recordForm.customerId">
-            <option value="">Müşteri seçin</option>
-            @for (customer of customers.value() ?? []; track customer.id) {
-              <option [value]="customer.id">{{ recordName(customer) }}</option>
-            }
-          </select></label
-        >
-        <div class="form-grid">
-          <label>Tutar<input type="number" [formField]="recordForm.amount" /></label
-          ><label
-            >Yöntem<select [formField]="recordForm.method">
-              <option value="card">Kart</option>
-              <option value="cash">Nakit</option>
-              <option value="transfer">Havale</option>
-              <option value="online">Online</option>
-            </select></label
-          >
-        </div>
-      } @else {
-        <label
-          >Kayıt adı<input [formField]="recordForm.name" placeholder="Ad veya başlık" />
-          @if (recordForm.name().touched() && recordForm.name().errors().length) {
-            <small>{{ recordForm.name().errors()[0].message }}</small>
-          }
-        </label>
-      }
+  >
+    <form class="record-form" (submit)="save(); $event.preventDefault()">
       @if (definition.branchRequired) {
-        <label
-          >Şube<select [formField]="recordForm.branchId">
-            <option value="">Şube seçin</option>
+        <label class="full" for="workspace-branch"
+          >Sube <b aria-hidden="true">*</b
+          ><select
+            id="workspace-branch"
+            [value]="fieldValue('branchId')"
+            (change)="updateField({ key: 'branchId', label: 'Sube', type: 'select' }, $event)"
+          >
+            <option value="">Sube secin</option>
             @for (branch of branches.value() ?? []; track branch.id) {
               <option [value]="branch.id">{{ branch.name }}</option>
             }
           </select></label
         >
       }
-      @if (definition.resource !== 'payments') {
-        <label
-          >Durum<select [formField]="recordForm.status">
-            <option value="active">Aktif</option>
-            <option value="draft">Taslak</option>
-            <option value="inactive">Pasif</option>
-          </select></label
-        ><label
-          >Not<textarea
-            [formField]="recordForm.note"
-            rows="5"
-            placeholder="Operasyon notu"
-          ></textarea>
+      @for (field of definition.fields ?? []; track field.key) {
+        <label [class.full]="field.fullWidth" [for]="fieldId(field)"
+          >{{ field.label }}
+          @if (field.required) {
+            <b aria-hidden="true">*</b>
+          }
+          @switch (field.type) {
+            @case ('textarea') {
+              <textarea
+                [id]="fieldId(field)"
+                rows="4"
+                [value]="fieldValue(field.key)"
+                [placeholder]="field.placeholder || ''"
+                [required]="field.required || false"
+                (input)="updateField(field, $event)"
+              ></textarea>
+            }
+            @case ('select') {
+              <select
+                [id]="fieldId(field)"
+                [value]="fieldValue(field.key)"
+                [required]="field.required || false"
+                (change)="updateField(field, $event)"
+              >
+                <option value="">Secin</option>
+                @for (option of field.options ?? []; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            }
+            @default {
+              <input
+                [id]="fieldId(field)"
+                [type]="field.type"
+                [value]="fieldValue(field.key)"
+                [placeholder]="field.placeholder || ''"
+                [required]="field.required || false"
+                [min]="field.min ?? null"
+                [step]="field.step ?? null"
+                (input)="updateField(field, $event)"
+              />
+            }
+          }
         </label>
       }
       @if (feedback()) {
-        <div class="form-error">{{ feedback() }}</div>
+        <div class="form-error full" role="alert">{{ feedback() }}</div>
       }
       <button class="hidden-submit" type="submit">Kaydet</button>
     </form>
     <div drawer-footer class="drawer-actions">
-      <button type="button" (click)="drawerOpen.set(false)">Vazgeç</button
-      ><button
-        class="primary"
-        type="button"
-        [disabled]="saving() || recordForm().invalid()"
-        (click)="save()"
-      >
-        {{ saving() ? 'Kaydediliyor…' : 'Kaydet' }}
+      <button type="button" (click)="drawerOpen.set(false)">Vazgec</button
+      ><button class="primary" type="button" [disabled]="saving() || !complete()" (click)="save()">
+        {{ saving() ? 'Kaydediliyor…' : editingId() ? 'Degisiklikleri kaydet' : 'Kaydi olustur' }}
       </button>
-    </div></app-slide-over
-  >
+    </div>
+  </app-slide-over>
 }

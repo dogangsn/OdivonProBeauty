@@ -1,0 +1,88 @@
+<div class="backdrop" aria-hidden="true">
+  <div class="aurora aurora--violet"></div>
+  <div class="aurora aurora--pink"></div>
+  <div class="aurora aurora--indigo"></div>
+  <div class="grid-floor"></div>
+  @for (star of stars; track star) {
+    <span
+      class="star"
+      [style.top.%]="star.top"
+      [style.left.%]="star.left"
+      [style.animation-delay.s]="star.delay"
+    ></span>
+  }
+</div>
+
+<section class="showcase" aria-labelledby="showcase-title">
+  <a class="brand" routerLink="/login" aria-label="OdivonPro Beauty ana sayfa">
+    <span class="brand__mark">O</span>
+    <span><strong>OdivonPro</strong><small>Beauty Center</small></span>
+  </a>
+
+  <div class="showcase__copy">
+    <div class="eyebrow reveal" style="--d: 0.1s"><i></i> Güzellik merkezinizin yeni ritmi</div>
+    <h1 id="showcase-title" class="reveal" style="--d: 0.2s">
+      <span class="sr-only"
+        >Randevularınızı, müşterilerinizi, seanslarınızı ve kazancınızı tek akışta yönetin.</span
+      >
+      <span aria-hidden="true">
+        <span class="ticker"
+          ><span class="ticker__track"
+            ><span>Randevularınızı</span><span>Müşterilerinizi</span><span>Seanslarınızı</span
+            ><span>Kazancınızı</span><span>Randevularınızı</span></span
+          ></span
+        >
+        <em>tek akışta</em> yönetin.
+      </span>
+    </h1>
+    <p class="reveal" style="--d: 0.3s">
+      Randevudan müşteri deneyimine, seanstan finans yönetimine kadar merkezinizi tek bir zarif
+      akışta buluşturun.
+    </p>
+
+    <ul class="stats reveal" style="--d: 0.4s" aria-label="Platform özeti">
+      <li>
+        <b class="count count--a" aria-hidden="true"></b><span class="sr-only">%98</span
+        ><small>müşteri memnuniyeti</small>
+      </li>
+      <li>
+        <b class="count count--b" aria-hidden="true"></b><span class="sr-only">7/24</span
+        ><small>online randevu</small>
+      </li>
+      <li>
+        <b class="count count--c" aria-hidden="true"></b><span class="sr-only">3 kat</span
+        ><small>daha hızlı kasa</small>
+      </li>
+    </ul>
+  </div>
+
+  <div class="orbit-scene" aria-hidden="true">
+    <div class="orb"><span>✦</span></div>
+    <div class="ring ring--one">
+      <span class="satellite"><i class="material-symbols-outlined">calendar_month</i></span>
+    </div>
+    <div class="ring ring--two">
+      <span class="satellite"><i class="material-symbols-outlined">spa</i></span>
+    </div>
+    <div class="ring ring--three">
+      <span class="satellite"><i class="material-symbols-outlined">insights</i></span>
+    </div>
+
+    <div class="scene-card scene-card--appointment">
+      <div class="scene-card__top">
+        <span class="scene-icon">✦</span><small>SIRADAKİ BAKIM</small><i></i>
+      </div>
+      <strong>Cilt yenileme</strong>
+      <p><b>14:30</b><span>Uzman ve oda hazır</span></p>
+      <div class="progress"><i></i></div>
+    </div>
+    <div class="scene-card scene-card--pulse">
+      <div><small>BUGÜNÜN AKIŞI</small><strong>Merkeziniz hazır</strong></div>
+      <div class="pulse-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+  </div>
+
+  <footer class="reveal" style="--d: 0.55s">
+    <span><i></i> Güvenli altyapı</span><span>Firebase Auth</span><span>KVKK uyumlu akış</span>
+  </footer>
+</section>

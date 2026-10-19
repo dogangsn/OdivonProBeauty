@@ -2,9 +2,10 @@ import { Component, inject, signal } from '@angular/core';
 import { FormField, email, form, required, submit } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth';
+import { LoginShowcase } from '../login-showcase/login-showcase';
 
 @Component({
-  imports: [FormField, RouterLink],
+  imports: [FormField, LoginShowcase, RouterLink],
   selector: 'app-login',
   styleUrl: './login.css',
   templateUrl: './login.html',
@@ -15,6 +16,7 @@ export class Login {
   protected readonly notice = signal('');
   protected readonly isSubmitting = signal(false);
   protected readonly showPassword = signal(false);
+  protected readonly pointer = signal({ x: 50, y: 0 });
   protected readonly loginModel = signal({ email: '', password: '' });
   protected readonly loginForm = form(this.loginModel, (path) => {
     required(path.email, { message: 'E-posta zorunludur.' });
@@ -33,6 +35,19 @@ export class Login {
         this.isSubmitting.set(false);
       }
     });
+  }
+
+  protected trackPointer(event: PointerEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    this.pointer.set({
+      x: Math.round(((event.clientX - rect.left) / rect.width) * 100),
+      y: Math.round(((event.clientY - rect.top) / rect.height) * 100),
+    });
+  }
+
+  protected resetPointer(): void {
+    this.pointer.set({ x: 50, y: 0 });
   }
 
   protected async resetPassword(): Promise<void> {

@@ -1,5 +1,97 @@
-<article class="kpi-card" [attr.data-tone]="tone()">
-  <div class="kpi-card__top"><span>{{ label() }}</span><span class="kpi-card__icon">✦</span></div>
-  <strong>{{ value() }}</strong>
-  <footer><span class="live-dot"></span>{{ detail() }}</footer>
-</article>
+@if (tone() === 'hero') {
+  <article class="kpi-hero-card">
+    <div class="kpi-hero-card__top">
+      <span class="kpi-hero-card__label">{{ label() }}</span>
+      <div class="kpi-hero-card__icon">
+        @if (icon()) {
+          <span class="material-symbols-outlined icon-size-5">{{ icon() }}</span>
+        } @else {
+          <span class="material-symbols-outlined icon-size-5">stars</span>
+        }
+      </div>
+    </div>
+    <div class="kpi-hero-card__body">
+      <strong class="kpi-hero-card__value">{{ value() }}</strong>
+      <span class="kpi-hero-card__sub">{{ detail() }}</span>
+    </div>
+    <footer class="kpi-hero-card__footer">
+      <span class="inline-flex items-center gap-1.5 font-bold">
+        <span class="live-dot pulse-white"></span>
+        Canlı Sistem
+      </span>
+      <span>Operasyon Aktif</span>
+    </footer>
+  </article>
+} @else {
+  <article class="kpi-card flex flex-col justify-between" [attr.data-tone]="tone()">
+    <div>
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          {{ label() }}
+        </span>
+        <div class="kpi-card__badge" [attr.data-tone]="tone()">
+          @if (icon()) {
+            <span class="material-symbols-outlined icon-size-5">{{ icon() }}</span>
+          } @else {
+            <span class="material-symbols-outlined icon-size-5">
+              {{
+                tone() === 'emerald'
+                  ? 'trending_up'
+                  : tone() === 'amber'
+                    ? 'schedule'
+                    : tone() === 'rose'
+                      ? 'warning'
+                      : 'analytics'
+              }}
+            </span>
+          }
+        </div>
+      </div>
+      <div class="mt-4">
+        <strong
+          class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none block"
+        >
+          {{ value() }}
+        </strong>
+        <div
+          class="text-xs font-semibold mt-1.5"
+          [class.text-emerald-600]="tone() === 'emerald'"
+          [class.dark:text-emerald-400]="tone() === 'emerald'"
+          [class.text-amber-600]="tone() === 'amber'"
+          [class.dark:text-amber-400]="tone() === 'amber'"
+          [class.text-rose-600]="tone() === 'rose'"
+          [class.dark:text-rose-400]="tone() === 'rose'"
+          [class.text-indigo-600]="tone() === 'indigo'"
+          [class.dark:text-indigo-400]="tone() === 'indigo'"
+        >
+          {{ detail() }}
+        </div>
+      </div>
+    </div>
+    <footer
+      class="flex items-center justify-between mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800/80 text-xs"
+    >
+      <span class="text-slate-500 dark:text-slate-400">Durum Göstergesi</span>
+      <span
+        class="inline-flex items-center gap-1.5 font-bold text-xs"
+        [class.text-emerald-600]="tone() === 'emerald'"
+        [class.dark:text-emerald-400]="tone() === 'emerald'"
+        [class.text-amber-600]="tone() === 'amber'"
+        [class.dark:text-amber-400]="tone() === 'amber'"
+        [class.text-rose-600]="tone() === 'rose'"
+        [class.dark:text-rose-400]="tone() === 'rose'"
+        [class.text-indigo-600]="tone() === 'indigo'"
+        [class.dark:text-indigo-400]="tone() === 'indigo'"
+      >
+        <span
+          class="w-2 h-2 rounded-full"
+          [class.bg-emerald-500]="tone() === 'emerald'"
+          [class.bg-amber-500]="tone() === 'amber'"
+          [class.bg-rose-500]="tone() === 'rose'"
+          [class.bg-indigo-500]="tone() === 'indigo'"
+        ></span>
+        Canlı Veri
+      </span>
+    </footer>
+  </article>
+}

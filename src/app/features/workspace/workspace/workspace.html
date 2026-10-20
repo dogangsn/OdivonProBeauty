@@ -1,149 +1,281 @@
-<header class="page-head">
-  <div>
-    <p>{{ definition.eyebrow }}</p>
-    <h1>{{ definition.title }}</h1>
-    <span>{{ definition.description }}</span>
-  </div>
+<!-- 1. Executive Page Header -->
+<app-page-header
+  icon="table_view"
+  [eyebrow]="definition.eyebrow"
+  [title]="definition.title"
+  [description]="definition.description"
+>
   @if (!definition.readonly) {
-    <button type="button" (click)="openCreate()">
-      <span aria-hidden="true">+</span>{{ definition.primaryAction }}
-    </button>
+    <div actions class="flex items-center gap-2">
+      <button type="button" (click)="openCreate()" class="odv-btn-primary">
+        <span class="material-symbols-outlined icon-size-4">add</span>
+        <span class="capitalize">{{ definition.primaryAction }}</span>
+      </button>
+    </div>
   }
-</header>
+</app-page-header>
 
-<section class="summary-strip" aria-label="Kayit ozeti">
-  <div>
-    <span>Toplam kayit</span><strong>{{ rows().length }}</strong>
+<!-- 2. Operational Summary Strip -->
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5" aria-label="Kayıt Özeti">
+  <div class="odv-card p-4 flex items-center justify-between">
+    <div>
+      <span
+        class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+      >
+        Toplam Kayıt
+      </span>
+      <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+        {{ rows().length }}
+      </strong>
+    </div>
+    <div
+      class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
+    >
+      <span class="material-symbols-outlined icon-size-5">format_list_bulleted</span>
+    </div>
   </div>
-  <div>
-    <span>Gorunum</span><strong>{{ branchFilter() ? 'Secili sube' : 'Tum subeler' }}</strong>
+
+  <div class="odv-card p-4 flex items-center justify-between">
+    <div>
+      <span
+        class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+      >
+        Şube Kapsamı
+      </span>
+      <strong
+        class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-1 block truncate max-w-[200px]"
+      >
+        {{ branchFilter() ? 'Seçili Şube' : 'Tüm Şubeler' }}
+      </strong>
+    </div>
+    <div
+      class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center"
+    >
+      <span class="material-symbols-outlined icon-size-5">storefront</span>
+    </div>
   </div>
-  <div>
-    <span>Veri kaynagi</span
-    ><strong [class.error-text]="remote.error()">{{
-      remote.error() ? 'Baglanti hatasi' : remote.isLoading() ? 'Yukleniyor' : 'MainApi canli'
-    }}</strong>
+
+  <div class="odv-card p-4 flex items-center justify-between">
+    <div>
+      <span
+        class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+      >
+        Veri Kaynağı
+      </span>
+      <span
+        class="inline-flex items-center gap-1.5 font-bold text-xs mt-1"
+        [class.text-emerald-600]="!remote.error()"
+        [class.dark:text-emerald-400]="!remote.error()"
+        [class.text-rose-600]="remote.error()"
+      >
+        <span
+          class="w-2 h-2 rounded-full"
+          [class.bg-emerald-500]="!remote.error()"
+          [class.bg-rose-500]="remote.error()"
+          [class.animate-pulse]="!remote.error()"
+        ></span>
+        {{
+          remote.error()
+            ? 'Bağlantı Hatası'
+            : remote.isLoading()
+              ? 'Yükleniyor…'
+              : 'MainApi Çevrimiçi'
+        }}
+      </span>
+    </div>
+    <div
+      class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+    >
+      <span class="material-symbols-outlined icon-size-5">cloud_done</span>
+    </div>
   </div>
 </section>
 
-<section class="toolbar" aria-label="Kayit filtreleri">
-  <label class="search"
-    ><span aria-hidden="true">⌕</span><span class="sr-only">Kayitlarda ara</span
-    ><input
+<!-- 3. Live Search & Filter Bar -->
+<section
+  class="odv-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5"
+  aria-label="Kayıt Filtreleri"
+>
+  <div class="relative flex-1">
+    <span
+      class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 icon-size-4.5"
+    >
+      search
+    </span>
+    <input
       type="search"
       [value]="search()"
       (input)="updateSearch($event)"
-      placeholder="Ad, telefon, kod veya durum ara"
-  /></label>
-  <div>
-    @if (definition.branchRequired) {
-      <label class="select-wrap"
-        ><span class="sr-only">Sube</span
-        ><select [value]="branchFilter()" (change)="updateFilter('branch', $event)">
-          <option value="">Tum subeler</option>
-          @for (branch of branches.value() ?? []; track branch.id) {
-            <option [value]="branch.id">{{ branch.name }}</option>
-          }
-        </select></label
+      placeholder="Ad, kod, telefon veya detay ara…"
+      class="odv-input pl-10"
+      aria-label="Kayıtlarda ara"
+    />
+  </div>
+
+  <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+    @if (definition.branchRequired && (branches.value()?.length ?? 0) > 0) {
+      <select
+        [value]="branchFilter()"
+        (change)="updateFilter('branch', $event)"
+        class="odv-input text-xs sm:text-sm font-semibold cursor-pointer max-w-[180px]"
+        aria-label="Şube filtresi"
       >
+        <option value="">Tüm Şubeler</option>
+        @for (branch of branches.value() ?? []; track branch.id) {
+          <option [value]="branch.id">{{ branch.name }}</option>
+        }
+      </select>
     }
-    <label class="select-wrap"
-      ><span class="sr-only">Durum</span
-      ><select [value]="statusFilter()" (change)="updateFilter('status', $event)">
-        <option value="">Tum durumlar</option>
-        <option value="active">Aktif</option>
-        <option value="pending">Bekliyor</option>
-        <option value="completed">Tamamlandi</option>
-        <option value="inactive">Pasif</option>
-      </select></label
+
+    <select
+      [value]="statusFilter()"
+      (change)="updateFilter('status', $event)"
+      class="odv-input text-xs sm:text-sm font-semibold cursor-pointer max-w-[150px]"
+      aria-label="Durum filtresi"
     >
+      <option value="">Tüm Durumlar</option>
+      <option value="active">Aktif</option>
+      <option value="pending">Bekliyor</option>
+      <option value="completed">Tamamlandı</option>
+      <option value="inactive">Pasif</option>
+    </select>
+
     <button
-      class="icon-button"
+      class="odv-icon-btn border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
       type="button"
       aria-label="Verileri yenile"
+      title="Yenile"
       (click)="remote.reload()"
     >
-      ↻
+      <span class="material-symbols-outlined icon-size-4.5">refresh</span>
     </button>
   </div>
 </section>
 
+<!-- Feedback Alert -->
 @if (feedback() && !drawerOpen()) {
-  <div class="alert" role="alert">{{ feedback() }}</div>
+  <div
+    class="mb-5 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between gap-3"
+    role="alert"
+  >
+    <span>{{ feedback() }}</span>
+    <button
+      type="button"
+      (click)="feedback.set('')"
+      class="text-amber-600 dark:text-amber-400 hover:text-amber-900 border-0 bg-transparent cursor-pointer font-bold"
+    >
+      ✕
+    </button>
+  </div>
 }
 
-<section class="table-card">
-  <header>
-    <div>
-      <strong>{{ definition.title }}</strong
-      ><span>Tenant ve sube yetkileri sunucu tarafinda uygulanir</span>
-    </div>
-    <span class="live-pill"
-      ><i></i>{{ remote.isLoading() ? 'Senkronize ediliyor' : 'Canli veri' }}</span
-    >
-  </header>
+<!-- 4. Responsive Enterprise Data Table -->
+<div class="odv-card overflow-hidden">
   @if (remote.error()) {
-    <div class="state">
-      <span aria-hidden="true">!</span>
-      <h2>Veriler alinamadi</h2>
-      <p>{{ remote.error() }}</p>
-      <button type="button" (click)="remote.reload()">Tekrar dene</button>
+    <div class="p-12 flex flex-col items-center justify-center text-center">
+      <span class="material-symbols-outlined text-rose-500 icon-size-8">error</span>
+      <h2 class="text-base font-bold text-slate-900 dark:text-white mt-2">Veriler Alınamadı</h2>
+      <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mt-1">{{ remote.error() }}</p>
+      <button type="button" (click)="remote.reload()" class="mt-4 odv-btn-primary">
+        <span class="material-symbols-outlined icon-size-4">refresh</span>
+        <span>Tekrar Dene</span>
+      </button>
     </div>
   } @else {
-    <div class="table-scroll">
-      <table>
+    <div class="overflow-x-auto custom-scroll">
+      <table class="w-full text-left border-collapse">
         <thead>
-          <tr>
+          <tr
+            class="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 odv-th"
+          >
             @for (column of definition.columns; track column.key) {
-              <th>{{ column.label }}</th>
+              <th class="py-3.5 px-6">{{ column.label }}</th>
             }
             @if (!definition.readonly) {
-              <th><span class="sr-only">Islemler</span></th>
+              <th class="py-3.5 px-6 text-right">İşlemler</th>
             }
           </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
           @for (row of rows(); track row.id) {
-            <tr>
+            <tr class="hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 transition-colors group">
               @for (column of definition.columns; track column.key) {
-                <td>
+                <td class="odv-td">
                   @if (column.format === 'status') {
                     <app-status-badge [status]="statusValue(row, column)" />
+                  } @else if ($index === 0) {
+                    <div class="flex items-center gap-3">
+                      <span
+                        class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[11px] font-bold flex-shrink-0 group-hover:scale-105 transition-transform shadow-2xs border border-indigo-100 dark:border-indigo-900/40"
+                      >
+                        {{ initials(cellValue(row, column)) }}
+                      </span>
+                      <div class="min-w-0">
+                        <strong
+                          class="block font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
+                        >
+                          {{ cellValue(row, column) }}
+                        </strong>
+                        <span
+                          class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 font-semibold border border-slate-200 dark:border-slate-700"
+                        >
+                          #{{ row.id.slice(0, 8) }}
+                        </span>
+                      </div>
+                    </div>
                   } @else {
-                    <span [class.primary-cell]="$index === 0">{{ cellValue(row, column) }}</span>
-                    @if ($index === 0) {
-                      <small>{{ row.id }}</small>
-                    }
+                    <span class="text-slate-600 dark:text-slate-300">
+                      {{ cellValue(row, column) }}
+                    </span>
                   }
                 </td>
               }
               @if (!definition.readonly) {
-                <td class="row-actions">
-                  <button type="button" (click)="openEdit(row)">Duzenle</button
-                  ><button
-                    class="danger"
-                    type="button"
-                    [disabled]="deletingId() === row.id"
-                    (click)="remove(row)"
-                  >
-                    {{ deletingId() === row.id ? 'Siliniyor' : 'Sil' }}
-                  </button>
+                <td class="odv-td text-right">
+                  <div class="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      class="odv-icon-btn"
+                      title="Düzenle"
+                      (click)="openEdit(row)"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="odv-icon-btn odv-icon-btn-danger"
+                      title="Sil"
+                      [disabled]="deletingId() === row.id"
+                      (click)="remove(row)"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">delete</span>
+                    </button>
+                  </div>
                 </td>
               }
             </tr>
           } @empty {
             <tr>
-              <td [attr.colspan]="definition.columns.length + (definition.readonly ? 0 : 1)">
-                <div class="state">
-                  <span aria-hidden="true">◇</span>
-                  <h2>{{ definition.emptyTitle || 'Henuz kayit yok' }}</h2>
-                  <p>
-                    {{
-                      definition.emptyDescription || 'Filtrelerinize uygun canli veri bulunamadi.'
-                    }}
+              <td
+                [attr.colspan]="definition.columns.length + (definition.readonly ? 0 : 1)"
+                class="py-16 text-center"
+              >
+                <div class="flex flex-col items-center justify-center">
+                  <span
+                    class="material-symbols-outlined text-slate-300 dark:text-slate-600 icon-size-8"
+                    >folder_open</span
+                  >
+                  <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2 mb-0">
+                    {{ definition.emptyTitle || 'Henüz Kayıt Yok' }}
+                  </h3>
+                  <p class="text-xs text-slate-400 max-w-sm mt-1 mb-4">
+                    {{ definition.emptyDescription || 'Filtrelerinize uygun kayıt bulunamadı.' }}
                   </p>
                   @if (!definition.readonly) {
-                    <button type="button" (click)="openCreate()">Ilk kaydi olustur</button>
+                    <button type="button" (click)="openCreate()" class="odv-btn-primary">
+                      <span class="material-symbols-outlined icon-size-4">add</span>
+                      <span>İlk Kaydı Oluştur</span>
+                    </button>
                   }
                 </div>
               </td>
@@ -152,63 +284,81 @@
         </tbody>
       </table>
     </div>
-  }
-</section>
 
+    <!-- Table Footer with Count -->
+    <footer
+      class="p-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400"
+    >
+      <span
+        >Toplam <strong>{{ rows().length }}</strong> kayıt listeleniyor</span
+      >
+      <span class="text-[11px] font-semibold text-slate-400">MainApi Enterprise Data Model</span>
+    </footer>
+  }
+</div>
+
+<!-- 5. Slide-Over Edit / Create Drawer -->
 @if (drawerOpen()) {
   <app-slide-over
-    [title]="editingId() ? 'Kaydı düzenle' : definition.primaryAction"
+    [title]="editingId() ? 'Kaydı Düzenle' : definition.primaryAction"
     [description]="definition.description"
-    [eyebrow]="editingId() ? 'Kayıt güncelleme' : 'Yeni kayıt oluşturma'"
+    [eyebrow]="editingId() ? 'Kayıt Güncelleme' : 'Yeni Kayıt Oluşturma'"
     (closed)="closeDrawer()"
   >
-    <form
-      class="record-form"
-      [attr.aria-busy]="saving()"
-      (submit)="save(); $event.preventDefault()"
-    >
-      <div class="form-intro full">
-        <span aria-hidden="true">01</span>
-        <div>
-          <strong>{{
-            editingId() ? 'Kayıt bilgilerini güncelleyin' : 'Temel bilgileri ekleyin'
-          }}</strong>
-          <small>Alanları kontrol edin; zorunlu bilgiler yıldız ile işaretlenmiştir.</small>
+    <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+      @if (feedback()) {
+        <div
+          class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold"
+          role="alert"
+        >
+          {{ feedback() }}
         </div>
-      </div>
-      @if (definition.branchRequired) {
-        <label class="full" for="workspace-branch"
-          ><span class="field-label">Şube <b aria-hidden="true">*</b></span
-          ><select
+      }
+
+      @if (definition.branchRequired && (branches.value()?.length ?? 0) > 0) {
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="workspace-branch"
+          >
+            Şube <span class="text-rose-500">*</span>
+          </label>
+          <select
             id="workspace-branch"
             required
-            [value]="fieldValue('branchId')"
+            [value]="fieldValue('branchId') || branches.value()?.[0]?.id || ''"
             (change)="updateField({ key: 'branchId', label: 'Şube', type: 'select' }, $event)"
+            class="odv-input"
           >
-            <option value="">Şube seçin</option>
             @for (branch of branches.value() ?? []; track branch.id) {
               <option [value]="branch.id">{{ branch.name }}</option>
             }
-          </select></label
-        >
+          </select>
+        </div>
       }
+
       @for (field of definition.fields ?? []; track field.key) {
-        <label [class.full]="field.fullWidth" [for]="fieldId(field)"
-          ><span class="field-label"
-            >{{ field.label }}
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            [for]="fieldId(field)"
+          >
+            {{ field.label }}
             @if (field.required) {
-              <b aria-hidden="true">*</b>
+              <span class="text-rose-500">*</span>
             }
-          </span>
+          </label>
+
           @switch (field.type) {
             @case ('textarea') {
               <textarea
                 [id]="fieldId(field)"
-                rows="4"
+                rows="3"
                 [value]="fieldValue(field.key)"
                 [placeholder]="field.placeholder || ''"
                 [required]="field.required || false"
                 (input)="updateField(field, $event)"
+                class="odv-input"
               ></textarea>
             }
             @case ('select') {
@@ -217,6 +367,7 @@
                 [value]="fieldValue(field.key)"
                 [required]="field.required || false"
                 (change)="updateField(field, $event)"
+                class="odv-input"
               >
                 <option value="">Seçin</option>
                 @for (option of field.options ?? []; track option.value) {
@@ -234,29 +385,32 @@
                 [min]="field.min ?? null"
                 [step]="field.step ?? null"
                 (input)="updateField(field, $event)"
+                class="odv-input"
               />
             }
           }
-        </label>
+        </div>
       }
-      @if (feedback()) {
-        <div class="form-error full" role="alert">{{ feedback() }}</div>
-      }
-      <button class="hidden-submit" type="submit">Kaydet</button>
+
+      <button class="hidden" type="submit">Kaydet</button>
     </form>
-    <div drawer-footer class="drawer-actions">
-      <span class="save-hint"
-        ><i aria-hidden="true"></i> Veriler MainApi üzerinden güvenle kaydedilir</span
+
+    <div drawer-footer class="flex items-center justify-between gap-3">
+      <span class="text-[11px] text-slate-400 hidden sm:inline"
+        >MainApi ile güvenle senkronize edilir</span
       >
-      <button class="secondary" type="button" (click)="closeDrawer()">Vazgeç</button
-      ><button class="primary" type="button" [disabled]="saving() || !complete()" (click)="save()">
-        <span>{{
-          saving() ? 'Kaydediliyor…' : editingId() ? 'Değişiklikleri kaydet' : 'Kaydı oluştur'
-        }}</span>
-        @if (!saving()) {
-          <b aria-hidden="true">→</b>
-        }
-      </button>
+      <div class="flex items-center gap-2.5 ml-auto">
+        <button type="button" (click)="closeDrawer()" class="odv-btn-ghost">Vazgeç</button>
+        <button
+          type="button"
+          [disabled]="saving() || !complete()"
+          (click)="save()"
+          class="odv-btn-primary"
+        >
+          <span class="material-symbols-outlined icon-size-4">save</span>
+          <span>{{ saving() ? 'Kaydediliyor…' : editingId() ? 'Güncelle' : 'Kaydet' }}</span>
+        </button>
+      </div>
     </div>
   </app-slide-over>
 }

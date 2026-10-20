@@ -3,6 +3,7 @@ import { FormField, form, required, submit } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import { BeautyRecord } from '../../../core/beauty.model';
+import { PageHeader } from '../../../shared/page-header/page-header';
 import { StatusBadge } from '../../../shared/status-badge/status-badge';
 
 interface RecommendationResponse {
@@ -13,7 +14,7 @@ interface RecommendationResponse {
 }
 
 @Component({
-  imports: [FormField, StatusBadge],
+  imports: [FormField, PageHeader, StatusBadge],
   selector: 'app-recommendations',
   styleUrl: './recommendations.css',
   templateUrl: './recommendations.html',

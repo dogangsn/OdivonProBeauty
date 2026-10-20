@@ -6,6 +6,8 @@ import { ApiClient } from '../../../core/api-client';
 import { Auth } from '../../../core/auth';
 import { BeautyRecord } from '../../../core/beauty.model';
 import { KpiCard } from '../../../shared/kpi-card/kpi-card';
+import { LiveRadar } from '../../../shared/live-radar/live-radar';
+import { PageHeader } from '../../../shared/page-header/page-header';
 import { StatusBadge } from '../../../shared/status-badge/status-badge';
 
 interface DashboardSummary {
@@ -16,7 +18,7 @@ interface DashboardSummary {
 }
 
 @Component({
-  imports: [BaseChartDirective, KpiCard, RouterLink, StatusBadge],
+  imports: [BaseChartDirective, KpiCard, LiveRadar, PageHeader, RouterLink, StatusBadge],
   selector: 'app-dashboard',
   styleUrl: './dashboard.css',
   templateUrl: './dashboard.html',
@@ -45,6 +47,9 @@ export class Dashboard {
     loader: async () =>
       (await firstValueFrom(this.api.list<BeautyRecord>('payments', { limit: 200 }))).data,
   });
+  protected readonly activeAppointmentsCount = computed(
+    () => (this.appointments.value() ?? []).length,
+  );
   protected readonly chartData = computed(() => {
     const days = Array.from({ length: 7 }, (_, index) => {
       const date = new Date();
@@ -108,6 +113,13 @@ export class Dashboard {
     return Number.isNaN(date.getTime())
       ? '—'
       : new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit' }).format(date);
+  }
+  protected initials(name: string): string {
+    if (!name) return '??';
+    const parts = name.trim().split(/\s+/);
+    return parts.length > 1
+      ? (parts[0][0] + parts[parts.length - 1][0]).toLocaleUpperCase('tr')
+      : parts[0].slice(0, 2).toLocaleUpperCase('tr');
   }
   protected displayName(): string {
     return (

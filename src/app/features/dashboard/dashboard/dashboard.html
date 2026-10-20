@@ -1,94 +1,280 @@
-<header class="hero">
-  <div>
-    <p>OPERASYON ÖZETİ</p>
-    <h1>Merhaba, {{ displayName() }}</h1>
-    <span>Canlı işletme verileriniz tek görünümde.</span>
+<!-- 1. Executive Page Header -->
+<app-page-header
+  icon="space_dashboard"
+  eyebrow="OPERASYONEL GENEL BAKIŞ"
+  [title]="'Merhaba, ' + displayName()"
+  description="OdivonPro Beauty operasyonel ve finansal canlı göstergeleri tek görünümde."
+>
+  <div actions class="flex items-center gap-2.5">
+    <a routerLink="/appointments" class="odv-btn-ghost">
+      <span class="material-symbols-outlined icon-size-4">calendar_month</span>
+      <span>Takvim</span>
+    </a>
+    <a routerLink="/customers" [queryParams]="{ create: 1 }" class="odv-btn-primary">
+      <span class="material-symbols-outlined icon-size-4">add</span>
+      <span>Yeni Müşteri</span>
+    </a>
   </div>
-  <div class="hero__actions">
-    <a routerLink="/appointments">Takvimi aç</a
-    ><a class="primary" routerLink="/customers" [queryParams]="{ create: 1 }">+ Yeni müşteri</a>
-  </div>
-</header>
+</app-page-header>
+
+<!-- Error notification if summary load fails -->
 @if (summary.error()) {
-  <div class="dashboard-error">
-    <strong>Özet verileri alınamadı.</strong
-    ><button type="button" (click)="summary.reload()">Tekrar dene</button>
+  <div
+    class="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 flex items-center justify-between gap-4 text-xs"
+  >
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-rose-600 dark:text-rose-400 icon-size-5"
+        >error</span
+      >
+      <span class="font-bold text-rose-800 dark:text-rose-200"
+        >Özet gösterge verileri alınamadı.</span
+      >
+    </div>
+    <button
+      type="button"
+      (click)="summary.reload()"
+      class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold cursor-pointer hover:bg-rose-700 transition-colors border-0"
+    >
+      Tekrar Dene
+    </button>
   </div>
 }
-<section class="kpi-grid">
+
+<!-- 2. Live Telemetry Radar Banner -->
+<app-live-radar
+  [currentCount]="activeAppointmentsCount()"
+  [maxCapacity]="12"
+  [todayTotal]="summary.value()?.appointments ?? 0"
+  [systemOnline]="!summary.error()"
+/>
+
+<!-- 3. Executive 4-Column KPI Cards Grid -->
+<section
+  class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6"
+  aria-label="Temel Metrikler"
+>
+  <!-- Card 1: Signature Primary Hero Gradient Card -->
   <app-kpi-card
     label="Randevular"
     [value]="count(summary.value()?.appointments)"
-    detail="Tenant kapsamındaki toplam"
-  /><app-kpi-card
-    label="Toplam ciro"
+    detail="Bugün ve kayıtlı operasyonlar"
+    tone="hero"
+    icon="event_available"
+  />
+
+  <!-- Card 2: Emerald Positive Metric Card -->
+  <app-kpi-card
+    label="Toplam Ciro"
     [value]="currency(summary.value()?.revenue)"
-    detail="Kaydedilmiş ödeme toplamı"
+    detail="Tahsil edilen net ciro"
     tone="emerald"
-  /><app-kpi-card
-    label="Müşteriler"
+    icon="payments"
+  />
+
+  <!-- Card 3: Indigo CRM Metric Card -->
+  <app-kpi-card
+    label="Müşteri Portföyü"
     [value]="count(summary.value()?.customers)"
-    detail="Aktif CRM kayıtları"
-    tone="amber"
-  /><app-kpi-card
-    label="Kritik stok"
+    detail="Aktif kayıtlı CRM profili"
+    tone="indigo"
+    icon="group"
+  />
+
+  <!-- Card 4: Rose Critical Stock Card -->
+  <app-kpi-card
+    label="Kritik Stok Uyarısı"
     [value]="count(summary.value()?.criticalStock)"
-    detail="Kontrol edilmesi gereken ürün"
+    detail="Minimum limit altındaki ürün"
     tone="rose"
+    icon="inventory_2"
   />
 </section>
-<section class="dashboard-grid">
-  <article class="panel revenue">
-    <header>
+
+<!-- 4. Main Two-Column Analytics & Schedule Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+  <!-- Left: Revenue Trend Chart (7 columns) -->
+  <article class="lg:col-span-7 odv-card p-6 flex flex-col justify-between">
+    <header
+      class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800"
+    >
       <div>
-        <p>CİRO EĞİLİMİ</p>
-        <h2>Son 7 gün</h2>
+        <span
+          class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block mb-0.5"
+        >
+          FİNANSAL TELEMETRİ
+        </span>
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white m-0">
+          Haftalık Ciro Eğilimi
+        </h2>
       </div>
-      <strong>{{ currency(summary.value()?.revenue) }}</strong>
+      <div class="text-right">
+        <span class="text-xs text-slate-400 block">7 Günlük Toplam</span>
+        <strong class="text-lg font-black text-slate-900 dark:text-white">
+          {{ currency(summary.value()?.revenue) }}
+        </strong>
+      </div>
     </header>
-    <div class="chart">
+
+    <div class="h-64 mt-4 w-full">
       <canvas baseChart type="line" [data]="chartData()" [options]="chartOptions"></canvas>
     </div>
   </article>
-  <article class="panel next">
-    <header>
+
+  <!-- Right: Upcoming Appointments (5 columns) -->
+  <article class="lg:col-span-5 odv-card p-6 flex flex-col justify-between">
+    <header
+      class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800"
+    >
       <div>
-        <p>SIRADAKİ</p>
-        <h2>Yaklaşan randevular</h2>
+        <span
+          class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block mb-0.5"
+        >
+          GÜNLÜK AKIŞ
+        </span>
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white m-0">
+          Yaklaşan Randevular
+        </h2>
       </div>
-      <a routerLink="/appointments">Tümü</a>
+      <a
+        routerLink="/appointments"
+        class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+      >
+        <span>Tümü</span>
+        <span class="material-symbols-outlined icon-size-4">arrow_forward</span>
+      </a>
     </header>
-    @for (item of appointments.value() ?? []; track item.id) {
-      <div class="appointment">
-        <time>{{ time(item) }}</time>
-        <div>
-          <strong>{{ customerName(item) }}</strong
-          ><span>{{ serviceName(item) }}</span>
+
+    <div
+      class="divide-y divide-slate-100 dark:divide-slate-800/80 overflow-y-auto max-h-72 custom-scroll mt-2 pr-1"
+    >
+      @for (item of appointments.value() ?? []; track item.id) {
+        <div
+          class="py-3 flex items-center justify-between gap-3 group hover:bg-slate-50/60 dark:hover:bg-slate-800/40 rounded-xl px-2 transition-colors"
+        >
+          <div class="flex items-center gap-3 min-w-0">
+            <span
+              class="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold flex-shrink-0 border border-indigo-100 dark:border-indigo-900/40 group-hover:scale-105 transition-transform"
+            >
+              {{ initials(customerName(item)) }}
+            </span>
+            <div class="min-w-0">
+              <strong
+                class="block text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate"
+              >
+                {{ customerName(item) }}
+              </strong>
+              <span class="block text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                {{ serviceName(item) }}
+              </span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span
+              class="text-xs font-mono font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md"
+            >
+              {{ time(item) }}
+            </span>
+            <app-status-badge [status]="item.status || 'pending'" />
+          </div>
         </div>
-        <app-status-badge [status]="item.status || 'pending'" />
-      </div>
-    } @empty {
-      <div class="empty">
-        <span>◇</span><strong>Yaklaşan randevu yok</strong
-        ><small>Yeni kayıtlar burada görünecek.</small>
-      </div>
-    }
+      } @empty {
+        <div class="py-12 flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 icon-size-8"
+            >event_busy</span
+          >
+          <strong class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-2"
+            >Yaklaşan Randevu Yok</strong
+          >
+          <span class="text-[11px] text-slate-400 mt-0.5"
+            >Bugün için planlanan yeni randevular burada listelenir.</span
+          >
+        </div>
+      }
+    </div>
   </article>
 </section>
-<section class="quick">
-  <article>
-    <span>⚡</span>
-    <div><strong>Hızlı randevu</strong><small>Müsaitlik kontrolüyle oluştur</small></div>
-    <a routerLink="/appointments">Başlat →</a>
+
+<!-- 5. Quick Actions Bar -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-5" aria-label="Hızlı İşlemler">
+  <article
+    class="odv-card p-5 flex items-center justify-between gap-4 hover:border-indigo-500/40 transition-all hover:shadow-md group"
+  >
+    <div class="flex items-center gap-3.5">
+      <div
+        class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform"
+      >
+        <span class="material-symbols-outlined icon-size-6">add_alarm</span>
+      </div>
+      <div>
+        <strong class="block text-sm font-bold text-slate-900 dark:text-white"
+          >Hızlı Randevu</strong
+        >
+        <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+          >Müsaitlik ve oda kontrolü ile randevu ver</span
+        >
+      </div>
+    </div>
+    <a
+      routerLink="/appointments"
+      class="odv-icon-btn group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
+      aria-label="Randevu takvimine git"
+    >
+      <span class="material-symbols-outlined icon-size-5">arrow_forward</span>
+    </a>
   </article>
-  <article>
-    <span>◇</span>
-    <div><strong>Paket ve seans</strong><small>Canlı paket kayıtlarını yönet</small></div>
-    <a routerLink="/sessions" [queryParams]="{ create: 1 }">Başlat →</a>
+
+  <article
+    class="odv-card p-5 flex items-center justify-between gap-4 hover:border-purple-500/40 transition-all hover:shadow-md group"
+  >
+    <div class="flex items-center gap-3.5">
+      <div
+        class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform"
+      >
+        <span class="material-symbols-outlined icon-size-6">spa</span>
+      </div>
+      <div>
+        <strong class="block text-sm font-bold text-slate-900 dark:text-white"
+          >Paket ve Seans</strong
+        >
+        <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+          >Müşteri paketlerini ve kalan seansları yönet</span
+        >
+      </div>
+    </div>
+    <a
+      routerLink="/sessions"
+      [queryParams]="{ create: 1 }"
+      class="odv-icon-btn group-hover:text-purple-600 dark:group-hover:text-purple-400"
+      aria-label="Seans başlat"
+    >
+      <span class="material-symbols-outlined icon-size-5">arrow_forward</span>
+    </a>
   </article>
-  <article>
-    <span>✺</span>
-    <div><strong>AI bakım önerisi</strong><small>Uzman onaylı taslak</small></div>
-    <a routerLink="/ai-recommendations">İncele →</a>
+
+  <article
+    class="odv-card p-5 flex items-center justify-between gap-4 hover:border-pink-500/40 transition-all hover:shadow-md group"
+  >
+    <div class="flex items-center gap-3.5">
+      <div
+        class="w-12 h-12 rounded-xl bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform"
+      >
+        <span class="material-symbols-outlined icon-size-6">auto_awesome</span>
+      </div>
+      <div>
+        <strong class="block text-sm font-bold text-slate-900 dark:text-white"
+          >AI Bakım Önerisi</strong
+        >
+        <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+          >Akıllı cilt analizi ve uzman onaylı taslak</span
+        >
+      </div>
+    </div>
+    <a
+      routerLink="/ai-recommendations"
+      class="odv-icon-btn group-hover:text-pink-600 dark:group-hover:text-pink-400"
+      aria-label="AI önerisine git"
+    >
+      <span class="material-symbols-outlined icon-size-5">arrow_forward</span>
+    </a>
   </article>
 </section>

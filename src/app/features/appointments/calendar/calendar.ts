@@ -9,6 +9,7 @@ import breezyThemePlugin from 'fullcalendar/themes/breezy';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import { BeautyRecord, BranchRecord } from '../../../core/beauty.model';
+import { PageHeader } from '../../../shared/page-header/page-header';
 import { SlideOver } from '../../../shared/slide-over/slide-over';
 
 interface AppointmentForm {
@@ -24,7 +25,7 @@ interface AppointmentForm {
 }
 
 @Component({
-  imports: [FormField, FullCalendarModule, SlideOver],
+  imports: [FormField, FullCalendarModule, PageHeader, SlideOver],
   selector: 'app-calendar',
   styleUrl: './calendar.css',
   templateUrl: './calendar.html',

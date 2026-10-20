@@ -1,9 +1,5 @@
-<button
-  class="backdrop"
-  type="button"
-  aria-label="Kayıt panelini kapat"
-  (click)="requestClose()"
-></button>
+<div class="backdrop" aria-hidden="true" (click)="requestClose()"></div>
+
 <aside
   role="dialog"
   aria-modal="true"
@@ -11,29 +7,35 @@
   aria-describedby="slide-over-description"
   cdkTrapFocus
   [cdkTrapFocusAutoCapture]="true"
+  class="slide-over-panel"
 >
-  <div class="accent" aria-hidden="true"></div>
-  <header>
-    <div class="heading-mark" aria-hidden="true">
-      <svg viewBox="0 0 24 24" focusable="false">
-        <path d="M12 3v18M3 12h18" />
-      </svg>
-    </div>
-    <div class="heading-copy">
-      <p><i aria-hidden="true"></i>{{ eyebrow() }}</p>
-      <h2 id="slide-over-title">{{ title() }}</h2>
-      <span id="slide-over-description">{{ description() }}</span>
-      <div class="trust-row" aria-label="Kayıt bilgisi">
-        <span><b aria-hidden="true">✓</b> Güvenli işlem</span>
-        <span><b aria-hidden="true">*</b> Zorunlu alanlar</span>
+  <div class="accent-line" aria-hidden="true"></div>
+  <header class="slide-over-header">
+    <div class="header-content">
+      <div class="header-icon" aria-hidden="true">
+        <span class="material-symbols-outlined icon-size-5">edit_note</span>
+      </div>
+      <div class="header-text">
+        <span class="eyebrow-pill">{{ eyebrow() }}</span>
+        <h2 id="slide-over-title">{{ title() }}</h2>
+        <span id="slide-over-description">{{ description() }}</span>
       </div>
     </div>
-    <button class="close" type="button" aria-label="Kapat" (click)="requestClose()">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="m6 6 12 12M18 6 6 18" />
-      </svg>
+    <button
+      class="close-button odv-icon-btn"
+      type="button"
+      aria-label="Kapat"
+      (click)="requestClose()"
+    >
+      <span class="material-symbols-outlined icon-size-5">close</span>
     </button>
   </header>
-  <section class="drawer-body"><ng-content /></section>
-  <footer><ng-content select="[drawer-footer]" /></footer>
+
+  <section class="drawer-body custom-scroll">
+    <ng-content />
+  </section>
+
+  <footer class="slide-over-footer">
+    <ng-content select="[drawer-footer]" />
+  </footer>
 </aside>

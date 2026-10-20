@@ -1,77 +1,208 @@
-<div class="app-shell">
+<div class="app-shell flex min-h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 font-sans">
+  <!-- Mobile Toggle Button -->
   <button
-    class="mobile-toggle"
+    class="mobile-toggle lg:hidden fixed z-40 start-4 top-4 w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 border-0 cursor-pointer"
     type="button"
-    aria-label="Menüyü aç"
+    aria-label="Menüyü aç veya kapat"
     (click)="menuOpen.update((value) => !value)"
   >
-    ☰
+    <span class="material-symbols-outlined icon-size-5">
+      {{ menuOpen() ? 'close' : 'menu' }}
+    </span>
   </button>
-  <aside [class.is-open]="menuOpen()">
-    <a class="brand" routerLink="/dashboard" aria-label="OdivonPro Beauty ana sayfa"
-      ><span class="brand__mark">O</span
-      ><span><strong>OdivonPro</strong><small>Beauty Center</small></span></a
+
+  <!-- Mobile Backdrop -->
+  @if (menuOpen()) {
+    <div
+      class="mobile-backdrop fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 lg:hidden"
+      (click)="menuOpen.set(false)"
+    ></div>
+  }
+
+  <!-- Sidebar Aside (Logical Start Placement) -->
+  <aside
+    class="sidebar fixed inset-y-0 start-0 z-30 w-72 flex flex-col p-5 bg-[#0e1526] border-e border-slate-800/80 text-slate-300 transition-transform duration-200 ease-in-out lg:translate-x-0 overflow-hidden"
+    [class.translate-x-0]="menuOpen()"
+    [class.-translate-x-full]="!menuOpen()"
+  >
+    <!-- Brand Logo -->
+    <a
+      routerLink="/dashboard"
+      class="brand flex items-center gap-3 no-underline text-white group"
+      aria-label="OdivonPro Beauty ana sayfa"
     >
-    <div class="branch">
-      <small>AKTİF ŞUBE</small
-      ><select [value]="activeBranchId()" (change)="selectBranch($event)" aria-label="Aktif şube">
-        <option value="">{{ branchName() }}</option>
-        @for (branch of branches.value() ?? []; track branch.id) {
-          <option [value]="branch.id">{{ branch.name }}</option>
-        }</select
-      ><span
-        ><i [class.error]="branches.error()"></i
-        >{{
-          branches.error()
-            ? 'Bağlantı kurulamadı'
-            : branches.isLoading()
-              ? 'Şubeler yükleniyor'
-              : 'Operasyon aktif'
-        }}</span
+      <div
+        class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform"
       >
+        <span class="material-symbols-outlined icon-size-6 text-white">spa</span>
+      </div>
+      <div>
+        <strong class="block text-base font-black tracking-tight leading-none text-white">
+          Odivon<span class="text-indigo-400">Pro</span>
+        </strong>
+        <span class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">
+          Beauty Center
+        </span>
+      </div>
+    </a>
+
+    <!-- Active Branch Selector -->
+    <div class="branch-card mt-5 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+      <div class="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">
+        <span>{{ 'topbar.activeBranch' | t }}</span>
+        <span class="flex items-center gap-1 text-[10px] font-bold" [class.text-emerald-400]="!branches.error()" [class.text-rose-400]="branches.error()">
+          <span class="w-1.5 h-1.5 rounded-full" [class.bg-emerald-400]="!branches.error()" [class.bg-rose-400]="branches.error()" [class.animate-pulse]="!branches.error()"></span>
+          {{ branches.error() ? ('topbar.offline' | t) : ('topbar.live' | t) }}
+        </span>
+      </div>
+      <div class="relative mt-1.5">
+        <select
+          [value]="activeBranchId()"
+          (change)="selectBranch($event)"
+          aria-label="Aktif şube seçimi"
+          class="w-full py-1.5 px-2.5 pe-8 rounded-lg text-xs font-bold bg-slate-800/80 border border-slate-700 text-white appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        >
+          <option value="">{{ branchName() }}</option>
+          @for (branch of branches.value() ?? []; track branch.id) {
+            <option [value]="branch.id">{{ branch.name }}</option>
+          }
+        </select>
+        <span class="material-symbols-outlined icon-size-4 absolute end-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+          expand_more
+        </span>
+      </div>
     </div>
-    <nav aria-label="Ana menü">
-      @for (section of sections; track section.label) {
-        <p>{{ section.label }}</p>
-        @for (item of section.items; track item.route) {
-          <a [routerLink]="item.route" routerLinkActive="active" (click)="menuOpen.set(false)"
-            ><span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span
-            >{{ item.label }}</a
+
+    <!-- Navigation List with Collapsible Groups -->
+    <nav class="sidebar-nav flex-1 overflow-y-auto mt-4 pe-1 space-y-2 custom-scroll" aria-label="Ana menü">
+      @for (section of sections; track section.key) {
+        <div class="rounded-xl border border-slate-800/40 bg-slate-900/30 overflow-hidden transition-all">
+          <!-- Accordion Header Button -->
+          <button
+            type="button"
+            (click)="toggleSection(section.key)"
+            class="w-full flex items-center justify-between px-3 py-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 hover:text-white hover:bg-slate-800/60 cursor-pointer border-0 bg-transparent transition-colors"
           >
-        }
+            <span class="truncate">{{ section.key | t }}</span>
+            <span
+              class="material-symbols-outlined icon-size-4 text-slate-400 transition-transform duration-200"
+              [class.rotate-180]="isSectionExpanded(section.key)"
+            >
+              expand_more
+            </span>
+          </button>
+
+          <!-- Collapsible Menu Items -->
+          @if (isSectionExpanded(section.key)) {
+            <div class="space-y-0.5 p-1 pt-0">
+              @for (item of section.items; track item.route) {
+                <a
+                  [routerLink]="item.route"
+                  routerLinkActive="active"
+                  (click)="menuOpen.set(false)"
+                  class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all no-underline"
+                >
+                  <span class="material-symbols-outlined icon-size-4 nav-icon text-slate-400">
+                    {{ item.icon }}
+                  </span>
+                  <span class="truncate">{{ item.key | t }}</span>
+                </a>
+              }
+            </div>
+          }
+        </div>
       }
     </nav>
-    <a class="portal-link" routerLink="/portal">Müşteri portalını aç <span>↗</span></a>
-    <div class="profile">
-      <div class="avatar">{{ initials() }}</div>
-      <div>
-        <strong>{{ displayName() }}</strong
-        ><small>{{ profile.value()?.role || auth.role() || 'Kullanıcı' }}</small>
+
+    <!-- Bottom Actions & Customer Portal Link -->
+    <div class="sidebar-footer pt-3 border-t border-slate-800/80 mt-auto space-y-3">
+      <a
+        routerLink="/portal"
+        class="portal-button flex items-center justify-between p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-bold no-underline transition-all group"
+      >
+        <span class="flex items-center gap-2">
+          <span class="material-symbols-outlined icon-size-4 text-indigo-400">devices</span>
+          <span>{{ 'nav.portal' | t }}</span>
+        </span>
+        <span class="material-symbols-outlined icon-size-4 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform rtl:rotate-180">arrow_forward</span>
+      </a>
+
+      <!-- Profile -->
+      <div class="profile-card flex items-center justify-between gap-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800/70">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-xs">
+            {{ initials() }}
+          </div>
+          <div class="min-w-0">
+            <strong class="block text-xs font-bold text-white truncate">{{ displayName() }}</strong>
+            <span class="block text-[10px] text-slate-400 capitalize truncate">
+              {{ profile.value()?.role || auth.role() || 'Kullanıcı' }}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          aria-label="Çıkış yap"
+          (click)="auth.logout()"
+          class="w-7 h-7 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 flex items-center justify-center border-0 bg-transparent cursor-pointer transition-colors"
+          [title]="'topbar.logout' | t"
+        >
+          <span class="material-symbols-outlined icon-size-4 rtl:rotate-180">logout</span>
+        </button>
       </div>
-      <button type="button" aria-label="Çıkış" (click)="auth.logout()">↪</button>
     </div>
   </aside>
-  <main>
-    <header class="topbar">
-      <div>
-        <small>{{ today() }}</small
-        ><strong>Güzellik operasyon merkezi</strong>
+
+  <!-- Main Content Layout (Logical Start Margin) -->
+  <main class="main-content flex-1 flex flex-col min-h-screen lg:ms-72 transition-all">
+    <!-- Topbar -->
+    <header class="topbar sticky top-0 z-20 h-16 px-6 lg:px-8 flex items-center justify-between bg-white/80 dark:bg-[#0b1120]/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+          <span class="material-symbols-outlined icon-size-4 text-indigo-500">calendar_today</span>
+          <span>{{ today() }}</span>
+        </div>
+        <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">
+          {{ 'topbar.title' | t }}
+        </span>
       </div>
-      <div class="top-actions">
-        <button type="button" aria-label="Tema değiştir" (click)="theme.toggle()">
-          {{ theme.dark() ? '☀' : '☾' }}</button
-        ><span class="sync"
-          ><i [class.error]="profile.error()"></i
-          >{{
-            profile.error()
-              ? 'MainApi erişilemiyor'
-              : profile.isLoading()
-                ? 'Bağlanıyor'
-                : 'MainApi bağlı'
-          }}</span
+
+      <div class="flex items-center gap-2.5">
+        <!-- Live MainApi Sync Status -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+          <span
+            class="w-2 h-2 rounded-full"
+            [class.bg-emerald-500]="!profile.error()"
+            [class.bg-rose-500]="profile.error()"
+            [class.animate-pulse]="!profile.error()"
+          ></span>
+          <span class="text-[11px] font-bold">
+            {{ profile.error() ? ('topbar.offline' | t) : profile.isLoading() ? ('topbar.connecting' | t) : ('topbar.online' | t) }}
+          </span>
+        </div>
+
+        <!-- Language Selector Dropdown -->
+        <app-language-selector />
+
+        <!-- Theme Toggle Button -->
+        <button
+          type="button"
+          aria-label="Tema değiştir"
+          (click)="theme.toggle()"
+          class="odv-icon-btn border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+          [title]="'topbar.theme' | t"
         >
+          <span class="material-symbols-outlined icon-size-4.5">
+            {{ theme.dark() ? 'light_mode' : 'dark_mode' }}
+          </span>
+        </button>
       </div>
     </header>
-    <section class="page"><router-outlet /></section>
+
+    <!-- Page Content Container -->
+    <section class="page-container flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto">
+      <router-outlet />
+    </section>
   </main>
 </div>

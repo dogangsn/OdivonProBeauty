@@ -2,6 +2,7 @@ import { Component, computed, inject, resource, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
+import { BranchService } from '../../../core/branch.service';
 import {
   BeautyRecord,
   BranchRecord,
@@ -9,6 +10,7 @@ import {
   WorkspaceDefinition,
   WorkspaceField,
 } from '../../../core/beauty.model';
+import { PageHeader } from '../../../shared/page-header/page-header';
 import { SlideOver } from '../../../shared/slide-over/slide-over';
 import { StatusBadge } from '../../../shared/status-badge/status-badge';
 
@@ -16,7 +18,7 @@ type DraftValue = string | number | boolean;
 type Draft = Record<string, DraftValue>;
 
 @Component({
-  imports: [SlideOver, StatusBadge],
+  imports: [PageHeader, SlideOver, StatusBadge],
   selector: 'app-workspace',
   styleUrl: './workspace.css',
   templateUrl: './workspace.html',
@@ -25,6 +27,7 @@ export class Workspace {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(ApiClient);
+  protected readonly branchService = inject(BranchService);
   protected readonly definition = this.route.snapshot.data['definition'] as WorkspaceDefinition;
   protected readonly search = signal('');
   protected readonly statusFilter = signal('');
@@ -36,8 +39,7 @@ export class Workspace {
   protected readonly feedback = signal('');
   protected readonly draft = signal<Draft>({});
   protected readonly branches = resource({
-    loader: async () =>
-      (await firstValueFrom(this.api.list<BranchRecord>('branches', { limit: 100 }))).data,
+    loader: async () => this.branchService.ensureBranches(),
   });
   protected readonly remote = resource({
     params: () => ({ resource: this.definition.resource, branchId: this.branchFilter() }),
@@ -148,8 +150,12 @@ export class Workspace {
       return;
     }
     const values = this.draft();
-    const branchId = String(values['branchId'] ?? '');
-    if (this.definition.branchRequired && !branchId) {
+    const availableBranches = this.branches.value() ?? this.branchService.branches();
+    let branchId = String(values['branchId'] ?? '');
+    if (!branchId && availableBranches.length > 0) {
+      branchId = this.branchService.activeBranchId() || availableBranches[0].id;
+    }
+    if (this.definition.branchRequired && availableBranches.length > 0 && !branchId) {
       this.feedback.set('Devam etmek için bir şube seçin.');
       return;
     }
@@ -206,6 +212,14 @@ export class Workspace {
     return row.id;
   }
 
+  protected initials(name: string): string {
+    if (!name) return '??';
+    const parts = name.trim().split(/\s+/);
+    return parts.length > 1
+      ? (parts[0][0] + parts[parts.length - 1][0]).toLocaleUpperCase('tr')
+      : parts[0].slice(0, 2).toLocaleUpperCase('tr');
+  }
+
   protected cellValue(row: BeautyRecord, column: WorkspaceColumn): string {
     const value = this.resolve(row, column.key);
     if (column.format === 'date') return this.date(value);
@@ -230,9 +244,26 @@ export class Workspace {
   }
 
   private emptyDraft(): Draft {
-    const value: Draft = { branchId: this.branchFilter() || this.branches.value()?.[0]?.id || '' };
+    const available = this.branches.value() ?? this.branchService.branches();
+    const defaultBranchId =
+      this.branchFilter() || this.branchService.activeBranchId() || available[0]?.id || '';
+    const value: Draft = defaultBranchId ? { branchId: defaultBranchId } : {};
+    const now = new Date();
+    const todayDate = now.toISOString().slice(0, 10);
+    const localDatetime = new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
+      .toISOString()
+      .slice(0, 16);
+
     for (const field of this.definition.fields ?? []) {
-      value[field.key] = field.type === 'number' ? 0 : (field.options?.[0]?.value ?? '');
+      if (field.type === 'date') {
+        value[field.key] = todayDate;
+      } else if (field.type === 'datetime-local') {
+        value[field.key] = localDatetime;
+      } else if (field.type === 'number') {
+        value[field.key] = 0;
+      } else {
+        value[field.key] = field.options?.[0]?.value ?? '';
+      }
     }
     return value;
   }

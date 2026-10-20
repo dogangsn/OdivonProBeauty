@@ -1,0 +1,36 @@
+<!-- Dropdown Trigger Button -->
+<button
+  type="button"
+  (click)="toggleOpen($event)"
+  aria-label="Dil seçimi"
+  class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-2xs backdrop-blur-xs transition-all cursor-pointer"
+>
+  <span class="text-base leading-none">{{ activeOption().flag }}</span>
+  <span class="hidden md:inline">{{ activeOption().nativeName }}</span>
+  <span class="material-symbols-outlined icon-size-3.5 text-slate-400">expand_more</span>
+</button>
+
+<!-- Dropdown Menu -->
+@if (isOpen()) {
+  <div
+    class="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-44 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
+  >
+    @for (opt of options(); track opt.code) {
+      <button
+        type="button"
+        (click)="selectLanguage(opt.code, $event)"
+        class="w-full flex items-center justify-between px-3.5 py-2 text-xs font-semibold text-left rtl:text-right hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer border-0 bg-transparent"
+        [class.text-indigo-600]="opt.code === currentLang()"
+        [class.dark:text-indigo-400]="opt.code === currentLang()"
+      >
+        <span class="flex items-center gap-2.5">
+          <span class="text-base">{{ opt.flag }}</span>
+          <span>{{ opt.nativeName }}</span>
+        </span>
+        @if (opt.code === currentLang()) {
+          <span class="material-symbols-outlined icon-size-4 text-indigo-600 dark:text-indigo-400">check</span>
+        }
+      </button>
+    }
+  </div>
+}

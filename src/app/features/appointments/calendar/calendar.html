@@ -1,163 +1,311 @@
-<header class="page-head">
-  <div>
-    <p>OPERASYON TAKVİMİ</p>
-    <h1>Randevular</h1>
-    <span>Uzman, oda ve cihaz çakışmalarını canlı takvimde yönetin.</span>
+<!-- 1. Executive Page Header -->
+<app-page-header
+  icon="calendar_month"
+  eyebrow="OPERASYONEL TAKVİM"
+  title="Randevular"
+  description="Uzman, oda ve cihaz çakışmalarını canlı takvimde yönetin."
+>
+  <div actions class="flex items-center gap-2">
+    <button type="button" (click)="openCreate()" class="odv-btn-primary">
+      <span class="material-symbols-outlined icon-size-4">add</span>
+      <span>Hızlı Randevu</span>
+    </button>
   </div>
-  <button type="button" (click)="openCreate()"><span>+</span>Hızlı randevu</button>
-</header>
-<section class="calendar-stats" aria-label="Takvim ozeti">
-  <div>
-    <span>GORUNEN RANDEVU</span><strong>{{ appointmentStats().total }}</strong>
+</app-page-header>
+
+<!-- 2. Operational Stats Strip -->
+<section class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5" aria-label="Takvim Özeti">
+  <div class="odv-card p-4">
+    <span
+      class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+    >
+      Görünen Randevu
+    </span>
+    <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+      {{ appointmentStats().total }}
+    </strong>
   </div>
-  <div>
-    <span>ONAYLI</span><strong class="indigo">{{ appointmentStats().confirmed }}</strong>
+
+  <div class="odv-card p-4">
+    <span
+      class="block text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
+    >
+      Onaylı
+    </span>
+    <strong class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5 block">
+      {{ appointmentStats().confirmed }}
+    </strong>
   </div>
-  <div>
-    <span>BEKLEYEN</span><strong class="amber">{{ appointmentStats().waiting }}</strong>
+
+  <div class="odv-card p-4">
+    <span
+      class="block text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400"
+    >
+      Bekleyen
+    </span>
+    <strong class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">
+      {{ appointmentStats().waiting }}
+    </strong>
   </div>
-  <div>
-    <span>TAMAMLANAN</span><strong class="emerald">{{ appointmentStats().completed }}</strong>
+
+  <div class="odv-card p-4">
+    <span
+      class="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400"
+    >
+      Tamamlanan
+    </span>
+    <strong class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+      {{ appointmentStats().completed }}
+    </strong>
   </div>
 </section>
-<section class="filters">
-  <label
-    ><span>Şube</span
-    ><select [value]="branchId()" (change)="changeBranch($event)">
-      <option value="">Tüm şubeler</option>
+
+<!-- 3. Toolbar -->
+<section
+  class="odv-card p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5"
+  aria-label="Takvim Filtreleri"
+>
+  <div class="flex items-center gap-3">
+    <label
+      class="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap hidden sm:inline"
+      for="calendar-branch-select"
+      >Şube:</label
+    >
+    <select
+      id="calendar-branch-select"
+      [value]="branchId()"
+      (change)="changeBranch($event)"
+      class="odv-input max-w-xs font-semibold cursor-pointer"
+    >
+      <option value="">Tüm Şubeler</option>
       @for (branch of branches.value() ?? []; track branch.id) {
         <option [value]="branch.id">{{ branch.name }}</option>
       }
-    </select></label
-  ><span class="live"
-    ><i></i
-    >{{
-      appointments.error()
-        ? 'Bağlantı hatası'
-        : appointments.isLoading()
-          ? 'Yükleniyor'
-          : 'Canlı takvim'
-    }}</span
+    </select>
+  </div>
+
+  <div
+    class="flex items-center gap-2 text-xs font-bold"
+    [class.text-emerald-600]="!appointments.error()"
+    [class.dark:text-emerald-400]="!appointments.error()"
+    [class.text-rose-600]="appointments.error()"
   >
+    <span
+      class="w-2 h-2 rounded-full"
+      [class.bg-emerald-500]="!appointments.error()"
+      [class.bg-rose-500]="appointments.error()"
+      [class.animate-pulse]="!appointments.error()"
+    ></span>
+    <span>
+      {{
+        appointments.error()
+          ? 'Bağlantı Hatası'
+          : appointments.isLoading()
+            ? 'Yükleniyor…'
+            : 'Canlı Takvim Çevrimiçi'
+      }}
+    </span>
+  </div>
 </section>
-<section class="calendar-card beauty-calendar">
+
+<!-- 4. Calendar Card -->
+<section class="odv-card p-5 overflow-hidden beauty-calendar">
   @if (appointments.error()) {
-    <div class="state">
-      <strong>Takvim verileri alınamadı</strong><span>{{ appointments.error() }}</span
-      ><button type="button" (click)="appointments.reload()">Tekrar dene</button>
+    <div class="p-12 flex flex-col items-center justify-center text-center">
+      <span class="material-symbols-outlined text-rose-500 icon-size-8">error</span>
+      <h2 class="text-base font-bold text-slate-900 dark:text-white mt-2">
+        Takvim Verileri Alınamadı
+      </h2>
+      <p class="text-xs text-slate-400 mt-1 max-w-sm">{{ appointments.error() }}</p>
+      <button type="button" (click)="appointments.reload()" class="mt-4 odv-btn-primary">
+        <span class="material-symbols-outlined icon-size-4">refresh</span>
+        <span>Tekrar Dene</span>
+      </button>
     </div>
   } @else {
     <full-calendar [options]="options()" />
   }
 </section>
+
+<!-- 5. Slide-Over Drawer for New Appointment -->
 @if (drawerOpen()) {
   <app-slide-over
-    title="Yeni randevu"
+    title="Yeni Randevu"
     description="Uygunluk kontrolleri MainApi tarafından otomatik yapılır."
-    eyebrow="Takvim planlama"
+    eyebrow="Takvim Planlama"
     (closed)="closeDrawer()"
-    ><form
-      class="appointment-form"
-      [attr.aria-busy]="saving()"
-      (submit)="save(); $event.preventDefault()"
-    >
-      <div class="appointment-intro">
-        <span aria-hidden="true">✦</span>
-        <div>
-          <strong>Randevu akışını planlayın</strong>
-          <small>Uzman, oda ve cihaz uygunluğu kaydetmeden önce kontrol edilir.</small>
+  >
+    <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+      @if (error()) {
+        <div
+          class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold"
+          role="alert"
+        >
+          {{ error() }}
         </div>
-      </div>
-      <label
-        ><span class="field-label">Şube <b aria-hidden="true">*</b></span
-        ><select [formField]="appointmentForm.branchId">
-          <option value="">Şube seçin</option>
+      }
+
+      <div>
+        <label
+          class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+          for="appt-branch"
+        >
+          Şube <span class="text-rose-500">*</span>
+        </label>
+        <select id="appt-branch" [formField]="appointmentForm.branchId" class="odv-input">
+          <option value="">Şube Seçin</option>
           @for (item of branches.value() ?? []; track item.id) {
             <option [value]="item.id">{{ item.name }}</option>
           }
-        </select></label
-      ><label
-        ><span class="field-label">Müşteri <b aria-hidden="true">*</b></span
-        ><select [formField]="appointmentForm.customerId">
-          <option value="">Müşteri seçin</option>
+        </select>
+      </div>
+
+      <div>
+        <label
+          class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+          for="appt-customer"
+        >
+          Müşteri <span class="text-rose-500">*</span>
+        </label>
+        <select id="appt-customer" [formField]="appointmentForm.customerId" class="odv-input">
+          <option value="">Müşteri Seçin</option>
           @for (item of customers.value() ?? []; track item.id) {
             <option [value]="item.id">{{ name(item) }}</option>
           }
-        </select></label
-      >
-      <div class="form-grid">
-        <label
-          ><span class="field-label">Uzman <b aria-hidden="true">*</b></span
-          ><select [formField]="appointmentForm.staffId">
-            <option value="">Uzman seçin</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="appt-staff"
+          >
+            Uzman <span class="text-rose-500">*</span>
+          </label>
+          <select id="appt-staff" [formField]="appointmentForm.staffId" class="odv-input">
+            <option value="">Uzman Seçin</option>
             @for (item of staff.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
             }
-          </select></label
-        ><label
-          ><span class="field-label">Hizmet <b aria-hidden="true">*</b></span
-          ><select [formField]="appointmentForm.serviceId">
-            <option value="">Hizmet seçin</option>
+          </select>
+        </div>
+
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="appt-service"
+          >
+            Hizmet <span class="text-rose-500">*</span>
+          </label>
+          <select id="appt-service" [formField]="appointmentForm.serviceId" class="odv-input">
+            <option value="">Hizmet Seçin</option>
             @for (item of services.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
             }
-          </select></label
-        >
+          </select>
+        </div>
       </div>
-      <div class="form-grid">
-        <label
-          ><span class="field-label">Başlangıç <b aria-hidden="true">*</b></span
-          ><input type="datetime-local" [formField]="appointmentForm.startAt" /></label
-        ><label
-          ><span class="field-label">Bitiş <b aria-hidden="true">*</b></span
-          ><input type="datetime-local" [formField]="appointmentForm.endAt"
-        /></label>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="appt-start"
+          >
+            Başlangıç <span class="text-rose-500">*</span>
+          </label>
+          <input
+            id="appt-start"
+            type="datetime-local"
+            [formField]="appointmentForm.startAt"
+            class="odv-input"
+          />
+        </div>
+
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="appt-end"
+          >
+            Bitiş <span class="text-rose-500">*</span>
+          </label>
+          <input
+            id="appt-end"
+            type="datetime-local"
+            [formField]="appointmentForm.endAt"
+            class="odv-input"
+          />
+        </div>
       </div>
-      <div class="form-grid">
-        <label
-          ><span class="field-label">Oda</span
-          ><select [formField]="appointmentForm.roomId">
-            <option value="">Oda seçilmedi</option>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="appt-room"
+          >
+            Oda / Kabin
+          </label>
+          <select id="appt-room" [formField]="appointmentForm.roomId" class="odv-input">
+            <option value="">Oda Seçilmedi</option>
             @for (item of rooms.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
             }
-          </select></label
-        ><label
-          ><span class="field-label">Cihaz</span
-          ><select [formField]="appointmentForm.deviceId">
-            <option value="">Cihaz seçilmedi</option>
+          </select>
+        </div>
+
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="appt-device"
+          >
+            Cihaz
+          </label>
+          <select id="appt-device" [formField]="appointmentForm.deviceId" class="odv-input">
+            <option value="">Cihaz Seçilmedi</option>
             @for (item of devices.value() ?? []; track item.id) {
               <option [value]="item.id">{{ name(item) }}</option>
             }
-          </select></label
-        >
+          </select>
+        </div>
       </div>
-      <label
-        ><span class="field-label">Randevu notu</span
-        ><textarea
-          rows="4"
-          placeholder="Hazırlık, müşteri talebi veya uygulama notu ekleyin…"
+
+      <div>
+        <label
+          class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+          for="appt-notes"
+        >
+          Randevu Notu
+        </label>
+        <textarea
+          id="appt-notes"
+          rows="3"
+          placeholder="Müşteri talebi, özel hassasiyetler veya uygulama notları…"
           [formField]="appointmentForm.notes"
+          class="odv-input"
         ></textarea>
-      </label>
-      @if (error()) {
-        <div class="form-error">{{ error() }}</div>
-      }
+      </div>
+
+      <button class="hidden" type="submit">Kaydet</button>
     </form>
-    <div drawer-footer class="drawer-actions">
-      <span class="save-hint"><i aria-hidden="true"></i> Çakışmalar otomatik kontrol edilir</span>
-      <button class="secondary" type="button" (click)="closeDrawer()">Vazgeç</button
-      ><button
-        class="primary"
-        type="button"
-        [disabled]="saving() || appointmentForm().invalid()"
-        (click)="save()"
+
+    <div drawer-footer class="flex items-center justify-between gap-3">
+      <span class="text-[11px] text-slate-400 hidden sm:inline"
+        >Çakışmalar otomatik kontrol edilir</span
       >
-        <span>{{ saving() ? 'Oluşturuluyor…' : 'Randevu oluştur' }}</span>
-        @if (!saving()) {
-          <b aria-hidden="true">→</b>
-        }
-      </button>
-    </div></app-slide-over
-  >
+      <div class="flex items-center gap-2.5 ml-auto">
+        <button type="button" (click)="closeDrawer()" class="odv-btn-ghost">Vazgeç</button>
+        <button
+          type="button"
+          [disabled]="saving() || appointmentForm().invalid()"
+          (click)="save()"
+          class="odv-btn-primary"
+        >
+          <span class="material-symbols-outlined icon-size-4">event_available</span>
+          <span>{{ saving() ? 'Oluşturuluyor…' : 'Randevu Oluştur' }}</span>
+        </button>
+      </div>
+    </div>
+  </app-slide-over>
 }

@@ -1,78 +1,230 @@
-<header>
-  <div>
-    <p>UZMAN DESTEK SİSTEMİ</p>
-    <h1>AI Bakım Önerisi</h1>
-    <span>Cilt analizi, geçmiş ve kontrendikasyonlardan açıklanabilir bir taslak üretir.</span>
+<!-- 1. Executive Page Header -->
+<app-page-header
+  icon="auto_awesome"
+  eyebrow="UZMAN DESTEK SİSTEMİ"
+  title="AI Bakım Önerisi"
+  description="Cilt analizi, geçmiş seanslar ve kontrendikasyonlardan açıklanabilir bir bakım taslağı üretir."
+>
+  <div actions class="flex items-center gap-2">
+    <app-status-badge [status]="result()?.status || 'not-configured'" />
   </div>
-  <app-status-badge [status]="result()?.status || 'not-configured'" />
-</header>
-<div class="notice">
-  <strong>Uzman onayı zorunlu</strong
-  ><span
-    >Öneri sağlayıcısının durumu MainApi üzerinden kontrol edilir. Hiçbir taslak uzman onayı olmadan
-    tedaviye dönüşmez.</span
+</app-page-header>
+
+<!-- Notice Banner -->
+<div
+  class="mb-6 p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex items-start gap-3.5"
+>
+  <div
+    class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 mt-0.5"
   >
+    <span class="material-symbols-outlined icon-size-4.5">verified_user</span>
+  </div>
+  <div>
+    <strong class="block text-xs font-bold text-indigo-900 dark:text-indigo-200"
+      >Uzman Onayı Zorunludur</strong
+    >
+    <p class="text-xs text-indigo-700 dark:text-indigo-300 mt-0.5 mb-0 leading-relaxed">
+      Öneri sağlayıcısının durumu MainApi üzerinden kontrol edilir. Üretilen taslaklar bilgilendirme
+      amaçlıdır; hiçbir öneri uzman estetisyen onayı olmadan tedavi protokolüne dönüşmez.
+    </p>
+  </div>
 </div>
-<section class="grid">
-  <form (submit)="preview(); $event.preventDefault()">
-    <h2>Değerlendirme girdileri</h2>
-    <label
-      >Müşteri<select [formField]="recommendationForm.customerId">
-        <option value="">Müşteri seçin</option>
+
+<!-- 2. Main Two-Column Layout -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- Left: Assessment Inputs Form (5 columns) -->
+  <form (submit)="preview(); $event.preventDefault()" class="lg:col-span-5 odv-card p-6 space-y-4">
+    <header class="pb-3 border-b border-slate-100 dark:border-slate-800">
+      <span
+        class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block mb-0.5"
+      >
+        PARAMETRELER
+      </span>
+      <h2 class="text-base font-bold text-slate-900 dark:text-white m-0">
+        Değerlendirme Girdileri
+      </h2>
+    </header>
+
+    <div>
+      <label
+        class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+        for="ai-customer"
+      >
+        Müşteri <span class="text-rose-500">*</span>
+      </label>
+      <select id="ai-customer" [formField]="recommendationForm.customerId" class="odv-input">
+        <option value="">Müşteri Seçin</option>
         @for (customer of customers.value() ?? []; track customer.id) {
           <option [value]="customer.id">{{ customerName(customer) }}</option>
         }
-      </select></label
-    ><label
-      >Bakım hedefi<input
+      </select>
+    </div>
+
+    <div>
+      <label
+        class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+        for="ai-goal"
+      >
+        Bakım Hedefi <span class="text-rose-500">*</span>
+      </label>
+      <input
+        id="ai-goal"
         [formField]="recommendationForm.goal"
-        placeholder="Bakım hedefini yazın" /></label
-    ><label
-      >Cilt tipi<select [formField]="recommendationForm.skinType">
-        <option value="combination">Karma</option>
-        <option value="dry">Kuru</option>
-        <option value="oily">Yağlı</option>
-        <option value="sensitive">Hassas</option>
-      </select></label
-    ><label>Uzman notu<textarea [formField]="recommendationForm.notes" rows="5"></textarea></label>
+        placeholder="Örn: Nem dengesi, leke giderme, anti-aging…"
+        class="odv-input"
+      />
+    </div>
+
+    <div>
+      <label
+        class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+        for="ai-skintype"
+      >
+        Cilt Tipi
+      </label>
+      <select id="ai-skintype" [formField]="recommendationForm.skinType" class="odv-input">
+        <option value="combination">Karma Cilt</option>
+        <option value="dry">Kuru Cilt</option>
+        <option value="oily">Yağlı Cilt</option>
+        <option value="sensitive">Hassas Cilt</option>
+      </select>
+    </div>
+
+    <div>
+      <label
+        class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+        for="ai-notes"
+      >
+        Uzman / Anamnez Notu
+      </label>
+      <textarea
+        id="ai-notes"
+        [formField]="recommendationForm.notes"
+        rows="4"
+        placeholder="Alerji, yakın zamanda yapılan işlem veya özel notlar…"
+        class="odv-input"
+      ></textarea>
+    </div>
+
     @if (error()) {
-      <div class="risk">
-        <strong>İstek tamamlanamadı</strong><span>{{ error() }}</span>
+      <div
+        class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold"
+        role="alert"
+      >
+        <strong>İstek Tamamlanamadı:</strong> {{ error() }}
       </div>
     }
-    <button type="submit" [disabled]="loading() || recommendationForm().invalid()">
-      {{ loading() ? 'Hazırlanıyor…' : 'Taslak öneriyi üret' }}
-    </button>
+
+    <div class="pt-2">
+      <button
+        type="submit"
+        [disabled]="loading() || recommendationForm().invalid()"
+        class="w-full odv-btn-primary justify-center"
+      >
+        <span class="material-symbols-outlined icon-size-4">auto_awesome</span>
+        <span>{{ loading() ? 'Taslak Hazırlanıyor…' : 'Taslak Öneriyi Üret' }}</span>
+      </button>
+    </div>
   </form>
-  <article>
+
+  <!-- Right: Result Preview (7 columns) -->
+  <article class="lg:col-span-7 odv-card p-6 flex flex-col justify-between">
     @if (!result()) {
-      <div class="empty">
-        <span>✺</span>
-        <h2>Öneri henüz oluşturulmadı</h2>
-        <p>Canlı müşteri kaydını seçip değerlendirmeyi tamamlayın.</p>
+      <div class="py-24 flex flex-col items-center justify-center text-center">
+        <div
+          class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3"
+        >
+          <span class="material-symbols-outlined icon-size-8">psychology</span>
+        </div>
+        <h3 class="text-base font-bold text-slate-900 dark:text-white m-0">
+          Öneri Henüz Oluşturulmadı
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-0 leading-relaxed">
+          Sol taraftaki panelden canlı müşteri kaydını seçip bakım hedefini girerek AI
+          değerlendirmesini başlatın.
+        </p>
       </div>
     } @else {
-      <p>MAINAPI SONUCU</p>
-      <h2>{{ result()?.draft?.title || 'Sağlayıcı yapılandırılmadı' }}</h2>
-      @if (result()?.draft?.steps?.length) {
-        <ul>
-          @for (step of result()?.draft?.steps; track step) {
-            <li>{{ step }}</li>
-          }
-        </ul>
-      }
-      @if (result()?.draft?.warnings?.length) {
-        <div class="risk">
-          <strong>Kontrol gereken noktalar</strong>
-          @for (warning of result()?.draft?.warnings; track warning) {
-            <span>{{ warning }}</span>
-          }
-        </div>
-      }
-      <footer>
-        <span>{{
-          result()?.requiresSpecialistApproval ? 'Uzman onayı bekleniyor' : 'Onay gerekmiyor'
-        }}</span>
+      <div>
+        <header
+          class="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
+        >
+          <div>
+            <span
+              class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block mb-0.5"
+            >
+              MAINAPI ANALİZ SONUCU
+            </span>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white m-0">
+              {{ result()?.draft?.title || 'Öneri Taslağı' }}
+            </h2>
+          </div>
+          <span class="badge-sky odv-badge text-xs font-bold">
+            {{ result()?.provider || 'Odivon Intelligence' }}
+          </span>
+        </header>
+
+        <!-- Recommended Steps -->
+        @if (result()?.draft?.steps?.length) {
+          <div class="mt-5">
+            <span
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2"
+            >
+              Önerilen Bakım Protokolü Adımları
+            </span>
+            <ol class="space-y-2.5 p-0 m-0 list-none">
+              @for (step of result()?.draft?.steps; track step) {
+                <li
+                  class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-xs text-slate-800 dark:text-slate-200"
+                >
+                  <span
+                    class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5"
+                  >
+                    {{ $index + 1 }}
+                  </span>
+                  <span class="leading-relaxed">{{ step }}</span>
+                </li>
+              }
+            </ol>
+          </div>
+        }
+
+        <!-- Warnings / Precautions -->
+        @if (result()?.draft?.warnings?.length) {
+          <div
+            class="mt-5 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60"
+          >
+            <strong
+              class="block text-xs font-bold text-rose-800 dark:text-rose-200 mb-1.5 flex items-center gap-1.5"
+            >
+              <span class="material-symbols-outlined icon-size-4">warning</span>
+              Kontrol Gereken Noktalar & Kontrendikasyonlar
+            </strong>
+            <ul class="m-0 pl-4 space-y-1 text-xs text-rose-700 dark:text-rose-300">
+              @for (warning of result()?.draft?.warnings; track warning) {
+                <li>{{ warning }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+
+      <footer
+        class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500"
+      >
+        <span
+          class="inline-flex items-center gap-1.5 font-bold"
+          [class.text-amber-600]="result()?.requiresSpecialistApproval"
+          [class.text-emerald-600]="!result()?.requiresSpecialistApproval"
+        >
+          <span
+            class="w-2 h-2 rounded-full"
+            [class.bg-amber-500]="result()?.requiresSpecialistApproval"
+            [class.bg-emerald-500]="!result()?.requiresSpecialistApproval"
+          ></span>
+          {{ result()?.requiresSpecialistApproval ? 'Uzman Onayı Bekleniyor' : 'Protokol Hazır' }}
+        </span>
+        <span class="text-[11px] font-medium text-slate-400">MainApi v1.0 Model</span>
       </footer>
     }
   </article>

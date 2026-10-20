@@ -7,8 +7,9 @@ import { Auth } from '../auth';
 import { BUILD_INFO, BuildInfo } from './build-info';
 import { PRESERVED_STORAGE_KEYS, compareVersions } from './version-compare';
 
-const CHECK_INTERVAL_MS = 30_000;
-const ROUTE_CHECK_THROTTLE_MS = 15_000;
+const CHECK_INTERVAL_MS = 10_000;
+const ROUTE_CHECK_THROTTLE_MS = 5_000;
+const AUTO_UPDATE_SECONDS = 45;
 
 @Service()
 export class VersionService {
@@ -26,7 +27,9 @@ export class VersionService {
   readonly manualOpen = signal(false);
   readonly isChecking = signal(false);
   readonly lastCheckedAt = signal<Date | null>(null);
+  readonly countdown = signal<number | null>(null);
   private lastRouteCheckTime = 0;
+  private countdownTimer: number | null = null;
 
   /** A newer release is deployed (or the API refused this build): the update dialog is shown. */
   readonly updateRequired = computed(() => this.forced() || this.available() !== null);
@@ -34,16 +37,8 @@ export class VersionService {
   /** Modal is visible if an update is required or if opened manually for release info. */
   readonly modalVisible = computed(() => this.updateRequired() || this.manualOpen());
 
-  /** Release marked critical in release.json (only changes the wording of the dialog). */
-  readonly critical = computed(() => {
-    const next = this.available();
-    if (this.forced()) return true;
-    if (!next) return false;
-    return (
-      next.forceLogout ||
-      (!!next.minVersion && compareVersions(this.current.version, next.minVersion) < 0)
-    );
-  });
+  /** Every release is critical/mandatory to guarantee schema, security & data integrity. */
+  readonly critical = computed(() => true);
 
   private started = false;
 
@@ -51,12 +46,15 @@ export class VersionService {
     if (this.started || typeof window === 'undefined') return;
     this.started = true;
 
+    // React immediately if ServiceWorker detects or finishes preparing a new release
     if (this.sw?.isEnabled) {
       const sub = this.sw.versionUpdates.subscribe(async (event) => {
-        if (event.type === 'VERSION_READY') {
+        console.info('[VersionService] ServiceWorker event:', event.type);
+        if (event.type === 'VERSION_DETECTED' || event.type === 'VERSION_READY') {
           await this.checkRemote();
           if (!this.available()) {
             this.forced.set(true);
+            this.startCountdown();
           }
         }
       });
@@ -89,6 +87,7 @@ export class VersionService {
 
     this.destroyRef.onDestroy(() => {
       window.clearInterval(timer);
+      this.stopCountdown();
       this.document.removeEventListener('visibilitychange', onVisible);
       defaultView.removeEventListener('focus', onVisible);
     });
@@ -99,10 +98,12 @@ export class VersionService {
   }
 
   closeModal(): void {
-    this.manualOpen.set(false);
-    if (!this.updateRequired()) {
-      this.available.set(null);
+    if (this.updateRequired()) {
+      // Mandatory update cannot be closed!
+      return;
     }
+    this.manualOpen.set(false);
+    this.available.set(null);
   }
 
   async checkNow(): Promise<void> {
@@ -118,26 +119,68 @@ export class VersionService {
 
   forceUpdate(): void {
     this.forced.set(true);
+    this.startCountdown();
     void this.checkRemote();
   }
 
   async applyUpdate(): Promise<void> {
     if (this.applying()) return;
     this.applying.set(true);
-    try {
-      await this.auth.signOutIfAuthenticated().catch(() => undefined);
-      if (typeof caches !== 'undefined') {
-        const keys = await caches.keys().catch(() => [] as string[]);
-        await Promise.all(keys.map((key) => caches.delete(key).catch(() => false)));
+    this.stopCountdown();
+
+    const doPurgeAndRedirect = async () => {
+      try {
+        await this.auth.signOutIfAuthenticated().catch(() => undefined);
+      } catch {
+        // Ignore auth error
       }
+
+      try {
+        if (typeof caches !== 'undefined') {
+          const keys = await caches.keys().catch(() => [] as string[]);
+          await Promise.all(keys.map((key) => caches.delete(key).catch(() => false)));
+        }
+      } catch {
+        // Ignore cache error
+      }
+
       this.clearStorage();
       this.clearCookies();
+      await this.clearIndexedDb();
+
       if (this.sw?.isEnabled) {
         await this.sw.activateUpdate().catch(() => false);
       }
-    } finally {
-      const targetWindow = this.document.defaultView ?? window;
-      targetWindow.location.replace('/login?updated=1');
+    };
+
+    // Guarantee that redirect runs within 2.5 seconds max even if any step stalls
+    await Promise.race([
+      doPurgeAndRedirect(),
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+    ]);
+
+    const targetWindow = this.document.defaultView ?? window;
+    targetWindow.location.replace('/login?updated=1');
+  }
+
+  private startCountdown(): void {
+    if (this.countdownTimer !== null || this.countdown() !== null) return;
+    this.countdown.set(AUTO_UPDATE_SECONDS);
+    this.countdownTimer = window.setInterval(() => {
+      const current = this.countdown();
+      if (current === null || current <= 1) {
+        this.stopCountdown();
+        void this.applyUpdate();
+      } else {
+        this.countdown.set(current - 1);
+      }
+    }, 1000);
+  }
+
+  private stopCountdown(): void {
+    if (this.countdownTimer !== null) {
+      window.clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
     }
   }
 
@@ -159,6 +202,7 @@ export class VersionService {
           `[VersionService] Yeni sürüm algılandı: ${remote.buildId} (Mevcut: ${this.current.buildId})`,
         );
         this.available.set(remote);
+        this.startCountdown();
       }
     } catch {
       // Offline or network error: will retry next interval
@@ -183,21 +227,42 @@ export class VersionService {
   private clearCookies(): void {
     try {
       const hostname = this.document.location?.hostname ?? '';
-      const domainParts = hostname.split('.');
-      const domains = [''];
-      for (let i = 0; i < domainParts.length - 1; i++) {
-        domains.push(`; domain=.${domainParts.slice(i).join('.')}`);
+      const parts = hostname.split('.');
+      const domainSuffixes = [''];
+      for (let i = 0; i < parts.length; i++) {
+        const d = parts.slice(i).join('.');
+        domainSuffixes.push(d);
+        domainSuffixes.push(`.${d}`);
       }
 
-      for (const cookie of this.document.cookie.split(';')) {
+      const cookies = this.document.cookie ? this.document.cookie.split(';') : [];
+      for (const cookie of cookies) {
         const name = cookie.split('=')[0]?.trim();
         if (!name) continue;
-        for (const domain of domains) {
-          this.document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
+        for (const dom of domainSuffixes) {
+          const domStr = dom ? `; domain=${dom}` : '';
+          this.document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domStr}`;
+          this.document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${domStr}`;
         }
       }
     } catch {
       // Ignore cookie errors
+    }
+  }
+
+  private async clearIndexedDb(): Promise<void> {
+    try {
+      const defaultView = this.document.defaultView ?? window;
+      if (typeof defaultView.indexedDB !== 'undefined' && defaultView.indexedDB.databases) {
+        const dbs = await defaultView.indexedDB.databases();
+        for (const db of dbs) {
+          if (db.name && (db.name.includes('firebase') || db.name.includes('firestore'))) {
+            defaultView.indexedDB.deleteDatabase(db.name);
+          }
+        }
+      }
+    } catch {
+      // Ignore indexedDB error
     }
   }
 }

@@ -93,11 +93,11 @@ import { VersionService } from '../../../core/version/version.service';
                         : 'SİSTEM EN GÜNCEL SÜRÜMDE'
                     }}
                   </span>
-                  @if (version.critical()) {
+                  @if (version.updateRequired()) {
                     <span
-                      class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-600 text-white shadow-xs"
+                      class="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-xs font-mono"
                     >
-                      KRİTİK GÜNCELLEME
+                      ZORUNLU GÜNCELLEME
                     </span>
                   }
                 </div>
@@ -108,7 +108,7 @@ import { VersionService } from '../../../core/version/version.service';
                 >
                   {{
                     version.updateRequired()
-                      ? 'OdivonPro Beauty Yeni Sürüm Hazır'
+                      ? 'Yeni Sürüm Yayında — Güncelleme Zorunludur'
                       : 'OdivonPro Beauty Sürüm Bilgisi'
                   }}
                 </h3>
@@ -116,7 +116,7 @@ import { VersionService } from '../../../core/version/version.service';
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-0 leading-relaxed">
                   {{
                     version.updateRequired()
-                      ? 'Sistemin kararlı, hızlı ve güvenli çalışması için yeni sürüme geçiş yapılması gerekmektedir.'
+                      ? 'Sistem güvenliği, veri bütünlüğü ve yeni geliştirmelerin devreye girmesi için zorunlu güncelleme uygulanacaktır. İşlem sonrası çerezleriniz temizlenerek güvenli giriş ekranına aktarılacaksınız.'
                       : 'Bulut altyapınız en son güvenlik yamaları ve performans geliştirmeleri ile senkronize çalışıyor.'
                   }}
                 </p>
@@ -227,6 +227,25 @@ import { VersionService } from '../../../core/version/version.service';
               </p>
             </div>
 
+            <!-- Auto-Update Countdown Alert -->
+            @if (version.updateRequired() && version.countdown() !== null) {
+              <div
+                class="flex items-center justify-between p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs font-semibold"
+              >
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined icon-size-4.5 animate-spin text-amber-600 dark:text-amber-400">
+                    hourglass_top
+                  </span>
+                  <span>Otomatik geçiş:</span>
+                </div>
+                <span
+                  class="font-mono font-bold px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-900 dark:text-amber-200"
+                >
+                  {{ version.countdown() }} sn sonra
+                </span>
+              </div>
+            }
+
             <!-- Security & Cache Clean Notice -->
             <div
               class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400"
@@ -237,8 +256,8 @@ import { VersionService } from '../../../core/version/version.service';
               <span>
                 {{
                   version.updateRequired()
-                    ? 'Güncelleme uygulandığında tarayıcı önbelleği güvenle yenilenecek, oturumunuz taze bir şekilde yeniden başlatılacaktır.'
-                    : 'Sistem her 5 dakikada bir ve sayfa odağı yenilendiğinde arka planda otomatik güncelleme denetimi gerçekleştirir.'
+                    ? 'Zorunlu güncelleme uygulandığında tarayıcı önbelleği ve çerezler temizlenecek, oturumunuz güvenle kapatılarak giriş ekranına yönlendirilecektir.'
+                    : 'Sistem her 10 saniyede bir ve sayfa odağı yenilendiğinde arka planda otomatik güncelleme denetimi gerçekleştirir.'
                 }}
               </span>
             </div>
@@ -251,16 +270,16 @@ import { VersionService } from '../../../core/version/version.service';
             @if (version.updateRequired()) {
               <button
                 type="button"
-                class="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:via-purple-500 hover:to-indigo-600 text-white font-black text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
+                class="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-rose-600 via-indigo-600 to-purple-700 hover:from-rose-500 hover:via-indigo-500 hover:to-purple-600 text-white font-black text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
                 [disabled]="version.applying()"
                 (click)="version.applyUpdate()"
               >
                 @if (version.applying()) {
                   <span class="material-symbols-outlined icon-size-4.5 animate-spin">refresh</span>
-                  <span>Güncelleme Uygulanıyor...</span>
+                  <span>Önbellek & Çerezler Temizleniyor...</span>
                 } @else {
-                  <span class="material-symbols-outlined icon-size-4.5">system_update_alt</span>
-                  <span>Şimdi Güncelle ve Yeniden Başlat</span>
+                  <span class="material-symbols-outlined icon-size-4.5">lock_reset</span>
+                  <span>Zorunlu Güncelle ve Oturumu Yenile</span>
                 }
               </button>
             } @else {

@@ -21,7 +21,9 @@ export class Login {
 
   constructor() {
     if (this.route.snapshot.queryParamMap.get('updated') === '1') {
-      this.notice.set('Uygulama başarıyla yeni sürüme güncellendi. Lütfen tekrar oturum açın.');
+      this.notice.set(
+        'Sistem başarıyla yeni sürüme güncellendi. Güvenliğiniz için çerezler ve önbellek temizlendi, lütfen tekrar oturum açın.',
+      );
     }
   }
   protected readonly loginModel = signal({ email: '', password: '' });

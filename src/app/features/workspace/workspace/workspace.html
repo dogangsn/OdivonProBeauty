@@ -7,6 +7,12 @@
 >
   @if (!definition.readonly) {
     <div actions class="flex items-center gap-2">
+      @if (isServiceWorkspace()) {
+        <button type="button" (click)="openWizard()" class="odv-btn-secondary">
+          <span class="material-symbols-outlined icon-size-4 text-indigo-500">auto_fix_high</span>
+          <span>Hazır Hizmet Sihirbazı</span>
+        </button>
+      }
       <button type="button" (click)="openCreate()" class="odv-btn-primary">
         <span class="material-symbols-outlined icon-size-4">add</span>
         <span class="capitalize">{{ definition.primaryAction }}</span>
@@ -258,26 +264,52 @@
             <tr>
               <td
                 [attr.colspan]="definition.columns.length + (definition.readonly ? 0 : 1)"
-                class="py-16 text-center"
+                class="py-12 text-center"
               >
-                <div class="flex flex-col items-center justify-center">
-                  <span
-                    class="material-symbols-outlined text-slate-300 dark:text-slate-600 icon-size-8"
-                    >folder_open</span
-                  >
-                  <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2 mb-0">
-                    {{ definition.emptyTitle || 'Henüz Kayıt Yok' }}
-                  </h3>
-                  <p class="text-xs text-slate-400 max-w-sm mt-1 mb-4">
-                    {{ definition.emptyDescription || 'Filtrelerinize uygun kayıt bulunamadı.' }}
-                  </p>
-                  @if (!definition.readonly) {
-                    <button type="button" (click)="openCreate()" class="odv-btn-primary">
-                      <span class="material-symbols-outlined icon-size-4">add</span>
-                      <span>İlk Kaydı Oluştur</span>
-                    </button>
-                  }
-                </div>
+                @if (isServiceWorkspace()) {
+                  <div class="flex flex-col items-center justify-center max-w-md mx-auto p-4">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/10 mb-3">
+                      <span class="material-symbols-outlined icon-size-7">auto_fix_high</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mt-1 mb-0">
+                      {{ definition.emptyTitle || 'Henüz Hizmet / Kategori Tanımlanmadı' }}
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-5 leading-relaxed">
+                      Lazer Epilasyon, Cilt Bakımı, Spa, Tırnak ve Bölgesel İncelme gibi hazır sektör şablonlarını sihirbaz ile tek tıkla yükleyebilirsiniz.
+                    </p>
+                    <div class="flex items-center gap-2.5 flex-wrap justify-center">
+                      <button type="button" (click)="openWizard()" class="odv-btn-primary">
+                        <span class="material-symbols-outlined icon-size-4">auto_fix_high</span>
+                        <span>Hazır Hizmet Sihirbazını Başlat</span>
+                      </button>
+                      @if (!definition.readonly) {
+                        <button type="button" (click)="openCreate()" class="odv-btn-ghost">
+                          <span class="material-symbols-outlined icon-size-4">add</span>
+                          <span>Manuel Ekle</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <div class="flex flex-col items-center justify-center">
+                    <span
+                      class="material-symbols-outlined text-slate-300 dark:text-slate-600 icon-size-8"
+                      >folder_open</span
+                    >
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2 mb-0">
+                      {{ definition.emptyTitle || 'Henüz Kayıt Yok' }}
+                    </h3>
+                    <p class="text-xs text-slate-400 max-w-sm mt-1 mb-4">
+                      {{ definition.emptyDescription || 'Filtrelerinize uygun kayıt bulunamadı.' }}
+                    </p>
+                    @if (!definition.readonly) {
+                      <button type="button" (click)="openCreate()" class="odv-btn-primary">
+                        <span class="material-symbols-outlined icon-size-4">add</span>
+                        <span>İlk Kaydı Oluştur</span>
+                      </button>
+                    }
+                  </div>
+                }
               </td>
             </tr>
           }
@@ -413,4 +445,12 @@
       </div>
     </div>
   </app-slide-over>
+}
+
+@if (isServiceWorkspace()) {
+  <app-service-wizard
+    [open]="wizardOpen()"
+    (close)="closeWizard()"
+    (completed)="onWizardCompleted($event)"
+  />
 }

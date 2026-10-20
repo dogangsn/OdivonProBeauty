@@ -16,12 +16,13 @@ import {
 import { PageHeader } from '../../../shared/page-header/page-header';
 import { SlideOver } from '../../../shared/slide-over/slide-over';
 import { StatusBadge } from '../../../shared/status-badge/status-badge';
+import { ServiceWizard, WizardCompletionResult } from '../../../shared/components/service-wizard/service-wizard';
 
 type DraftValue = string | number | boolean;
 type Draft = Record<string, DraftValue>;
 
 @Component({
-  imports: [PageHeader, SlideOver, StatusBadge],
+  imports: [PageHeader, SlideOver, StatusBadge, ServiceWizard],
   selector: 'app-workspace',
   styleUrl: './workspace.css',
   templateUrl: './workspace.html',
@@ -38,11 +39,17 @@ export class Workspace {
   protected readonly statusFilter = signal('');
   protected readonly branchFilter = signal('');
   protected readonly drawerOpen = signal(false);
+  protected readonly wizardOpen = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly deletingId = signal<string | null>(null);
   protected readonly feedback = signal('');
   protected readonly draft = signal<Draft>({});
+
+  protected readonly isServiceWorkspace = computed(
+    () => this.definition.resource === 'services' || this.definition.resource === 'service-categories',
+  );
+
   protected readonly branches = resource({
     loader: async () => this.branchService.ensureBranches(),
   });
@@ -96,6 +103,25 @@ export class Workspace {
     if (this.route.snapshot.queryParamMap.get('create') === '1') {
       this.openCreate();
     }
+    if (this.route.snapshot.queryParamMap.get('wizard') === '1' && this.isServiceWorkspace()) {
+      this.openWizard();
+    }
+  }
+
+  protected openWizard(): void {
+    this.wizardOpen.set(true);
+  }
+
+  protected closeWizard(): void {
+    this.wizardOpen.set(false);
+  }
+
+  protected onWizardCompleted(result: WizardCompletionResult): void {
+    this.wizardOpen.set(false);
+    this.feedback.set(
+      `${result.createdCategoriesCount} kategori ve ${result.createdServicesCount} hazır hizmet başarıyla tanımlandı.`,
+    );
+    this.remote.reload();
   }
 
   private preloadLookups(): void {

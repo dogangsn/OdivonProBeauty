@@ -75,4 +75,14 @@ describe('Workspace', () => {
       expect(options.some((o: any) => o.value === 'cash' || o.value === 'card')).toBe(true);
     }
   });
+
+  it('should open and close service wizard', () => {
+    const fixture = TestBed.createComponent(Workspace);
+    const component = fixture.componentInstance;
+    expect((component as any).wizardOpen()).toBe(false);
+    (component as any).openWizard();
+    expect((component as any).wizardOpen()).toBe(true);
+    (component as any).closeWizard();
+    expect((component as any).wizardOpen()).toBe(false);
+  });
 });

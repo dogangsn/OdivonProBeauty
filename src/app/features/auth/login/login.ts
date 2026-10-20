@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormField, email, form, required, submit } from '@angular/forms/signals';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth';
 import { LoginShowcase } from '../login-showcase/login-showcase';
 
@@ -12,11 +12,18 @@ import { LoginShowcase } from '../login-showcase/login-showcase';
 })
 export class Login {
   private readonly auth = inject(Auth);
+  private readonly route = inject(ActivatedRoute);
   protected readonly error = signal('');
   protected readonly notice = signal('');
   protected readonly isSubmitting = signal(false);
   protected readonly showPassword = signal(false);
   protected readonly pointer = signal({ x: 50, y: 0 });
+
+  constructor() {
+    if (this.route.snapshot.queryParamMap.get('updated') === '1') {
+      this.notice.set('Uygulama başarıyla yeni sürüme güncellendi. Lütfen tekrar oturum açın.');
+    }
+  }
   protected readonly loginModel = signal({ email: '', password: '' });
   protected readonly loginForm = form(this.loginModel, (path) => {
     required(path.email, { message: 'E-posta zorunludur.' });

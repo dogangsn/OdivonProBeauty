@@ -15,3 +15,6 @@
 
 /manifest.webmanifest
   Cache-Control: no-cache
+
+/version.json
+  Cache-Control: no-cache, no-store, must-revalidate

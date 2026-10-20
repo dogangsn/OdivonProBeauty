@@ -10,19 +10,15 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Theme } from '../../core/theme';
 import { LanguageSelector } from '../../shared/language-selector/language-selector';
 
+import { VersionService } from '../../core/version/version.service';
+
 interface CollapsibleNavSection {
   key: string;
   items: { key: string; icon: string; route: string }[];
 }
 
 @Component({
-  imports: [
-    LanguageSelector,
-    RouterLink,
-    RouterLinkActive,
-    RouterOutlet,
-    TranslatePipe,
-  ],
+  imports: [LanguageSelector, RouterLink, RouterLinkActive, RouterOutlet, TranslatePipe],
   selector: 'app-shell',
   styleUrl: './shell.css',
   templateUrl: './shell.html',
@@ -34,6 +30,7 @@ export class Shell {
   protected readonly theme = inject(Theme);
   protected readonly i18n = inject(I18nStore);
   protected readonly branchService = inject(BranchService);
+  protected readonly version = inject(VersionService);
   protected readonly menuOpen = signal(false);
   protected readonly activeBranchId = signal('');
 
@@ -180,8 +177,7 @@ export class Shell {
 
   protected branchName(): string {
     const branches = this.branches.value() ?? [];
-    const selected =
-      branches.find((branch) => branch.id === this.activeBranchId()) ?? branches[0];
+    const selected = branches.find((branch) => branch.id === this.activeBranchId()) ?? branches[0];
     return selected?.name ?? this.i18n.t('action.allBranches');
   }
 

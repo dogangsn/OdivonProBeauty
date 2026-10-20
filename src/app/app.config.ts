@@ -14,11 +14,14 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { authInterceptor } from './core/auth-interceptor';
 import { AppUpdate } from './core/app-update';
 import { AppVersion } from './core/app-version';
+import { VersionService } from './core/version/version.service';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    VersionService,
+    provideAppInitializer(() => inject(VersionService).start()),
     AppUpdate,
     provideAppInitializer(() => inject(AppUpdate).start()),
     provideAppInitializer(() => inject(AppVersion).check()),

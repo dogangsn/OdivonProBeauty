@@ -3,6 +3,9 @@ import { VersionService } from '../../../core/version/version.service';
 
 @Component({
   selector: 'app-update-banner',
+  host: {
+    style: 'display: contents;',
+  },
   template: `
     @if (version.modalVisible()) {
       <div

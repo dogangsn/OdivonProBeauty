@@ -1,16 +1,20 @@
 import { DOCUMENT } from '@angular/common';
 import { DestroyRef, Service, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
+import { filter } from 'rxjs';
 import { Auth } from '../auth';
 import { BUILD_INFO, BuildInfo } from './build-info';
 import { PRESERVED_STORAGE_KEYS, compareVersions } from './version-compare';
 
-const CHECK_INTERVAL_MS = 5 * 60_000;
+const CHECK_INTERVAL_MS = 30_000;
+const ROUTE_CHECK_THROTTLE_MS = 15_000;
 
 @Service()
 export class VersionService {
   private readonly document = inject(DOCUMENT);
   private readonly sw = inject(SwUpdate, { optional: true });
+  private readonly router = inject(Router, { optional: true });
   private readonly auth = inject(Auth);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -22,6 +26,7 @@ export class VersionService {
   readonly manualOpen = signal(false);
   readonly isChecking = signal(false);
   readonly lastCheckedAt = signal<Date | null>(null);
+  private lastRouteCheckTime = 0;
 
   /** A newer release is deployed (or the API refused this build): the update dialog is shown. */
   readonly updateRequired = computed(() => this.forced() || this.available() !== null);
@@ -47,21 +52,45 @@ export class VersionService {
     this.started = true;
 
     if (this.sw?.isEnabled) {
-      const sub = this.sw.versionUpdates.subscribe((event) => {
-        if (event.type === 'VERSION_READY') void this.checkRemote();
+      const sub = this.sw.versionUpdates.subscribe(async (event) => {
+        if (event.type === 'VERSION_READY') {
+          await this.checkRemote();
+          if (!this.available()) {
+            this.forced.set(true);
+          }
+        }
       });
       this.destroyRef.onDestroy(() => sub.unsubscribe());
     }
 
     void this.check();
     const timer = window.setInterval(() => void this.check(), CHECK_INTERVAL_MS);
+
     const onVisible = () => {
       if (!this.document.hidden) void this.check();
     };
     this.document.addEventListener('visibilitychange', onVisible);
+
+    const defaultView = this.document.defaultView ?? window;
+    defaultView.addEventListener('focus', onVisible);
+
+    if (this.router) {
+      const navSub = this.router.events
+        .pipe(filter((e) => e instanceof NavigationEnd))
+        .subscribe(() => {
+          const now = Date.now();
+          if (now - this.lastRouteCheckTime > ROUTE_CHECK_THROTTLE_MS) {
+            this.lastRouteCheckTime = now;
+            void this.check();
+          }
+        });
+      this.destroyRef.onDestroy(() => navSub.unsubscribe());
+    }
+
     this.destroyRef.onDestroy(() => {
       window.clearInterval(timer);
       this.document.removeEventListener('visibilitychange', onVisible);
+      defaultView.removeEventListener('focus', onVisible);
     });
   }
 
@@ -120,21 +149,15 @@ export class VersionService {
   }
 
   private async checkRemote(): Promise<void> {
-    const defaultView = this.document.defaultView ?? window;
-    // Don't block local dev debugging
-    if (
-      defaultView.location.hostname === 'localhost' ||
-      defaultView.location.hostname === '127.0.0.1'
-    ) {
-      return;
-    }
-
     try {
       const response = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) return;
       const remote = (await response.json()) as BuildInfo;
 
       if (remote.buildId && remote.buildId !== this.current.buildId) {
+        console.info(
+          `[VersionService] Yeni sürüm algılandı: ${remote.buildId} (Mevcut: ${this.current.buildId})`,
+        );
         this.available.set(remote);
       }
     } catch {

@@ -15,11 +15,32 @@ export class BranchService {
     this.branches().find((b) => b.id === this.activeBranchId()) ?? this.branches()[0] ?? null,
   );
 
+  private inFlight?: Promise<BranchRecord[]>;
+
   async ensureBranches(): Promise<BranchRecord[]> {
     if (this.branches().length > 0) return this.branches();
+    if (this.inFlight) return this.inFlight;
+    this.inFlight = this.loadBranches();
+    try {
+      return await this.inFlight;
+    } finally {
+      this.inFlight = undefined;
+    }
+  }
+
+  selectBranch(id: string): void {
+    this.activeBranchId.set(id);
+  }
+
+  private async loadBranches(): Promise<BranchRecord[]> {
     this.loading.set(true);
     try {
-      let list = await this.fetchList();
+      const fetchResult = await this.fetchList();
+      if (!fetchResult.ok) {
+        return [];
+      }
+
+      let list = fetchResult.data;
       if (list.length === 0) {
         // Attempt to onboard / create default branch if tenant is freshly initialized
         try {
@@ -30,7 +51,8 @@ export class BranchService {
               timezone: 'Europe/Istanbul',
             }),
           );
-          list = await this.fetchList();
+          const refetch = await this.fetchList();
+          if (refetch.ok) list = refetch.data;
         } catch {
           // If onboarding fails, try direct branch create
           try {
@@ -58,18 +80,14 @@ export class BranchService {
     }
   }
 
-  selectBranch(id: string): void {
-    this.activeBranchId.set(id);
-  }
-
-  private async fetchList(): Promise<BranchRecord[]> {
+  private async fetchList(): Promise<{ ok: boolean; data: BranchRecord[] }> {
     try {
       const response = await firstValueFrom(
         this.api.list<BranchRecord>('branches', { limit: 100 }),
       );
-      return response.data ?? [];
+      return { ok: true, data: response.data ?? [] };
     } catch {
-      return [];
+      return { ok: false, data: [] };
     }
   }
 }

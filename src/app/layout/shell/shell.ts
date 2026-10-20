@@ -38,7 +38,7 @@ export class Shell {
   protected readonly expandedSections = signal<Record<string, boolean>>({
     'nav.section.operation': true,
     'nav.section.customerCare': true,
-    'nav.section.catalogResource': true,
+    'nav.section.definitions': true,
     'nav.section.team': false,
     'nav.section.financeStock': false,
     'nav.section.growthManagement': false,
@@ -72,8 +72,9 @@ export class Shell {
       ],
     },
     {
-      key: 'nav.section.catalogResource',
+      key: 'nav.section.definitions',
       items: [
+        { key: 'nav.definitions', icon: 'tune', route: '/definitions' },
         { key: 'nav.services', icon: 'auto_awesome', route: '/services' },
         { key: 'nav.serviceCategories', icon: 'category', route: '/service-categories' },
         { key: 'nav.servicePackages', icon: 'redeem', route: '/service-packages' },

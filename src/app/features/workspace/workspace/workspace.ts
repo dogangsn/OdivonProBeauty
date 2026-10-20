@@ -3,6 +3,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import { BranchService } from '../../../core/branch.service';
+import { DefinitionsService } from '../../../core/definitions/definitions.service';
+import { DefinitionCategoryKey } from '../../../core/definitions/definitions.model';
+import { EntityLookupService } from '../../../core/entity-lookup.service';
 import {
   BeautyRecord,
   BranchRecord,
@@ -28,6 +31,8 @@ export class Workspace {
   private readonly router = inject(Router);
   private readonly api = inject(ApiClient);
   protected readonly branchService = inject(BranchService);
+  protected readonly definitions = inject(DefinitionsService);
+  protected readonly entityLookup = inject(EntityLookupService);
   protected readonly definition = this.route.snapshot.data['definition'] as WorkspaceDefinition;
   protected readonly search = signal('');
   protected readonly statusFilter = signal('');
@@ -87,9 +92,38 @@ export class Workspace {
   );
 
   constructor() {
+    this.preloadLookups();
     if (this.route.snapshot.queryParamMap.get('create') === '1') {
       this.openCreate();
     }
+  }
+
+  private preloadLookups(): void {
+    void this.definitions.syncRemote();
+
+    const needed = new Set<string>();
+    for (const field of this.definition.fields ?? []) {
+      if (field.lookup && this.entityLookup.isEntityResource(field.lookup)) {
+        needed.add(field.lookup);
+      }
+    }
+    for (const col of this.definition.columns ?? []) {
+      const inferred = this.inferEntityFromColumn(col.key);
+      if (inferred) needed.add(inferred);
+    }
+    for (const entity of needed) {
+      void this.entityLookup.ensure(entity);
+    }
+  }
+
+  protected optionsForField(field: WorkspaceField): readonly { label: string; value: string }[] {
+    if (field.lookup) {
+      if (this.entityLookup.isEntityResource(field.lookup)) {
+        return this.entityLookup.getOptions(field.lookup);
+      }
+      return this.definitions.getOptions(field.lookup as DefinitionCategoryKey);
+    }
+    return field.options ?? [];
   }
 
   protected updateSearch(event: Event): void {
@@ -182,6 +216,9 @@ export class Workspace {
           }),
         );
       }
+      if (this.entityLookup.isEntityResource(this.definition.resource)) {
+        void this.entityLookup.refresh(this.definition.resource);
+      }
       this.closeDrawer();
       this.remote.reload();
     } catch (error) {
@@ -196,6 +233,9 @@ export class Workspace {
     this.deletingId.set(row.id);
     try {
       await firstValueFrom(this.api.remove(this.definition.resource, row.id));
+      if (this.entityLookup.isEntityResource(this.definition.resource)) {
+        void this.entityLookup.refresh(this.definition.resource);
+      }
       this.remote.reload();
     } catch (error) {
       this.feedback.set(error instanceof Error ? error.message : 'Kayit silinemedi.');
@@ -205,9 +245,17 @@ export class Workspace {
   }
 
   protected recordName(row: BeautyRecord): string {
-    for (const key of ['fullName', 'name', 'title', 'invoiceNumber', 'customerId', 'staffId']) {
+    for (const key of ['fullName', 'name', 'title', 'invoiceNumber']) {
       const value = row[key];
       if (typeof value === 'string' && value) return value;
+    }
+    if (typeof row['customerId'] === 'string') {
+      const cust = this.entityLookup.resolve('customers', row['customerId']);
+      if (cust) return cust;
+    }
+    if (typeof row['staffId'] === 'string') {
+      const st = this.entityLookup.resolve('staff', row['staffId']);
+      if (st) return st;
     }
     return row.id;
   }
@@ -221,7 +269,10 @@ export class Workspace {
   }
 
   protected cellValue(row: BeautyRecord, column: WorkspaceColumn): string {
-    const value = this.resolve(row, column.key);
+    const raw = this.resolve(row, column.key);
+    const resolved = this.resolveColumnLabel(column.key, raw);
+    const value = resolved ?? raw;
+
     if (column.format === 'date') return this.date(value);
     if (column.format === 'currency') {
       return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(
@@ -232,6 +283,42 @@ export class Workspace {
     if (Array.isArray(value)) return value.join(', ');
     if (typeof value === 'boolean') return value ? 'Evet' : 'Hayir';
     return typeof value === 'string' || typeof value === 'number' ? String(value) : '—';
+  }
+
+  private resolveColumnLabel(key: string, value: unknown): string | undefined {
+    if (value === undefined || value === null || value === '') return undefined;
+
+    // 1. Check inferred entity from column key (e.g. customerId -> customers)
+    const inferred = this.inferEntityFromColumn(key);
+    if (inferred) {
+      const resolved = this.entityLookup.resolve(inferred, value);
+      if (resolved) return resolved;
+    }
+
+    // 2. Check field definition lookup if declared
+    const field = this.definition.fields?.find((f) => f.key === key);
+    if (field?.lookup) {
+      if (this.entityLookup.isEntityResource(field.lookup)) {
+        return this.entityLookup.resolve(field.lookup, value);
+      }
+      return this.definitions.resolveLabel(field.lookup as DefinitionCategoryKey, String(value));
+    }
+
+    return undefined;
+  }
+
+  private inferEntityFromColumn(colKey: string): string | undefined {
+    const map: Record<string, string> = {
+      customerId: 'customers',
+      serviceId: 'services',
+      staffId: 'staff',
+      deviceId: 'devices',
+      supplierId: 'suppliers',
+      packageId: 'packages',
+      productId: 'products',
+      categoryId: 'service-categories',
+    };
+    return map[colKey];
   }
 
   protected statusValue(row: BeautyRecord, column: WorkspaceColumn): string {
@@ -261,8 +348,10 @@ export class Workspace {
         value[field.key] = localDatetime;
       } else if (field.type === 'number') {
         value[field.key] = 0;
+      } else if (field.type === 'select') {
+        value[field.key] = this.optionsForField(field)[0]?.value ?? '';
       } else {
-        value[field.key] = field.options?.[0]?.value ?? '';
+        value[field.key] = '';
       }
     }
     return value;

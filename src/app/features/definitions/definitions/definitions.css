@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.category-tab {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-tab.active {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.35);
+  border-color: transparent;
+}
+
+.category-tab.active .tab-icon {
+  color: #ffffff !important;
+}
+
+.category-tab.active .tab-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.definition-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.definition-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+}

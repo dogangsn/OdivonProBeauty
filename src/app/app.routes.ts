@@ -72,6 +72,11 @@ export const routes: Routes = [
       },
       ...workspaceRoutes.map(([path, key]) => workspace(path, WORKSPACES[key])),
       {
+        path: 'definitions',
+        loadComponent: () =>
+          import('./features/definitions/definitions/definitions').then((m) => m.Definitions),
+      },
+      {
         path: 'ai-recommendations',
         loadComponent: () =>
           import('./features/ai/recommendations/recommendations').then((m) => m.Recommendations),

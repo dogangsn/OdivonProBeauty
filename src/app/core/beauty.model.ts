@@ -50,6 +50,7 @@ export interface WorkspaceField {
   placeholder?: string;
   required?: boolean;
   options?: readonly WorkspaceOption[];
+  lookup?: string;
   fullWidth?: boolean;
   min?: number;
   step?: number;

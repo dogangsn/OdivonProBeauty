@@ -370,7 +370,7 @@
                 class="odv-input"
               >
                 <option value="">Seçin</option>
-                @for (option of field.options ?? []; track option.value) {
+                @for (option of optionsForField(field); track option.value) {
                   <option [value]="option.value">{{ option.label }}</option>
                 }
               </select>

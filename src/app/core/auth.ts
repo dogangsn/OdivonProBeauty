@@ -75,6 +75,10 @@ export class Auth {
     return signInWithPhoneNumber(this.firebaseAuth, phoneNumber, verifier);
   }
 
+  async signOutIfAuthenticated(): Promise<void> {
+    if (await this.isReadyAndAuthenticated()) await signOut(this.firebaseAuth);
+  }
+
   async logout(): Promise<void> {
     if (this.firebaseAuth.currentUser) await signOut(this.firebaseAuth);
     await this.router.navigateByUrl('/login');

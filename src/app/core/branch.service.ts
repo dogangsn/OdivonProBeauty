@@ -40,39 +40,26 @@ export class BranchService {
         return [];
       }
 
-      let list = fetchResult.data;
-      if (list.length === 0) {
-        // Attempt to onboard / create default branch if tenant is freshly initialized
-        try {
-          await firstValueFrom(
-            this.api.request('POST', 'beauty/onboarding', {
-              businessName: 'Odivon Beauty',
-              branchName: 'Merkez Şube',
-              timezone: 'Europe/Istanbul',
-            }),
-          );
-          const refetch = await this.fetchList();
-          if (refetch.ok) list = refetch.data;
-        } catch {
-          // If onboarding fails, try direct branch create
-          try {
-            const created = await firstValueFrom(
-              this.api.create<BranchRecord>('branches', {
-                data: { name: 'Merkez Şube', code: 'MRK' },
-              }),
-            );
-            if (created.data) list = [created.data];
-          } catch {
-            // Backend might not support creating branches directly
-          }
-        }
+      const list = fetchResult.data ?? [];
+      // Deduplicate branches by id and normalized name to eliminate any duplicates
+      const uniqueList: BranchRecord[] = [];
+      const seenIds = new Set<string>();
+      const seenNames = new Set<string>();
+
+      for (const item of list) {
+        if (!item.id || seenIds.has(item.id)) continue;
+        const normName = (item.name || '').trim().toLowerCase();
+        if (normName && seenNames.has(normName)) continue;
+        seenIds.add(item.id);
+        if (normName) seenNames.add(normName);
+        uniqueList.push(item);
       }
 
-      this.branches.set(list);
-      if (list.length > 0 && !this.activeBranchId()) {
-        this.activeBranchId.set(list[0].id);
+      this.branches.set(uniqueList);
+      if (uniqueList.length > 0 && !this.activeBranchId()) {
+        this.activeBranchId.set(uniqueList[0].id);
       }
-      return list;
+      return uniqueList;
     } catch {
       return [];
     } finally {

@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   DEFINITION_CATEGORIES,
   DefinitionCategoryKey,
@@ -29,7 +30,7 @@ const COLOR_PRESETS = [
 ];
 
 @Component({
-  imports: [PageHeader, SlideOver],
+  imports: [PageHeader, RouterLink, SlideOver],
   selector: 'app-definitions',
   styleUrl: './definitions.css',
   templateUrl: './definitions.html',

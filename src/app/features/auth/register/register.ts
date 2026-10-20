@@ -9,7 +9,7 @@ import {
   submit,
   validate,
 } from '@angular/forms/signals';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Registration } from '../../../core/registration';
 import { AuthBackdrop } from '../auth-backdrop/auth-backdrop';
 
@@ -21,6 +21,7 @@ import { AuthBackdrop } from '../auth-backdrop/auth-backdrop';
 })
 export class Register {
   private readonly registration = inject(Registration);
+  private readonly router = inject(Router);
 
   protected readonly error = signal('');
   protected readonly isSubmitting = signal(false);
@@ -85,7 +86,24 @@ export class Register {
       this.isSubmitting.set(true);
       const model = this.registerModel();
       try {
-        await this.registration.createOwnerAccount(model);
+        const result = await this.registration.register(model);
+        try {
+          sessionStorage.setItem('odivon_registered_email', result.email);
+          sessionStorage.setItem(
+            'odivon_pending_setup',
+            JSON.stringify({
+              businessName: model.businessName,
+              branchName: model.branchName,
+              ownerName: model.ownerName,
+              phone: model.phone,
+            }),
+          );
+        } catch {
+          // Ignore storage errors
+        }
+        await this.router.navigate(['/verify-email'], {
+          queryParams: { email: result.email },
+        });
       } catch (error: unknown) {
         this.error.set(this.errorMessage(error));
       } finally {

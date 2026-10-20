@@ -6,6 +6,14 @@
   description="Ödeme yöntemleri, gider kalemleri, uygulama bölgeleri, segmentler, birimler ve işletmenize özel tüm parametrik listeleri dinamik olarak yönetin."
 >
   <div actions class="flex items-center gap-2.5">
+    <a
+      routerLink="/onboarding"
+      class="odv-btn-ghost text-xs text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800"
+      title="Genel Şube, Çalışma Saatleri ve Tanım Kurulum Sihirbazı"
+    >
+      <span class="material-symbols-outlined icon-size-4">auto_awesome</span>
+      <span class="hidden sm:inline">Kurulum Sihirbazı</span>
+    </a>
     <button
       type="button"
       (click)="resetCategory()"
@@ -21,6 +29,7 @@
     </button>
   </div>
 </app-page-header>
+
 
 <!-- 2. Category Selector Pills -->
 <nav

@@ -52,6 +52,21 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
   },
   {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email').then((m) => m.VerifyEmail),
+  },
+  {
+    path: 'auth/verify-email',
+    redirectTo: 'verify-email',
+  },
+  {
+    path: 'onboarding',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/onboarding/onboarding').then((m) => m.Onboarding),
+  },
+  {
     path: 'portal',
     loadComponent: () => import('./features/customer-portal/portal/portal').then((m) => m.Portal),
   },

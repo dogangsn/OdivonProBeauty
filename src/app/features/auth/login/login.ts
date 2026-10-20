@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormField, email, form, required, submit } from '@angular/forms/signals';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth';
 import { LoginShowcase } from '../login-showcase/login-showcase';
 
@@ -13,6 +13,7 @@ import { LoginShowcase } from '../login-showcase/login-showcase';
 export class Login {
   private readonly auth = inject(Auth);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   protected readonly error = signal('');
   protected readonly notice = signal('');
   protected readonly isSubmitting = signal(false);
@@ -20,10 +21,19 @@ export class Login {
   protected readonly pointer = signal({ x: 50, y: 0 });
 
   constructor() {
-    if (this.route.snapshot.queryParamMap.get('updated') === '1') {
+    const qp = this.route.snapshot.queryParamMap;
+    if (qp.get('updated') === '1') {
       this.notice.set(
         'Sistem başarıyla yeni sürüme güncellendi. Güvenliğiniz için çerezler ve önbellek temizlendi, lütfen tekrar oturum açın.',
       );
+    } else if (qp.get('verified') === '1') {
+      this.notice.set(
+        'E-posta adresiniz başarıyla doğrulandı. Lütfen şifrenizle giriş yaparak kurulum sihirbazına devam edin.',
+      );
+    }
+    const emailParam = qp.get('email');
+    if (emailParam) {
+      this.loginModel.update((m) => ({ ...m, email: emailParam.trim() }));
     }
   }
   protected readonly loginModel = signal({ email: '', password: '' });
@@ -37,7 +47,13 @@ export class Login {
       this.error.set('');
       this.isSubmitting.set(true);
       try {
-        await this.auth.login(this.loginModel().email, this.loginModel().password);
+        await this.auth.authenticate(this.loginModel().email, this.loginModel().password);
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        if (returnUrl) {
+          await this.router.navigateByUrl(returnUrl);
+        } else {
+          await this.auth.openDashboard();
+        }
       } catch {
         this.error.set('E-posta veya şifre hatalı. Bilgilerinizi kontrol edip tekrar deneyin.');
       } finally {

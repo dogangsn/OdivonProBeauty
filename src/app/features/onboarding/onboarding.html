@@ -1,0 +1,717 @@
+<main>
+  <app-auth-backdrop />
+
+  <div class="wizard-container">
+    <!-- Top Brand Header -->
+    <header class="wizard-header">
+      <div class="brand">
+        <span class="brand__mark">O</span>
+        <div class="brand__text">
+          <strong>OdivonPro</strong>
+          <small>Güzellik Merkezi Kurulum Sihirbazı</small>
+        </div>
+      </div>
+      <div class="step-indicator">
+        <span>Adım {{ currentStep() }} / 5</span>
+      </div>
+    </header>
+
+    <!-- Main Stepper Card Frame -->
+    <div class="card-frame">
+      <div class="card">
+        <!-- Horizontal Stepper Nav -->
+        <nav class="stepper-nav" aria-label="Kurulum adımları">
+          <button
+            type="button"
+            class="stepper-tab"
+            [class.stepper-tab--active]="currentStep() === 1"
+            [class.stepper-tab--done]="currentStep() > 1"
+            (click)="setStep(1)"
+          >
+            <span class="stepper-num">1</span>
+            <span class="stepper-label">Şube Bilgileri</span>
+          </button>
+
+          <span class="stepper-line" [class.stepper-line--done]="currentStep() > 1"></span>
+
+          <button
+            type="button"
+            class="stepper-tab"
+            [class.stepper-tab--active]="currentStep() === 2"
+            [class.stepper-tab--done]="currentStep() > 2"
+            (click)="setStep(2)"
+          >
+            <span class="stepper-num">2</span>
+            <span class="stepper-label">Çalışma Saatleri</span>
+          </button>
+
+          <span class="stepper-line" [class.stepper-line--done]="currentStep() > 2"></span>
+
+          <button
+            type="button"
+            class="stepper-tab"
+            [class.stepper-tab--active]="currentStep() === 3"
+            [class.stepper-tab--done]="currentStep() > 3"
+            (click)="setStep(3)"
+          >
+            <span class="stepper-num">3</span>
+            <span class="stepper-label">Tanımlar</span>
+          </button>
+
+          <span class="stepper-line" [class.stepper-line--done]="currentStep() > 3"></span>
+
+          <button
+            type="button"
+            class="stepper-tab"
+            [class.stepper-tab--active]="currentStep() === 4"
+            [class.stepper-tab--done]="currentStep() > 4"
+            (click)="setStep(4)"
+          >
+            <span class="stepper-num">4</span>
+            <span class="stepper-label">Hizmet Kataloğu</span>
+          </button>
+
+          <span class="stepper-line" [class.stepper-line--done]="currentStep() > 4"></span>
+
+          <button
+            type="button"
+            class="stepper-tab"
+            [class.stepper-tab--active]="currentStep() === 5"
+            (click)="setStep(5)"
+          >
+            <span class="stepper-num">5</span>
+            <span class="stepper-label">Özet & Başlat</span>
+          </button>
+        </nav>
+
+        @if (errorMessage()) {
+          <div class="alert-error" role="alert">
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <!-- STEP 1: Şube & Konum Bilgileri -->
+        @if (currentStep() === 1) {
+          <section class="step-panel" aria-labelledby="step1-title">
+            <div class="step-intro">
+              <span class="step-eyebrow">Adım 1 / 5</span>
+              <h1 id="step1-title">Şube ve İletişim Bilgileri</h1>
+              <p>Merkezinizin ilk şubesini, adresini ve iletişim kanallarını tanımlayın.</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-control col-6">
+                <label for="f-business">Merkez / İşletme Adı <span class="req">*</span></label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">spa</span>
+                  <input
+                    id="f-business"
+                    type="text"
+                    [value]="businessName()"
+                    (input)="businessName.set($any($event.target).value)"
+                    placeholder="Örn: Odivon Beauty & Spa"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-6">
+                <label for="f-branch">Şube Adı <span class="req">*</span></label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">storefront</span>
+                  <input
+                    id="f-branch"
+                    type="text"
+                    [value]="branchName()"
+                    (input)="branchName.set($any($event.target).value)"
+                    placeholder="Örn: Merkez Şube veya Kadıköy Şubesi"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-6">
+                <label for="f-phone">Şube Telefon Numarası</label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">call</span>
+                  <input
+                    id="f-phone"
+                    type="tel"
+                    [value]="branchPhone()"
+                    (input)="branchPhone.set($any($event.target).value)"
+                    placeholder="Örn: 05xx xxx xx xx veya 0212 xxx xx xx"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-6">
+                <label for="f-email">Şube E-posta Adresi</label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">mail</span>
+                  <input
+                    id="f-email"
+                    type="email"
+                    [value]="branchEmail()"
+                    (input)="branchEmail.set($any($event.target).value)"
+                    placeholder="iletisim@merkeziniz.com"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-6">
+                <label for="f-city">Şehir / İl <span class="req">*</span></label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">location_city</span>
+                  <select
+                    id="f-city"
+                    [value]="branchCity()"
+                    (change)="branchCity.set($any($event.target).value)"
+                  >
+                    @for (city of cities; track city) {
+                      <option [value]="city">{{ city }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-control col-6">
+                <label for="f-district">İlçe</label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">map</span>
+                  <input
+                    id="f-district"
+                    type="text"
+                    [value]="branchDistrict()"
+                    (input)="branchDistrict.set($any($event.target).value)"
+                    placeholder="Örn: Kadıköy, Çankaya, Karşıyaka…"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-12">
+                <label for="f-address">Açık Adres</label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">home_pin</span>
+                  <input
+                    id="f-address"
+                    type="text"
+                    [value]="branchAddress()"
+                    (input)="branchAddress.set($any($event.target).value)"
+                    placeholder="Cadde, sokak, bina ve kapı no…"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-6">
+                <label for="f-taxoffice">Vergi Dairesi <small>(İsteğe bağlı)</small></label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">account_balance</span>
+                  <input
+                    id="f-taxoffice"
+                    type="text"
+                    [value]="taxOffice()"
+                    (input)="taxOffice.set($any($event.target).value)"
+                    placeholder="Örn: Kadıköy Vergi Dairesi"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-6">
+                <label for="f-taxnum">Vergi No / TCKN <small>(İsteğe bağlı)</small></label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">badge</span>
+                  <input
+                    id="f-taxnum"
+                    type="text"
+                    [value]="taxNumber()"
+                    (input)="taxNumber.set($any($event.target).value)"
+                    placeholder="10 haneli VKN veya 11 haneli TCKN"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- STEP 2: Çalışma Saatleri & Randevu Planı -->
+        @if (currentStep() === 2) {
+          <section class="step-panel" aria-labelledby="step2-title">
+            <div class="step-intro">
+              <span class="step-eyebrow">Adım 2 / 5</span>
+              <h1 id="step2-title">Şube Çalışma Saatleri & Randevu Planı</h1>
+              <p>Müşterilerinize randevu verilecek açık günleri, mesai saatlerini ve seans sürelerini belirleyin.</p>
+            </div>
+
+            <!-- Preset day buttons -->
+            <div class="preset-days-toolbar">
+              <span class="toolbar-label">Hızlı Seçim:</span>
+              <button
+                type="button"
+                class="btn-chip"
+                (click)="setDaysPreset('weekdays')"
+              >
+                Hafta İçi (Pzt-Cum)
+              </button>
+              <button
+                type="button"
+                class="btn-chip"
+                (click)="setDaysPreset('mon_sat')"
+              >
+                Pzt-Cmt (Standart Salon)
+              </button>
+              <button
+                type="button"
+                class="btn-chip"
+                (click)="setDaysPreset('all')"
+              >
+                Tüm Günler (Haftanın 7 Günü)
+              </button>
+            </div>
+
+            <!-- Weekly Days Pills -->
+            <div class="days-selector">
+              @for (d of days(); track d.day) {
+                <button
+                  type="button"
+                  class="day-card"
+                  [class.day-card--active]="d.selected"
+                  (click)="toggleDay(d.day)"
+                >
+                  <span class="day-short">{{ d.short }}</span>
+                  <span class="day-label">{{ d.label }}</span>
+                  <span class="day-status">
+                    @if (d.selected) {
+                      <span class="material-symbols-outlined">check_circle</span> Açık
+                    } @else {
+                      <span class="material-symbols-outlined">cancel</span> Kapalı
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+
+            <!-- Hours & Slot Row -->
+            <div class="form-grid mt-4">
+              <div class="form-control col-4">
+                <label for="f-open">Günlük Açılış Saati <span class="req">*</span></label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">schedule</span>
+                  <input
+                    id="f-open"
+                    type="time"
+                    [value]="workDayStart()"
+                    (input)="workDayStart.set($any($event.target).value)"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-4">
+                <label for="f-close">Günlük Kapanış Saati <span class="req">*</span></label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">schedule</span>
+                  <input
+                    id="f-close"
+                    type="time"
+                    [value]="workDayEnd()"
+                    (input)="workDayEnd.set($any($event.target).value)"
+                  />
+                </div>
+              </div>
+
+              <div class="form-control col-4">
+                <label for="f-slot">Randevu Seans Aralığı (Slot)</label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined input-icon">timelapse</span>
+                  <select
+                    id="f-slot"
+                    [value]="slotDurationMin()"
+                    (change)="slotDurationMin.set(+$any($event.target).value)"
+                  >
+                    <option [value]="15">15 dakika</option>
+                    <option [value]="20">20 dakika</option>
+                    <option [value]="30">30 dakika (Önerilen)</option>
+                    <option [value]="45">45 dakika</option>
+                    <option [value]="60">60 dakika (1 saat)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Break / Lunch option -->
+              <div class="form-control col-12">
+                <label class="toggle-control">
+                  <input
+                    type="checkbox"
+                    [checked]="hasBreak()"
+                    (change)="hasBreak.set($any($event.target).checked)"
+                  />
+                  <span class="toggle-switch"></span>
+                  <span class="toggle-label font-bold">Öğle / Mola Saati Belirt (Bu saatlerde randevu oluşturulmaz)</span>
+                </label>
+              </div>
+
+              @if (hasBreak()) {
+                <div class="form-control col-6">
+                  <label for="f-breakstart">Mola Başlangıç</label>
+                  <div class="input-wrapper">
+                    <span class="material-symbols-outlined input-icon">coffee</span>
+                    <input
+                      id="f-breakstart"
+                      type="time"
+                      [value]="breakStart()"
+                      (input)="breakStart.set($any($event.target).value)"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-control col-6">
+                  <label for="f-breakend">Mola Bitiş</label>
+                  <div class="input-wrapper">
+                    <span class="material-symbols-outlined input-icon">alarm_on</span>
+                    <input
+                      id="f-breakend"
+                      type="time"
+                      [value]="breakEnd()"
+                      (input)="breakEnd.set($any($event.target).value)"
+                    />
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- STEP 3: Tanımlar ve Varsayılanlar -->
+        @if (currentStep() === 3) {
+          <section class="step-panel" aria-labelledby="step3-title">
+            <div class="step-intro">
+              <span class="step-eyebrow">Adım 3 / 5</span>
+              <h1 id="step3-title">Tanımlar & Varsayılan Sistem Verileri</h1>
+              <p>
+                Güzellik merkezinizde kullanılacak ödeme yöntemleri, kabin türleri, personel unvanları
+                ve standart tanımları seçin. Kurulum sonrası "Tanımlar" menüsünden dilediğiniz gibi güncelleyebilirsiniz.
+              </p>
+            </div>
+
+            <!-- Quick selection bar -->
+            <div class="preset-days-toolbar">
+              <span class="toolbar-label">Tanım Paketleri:</span>
+              <button
+                type="button"
+                class="btn-chip"
+                (click)="toggleAllDefCategories(true)"
+              >
+                Tümünü Seç (Önerilen)
+              </button>
+              <button
+                type="button"
+                class="btn-chip"
+                (click)="toggleAllDefCategories(false)"
+              >
+                Temizle
+              </button>
+            </div>
+
+            <!-- Categories Grid -->
+            <div class="def-categories-grid">
+              @for (cat of categoriesMeta; track cat.key) {
+                <label
+                  class="def-card"
+                  [class.def-card--checked]="selectedDefCategories()[cat.key]"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="selectedDefCategories()[cat.key]"
+                    (change)="toggleDefCategory(cat.key)"
+                  />
+                  <div class="def-card__icon" [attr.data-tone]="cat.badgeTone">
+                    <span class="material-symbols-outlined">{{ cat.icon }}</span>
+                  </div>
+                  <div class="def-card__content">
+                    <div class="def-card__title">
+                      <span>{{ cat.label }}</span>
+                      <span class="check-indicator">
+                        <span class="material-symbols-outlined">check</span>
+                      </span>
+                    </div>
+                    <p class="def-card__desc">{{ cat.description }}</p>
+                  </div>
+                </label>
+              }
+            </div>
+
+            <!-- Initial Room & Staff Quick Inputs -->
+            <div class="quick-asset-box mt-4">
+              <h3>Hızlı Başlangıç Odası ve Uzmanı</h3>
+              <p>Sistemi açtığınızda hemen randevu oluşturabilmeniz için bir oda/kabin ve uzman belirleyin:</p>
+
+              <div class="form-grid mt-3">
+                <div class="form-control col-6">
+                  <label for="f-firstroom">İlk Oda / Kabin Adı</label>
+                  <div class="input-wrapper">
+                    <span class="material-symbols-outlined input-icon">meeting_room</span>
+                    <input
+                      id="f-firstroom"
+                      type="text"
+                      [value]="initialFirstRoomName()"
+                      (input)="initialFirstRoomName.set($any($event.target).value)"
+                      placeholder="Örn: 1. Lazer Kabini"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-control col-6">
+                  <label for="f-firststaff">İlk Uzman / Yönetici Adı</label>
+                  <div class="input-wrapper">
+                    <span class="material-symbols-outlined input-icon">badge</span>
+                    <input
+                      id="f-firststaff"
+                      type="text"
+                      [value]="initialStaffName()"
+                      (input)="initialStaffName.set($any($event.target).value)"
+                      placeholder="Örn: Uzm. Estetisyen Ayşe Yılmaz"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- STEP 4: Hizmet Kataloğu & Hazır Paketler -->
+        @if (currentStep() === 4) {
+          <section class="step-panel" aria-labelledby="step4-title">
+            <div class="step-intro">
+              <span class="step-eyebrow">Adım 4 / 5</span>
+              <h1 id="step4-title">Hizmet Kataloğu & Hazır Hizmetler</h1>
+              <p>
+                Merkezinizde verdiğiniz hizmet alanlarını seçin. Her kategori için hazır seans süreleri,
+                standart fiyatlar ve KDV oranları otomatik olarak kataloğunuza eklenecektir.
+              </p>
+            </div>
+
+            <div class="preset-days-toolbar">
+              <span class="toolbar-label">Hızlı Seçim:</span>
+              <button
+                type="button"
+                class="btn-chip"
+                (click)="toggleAllPresetCategories(true)"
+              >
+                Tüm Hizmet Alanlarını Seç
+              </button>
+              <button
+                type="button"
+                class="btn-chip"
+                (click)="toggleAllPresetCategories(false)"
+              >
+                Hiçbiri (Sonra Kendim Ekleyeceğim)
+              </button>
+            </div>
+
+            <div class="service-catalog-grid">
+              @for (cat of presetCategories(); track cat.key) {
+                <div
+                  class="catalog-category-card"
+                  [class.catalog-category-card--active]="cat.selected"
+                >
+                  <div class="cat-header" (click)="togglePresetCategory(cat.key)">
+                    <div class="cat-header__left">
+                      <span
+                        class="cat-icon"
+                        [style.background]="cat.color + '15'"
+                        [style.color]="cat.color"
+                      >
+                        <span class="material-symbols-outlined">{{ cat.icon }}</span>
+                      </span>
+                      <div>
+                        <h3>{{ cat.name }}</h3>
+                        <p>{{ cat.description }}</p>
+                      </div>
+                    </div>
+                    <div class="cat-header__right">
+                      <span class="badge-count">{{ cat.services.length }} Hizmet</span>
+                      <span class="cat-checkbox">
+                        @if (cat.selected) {
+                          <span class="material-symbols-outlined">check_box</span>
+                        } @else {
+                          <span class="material-symbols-outlined">check_box_outline_blank</span>
+                        }
+                      </span>
+                    </div>
+                  </div>
+
+                  @if (cat.selected) {
+                    <div class="cat-services-list">
+                      @for (s of cat.services; track s.name) {
+                        <div class="service-row">
+                          <span class="service-name">{{ s.name }}</span>
+                          <div class="service-meta">
+                            <span class="badge-duration">{{ s.durationMin }} dk</span>
+                            <span class="service-price">{{ s.price }} ₺</span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- STEP 5: Özet & Başlatma -->
+        @if (currentStep() === 5) {
+          <section class="step-panel" aria-labelledby="step5-title">
+            <div class="step-intro">
+              <span class="step-eyebrow">Adım 5 / 5</span>
+              <h1 id="step5-title">Kurulum Özeti & Onay</h1>
+              <p>Belirlediğiniz ayarları kontrol edin ve güzellik merkezinizi kullanıma açın.</p>
+            </div>
+
+            <div class="summary-grid">
+              <!-- Summary Card 1: Şube Bilgileri -->
+              <div class="summary-card">
+                <div class="summary-card__head">
+                  <span class="material-symbols-outlined icon-indigo">storefront</span>
+                  <h3>Şube & İletişim</h3>
+                  <button type="button" class="btn-edit-step" (click)="setStep(1)">Düzenle</button>
+                </div>
+                <div class="summary-card__body">
+                  <div class="summary-item">
+                    <span class="label">Merkez Adı:</span>
+                    <strong class="val">{{ businessName() }}</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Şube:</span>
+                    <strong class="val">{{ branchName() }}</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Konum:</span>
+                    <span class="val">{{ branchCity() }} / {{ branchDistrict() || '-' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">İletişim:</span>
+                    <span class="val">{{ branchPhone() || '-' }} • {{ branchEmail() || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary Card 2: Çalışma Saatleri -->
+              <div class="summary-card">
+                <div class="summary-card__head">
+                  <span class="material-symbols-outlined icon-emerald">schedule</span>
+                  <h3>Çalışma Saatleri & Randevu</h3>
+                  <button type="button" class="btn-edit-step" (click)="setStep(2)">Düzenle</button>
+                </div>
+                <div class="summary-card__body">
+                  <div class="summary-item">
+                    <span class="label">Haftalık Günler:</span>
+                    <strong class="val text-emerald-600">{{ selectedDaysCount() }} Gün Açık</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Mesai Saatleri:</span>
+                    <strong class="val">{{ workDayStart() }} - {{ workDayEnd() }}</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Randevu Slotu:</span>
+                    <span class="val">{{ slotDurationMin() }} Dakika</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Öğle / Mola:</span>
+                    <span class="val">
+                      {{ hasBreak() ? breakStart() + ' - ' + breakEnd() : 'Molasız Kesintisiz' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary Card 3: Tanımlar -->
+              <div class="summary-card">
+                <div class="summary-card__head">
+                  <span class="material-symbols-outlined icon-purple">tune</span>
+                  <h3>Tanımlar & Odalar</h3>
+                  <button type="button" class="btn-edit-step" (click)="setStep(3)">Düzenle</button>
+                </div>
+                <div class="summary-card__body">
+                  <div class="summary-item">
+                    <span class="label">Seçilen Tanım Paketleri:</span>
+                    <strong class="val">{{ selectedDefCount() }} Kategori Aktif</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">İlk Kabin / Oda:</span>
+                    <span class="val">{{ initialFirstRoomName() || 'Oda eklenmeyecek' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Yetkili / Uzman:</span>
+                    <span class="val">{{ initialStaffName() || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary Card 4: Hizmet Kataloğu -->
+              <div class="summary-card">
+                <div class="summary-card__head">
+                  <span class="material-symbols-outlined icon-pink">spa</span>
+                  <h3>Hizmet Kataloğu</h3>
+                  <button type="button" class="btn-edit-step" (click)="setStep(4)">Düzenle</button>
+                </div>
+                <div class="summary-card__body">
+                  <div class="summary-item">
+                    <span class="label">Hizmet Grupları:</span>
+                    <strong class="val text-pink-600">{{ selectedPresetCategories().length }} Kategori</strong>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Eklenecek Hizmet Sayısı:</span>
+                    <strong class="val">{{ totalPresetServicesCount() }} Hazır Hizmet</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            @if (isSubmitting()) {
+              <div class="submission-banner">
+                <div class="spinner-large" aria-hidden="true"></div>
+                <h3>Sisteminiz Yapılandırılıyor</h3>
+                <p>{{ submitProgress() }}</p>
+              </div>
+            }
+          </section>
+        }
+
+        <!-- Wizard Navigation Footer -->
+        <footer class="wizard-footer">
+          <div class="footer-left">
+            @if (currentStep() > 1 && !isSubmitting()) {
+              <button type="button" class="btn-ghost" (click)="prevStep()">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span>Önceki Adım</span>
+              </button>
+            }
+          </div>
+
+          <div class="footer-right">
+            @if (currentStep() < 5) {
+              <button type="button" class="btn-primary" (click)="nextStep()">
+                <span>Sonraki Adım</span>
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn-finish"
+                [disabled]="isSubmitting()"
+                (click)="completeOnboarding()"
+              >
+                @if (isSubmitting()) {
+                  <span class="spinner-small" aria-hidden="true"></span>
+                  <span>Kaydediliyor…</span>
+                } @else {
+                  <span>Kurulumu Tamamla ve Sisteme Gir</span>
+                  <span class="material-symbols-outlined">rocket_launch</span>
+                }
+              </button>
+            }
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+</main>

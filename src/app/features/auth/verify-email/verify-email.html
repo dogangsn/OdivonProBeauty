@@ -1,0 +1,193 @@
+<main>
+  <app-auth-backdrop />
+
+  <section class="verify-section" aria-labelledby="verify-title">
+    <div class="brand-header reveal">
+      <a class="brand" routerLink="/login" aria-label="OdivonPro Beauty ana sayfası">
+        <span class="brand__mark">O</span>
+        <span><strong>OdivonPro</strong><small>Beauty Center</small></span>
+      </a>
+    </div>
+
+    <div class="card-frame">
+      <div class="card">
+        @switch (state()) {
+          @case ('loading') {
+            <div class="state-pane state-pane--loading" aria-live="polite">
+              <div class="spinner-large" aria-hidden="true"></div>
+              <h2>Doğrulanıyor…</h2>
+              <p>E-posta doğrulama bağlantınız kontrol ediliyor, lütfen bekleyin.</p>
+            </div>
+          }
+
+          @case ('success') {
+            <div class="state-pane state-pane--success" aria-live="polite">
+              <div class="icon-bubble icon-bubble--success" aria-hidden="true">
+                <span class="material-symbols-outlined">verified</span>
+              </div>
+              <div class="badge-success">Onaylandı</div>
+              <h2 id="verify-title">E-posta Adresiniz Doğrulandı! 🎉</h2>
+              <p>
+                <strong>{{ email() || 'Hesabınız' }}</strong> başarıyla doğrulandı ve aktifleştirildi.
+                Güzellik merkezinizin şube bilgilerini, çalışma saatlerini ve hizmet tanımlarını
+                belirlemek için kurulum sihirbazına başlayabilirsiniz.
+              </p>
+
+              <div class="actions">
+                <button
+                  type="button"
+                  class="btn-primary"
+                  (click)="proceedToWizardOrLogin()"
+                >
+                  <span>Kuruluma Başla (Sihirbazı Aç)</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                </button>
+              </div>
+            </div>
+          }
+
+          @case ('pending') {
+            <div class="state-pane" aria-live="polite">
+              <div class="icon-bubble icon-bubble--pending" aria-hidden="true">
+                <span class="material-symbols-outlined">mark_email_unread</span>
+              </div>
+              <div class="eyebrow-tag">
+                <span class="pulse-dot"></span>
+                <span>Doğrulama Bekleniyor</span>
+              </div>
+              <h2 id="verify-title">E-postanızı Doğrulayın</h2>
+              <p>
+                Hesabınızı güvenceye almak ve kurulumu tamamlamak için
+                @if (email()) {
+                  <span class="email-highlight">{{ email() }}</span>
+                } @else {
+                  <span>e-posta</span>
+                }
+                adresine bir doğrulama bağlantısı gönderdik. Lütfen gelen kutunuzdaki bağlantıya tıklayın.
+              </p>
+
+              @if (resendSuccess()) {
+                <div class="notice-box notice-box--success" role="status">
+                  <span class="material-symbols-outlined">check_circle</span>
+                  <span>Yeni doğrulama bağlantısı e-posta adresinize gönderildi.</span>
+                </div>
+              }
+
+              @if (errorMessage()) {
+                <div class="notice-box notice-box--danger" role="alert">
+                  <span class="material-symbols-outlined">error</span>
+                  <span>{{ errorMessage() }}</span>
+                </div>
+              }
+
+              <div class="actions">
+                <button
+                  type="button"
+                  class="btn-resend"
+                  [disabled]="resending() || resendCooldown() > 0"
+                  (click)="resendLink()"
+                >
+                  @if (resending()) {
+                    <span class="spinner-small" aria-hidden="true"></span>
+                    <span>Gönderiliyor…</span>
+                  } @else if (resendCooldown() > 0) {
+                    <span class="material-symbols-outlined">timer</span>
+                    <span>Tekrar gönder ({{ resendCooldown() }}s)</span>
+                  } @else {
+                    <span class="material-symbols-outlined">forward_to_inbox</span>
+                    <span>Bağlantıyı Tekrar Gönder</span>
+                  }
+                </button>
+              </div>
+
+              <details class="manual-token-card">
+                <summary>
+                  <span>Doğrulama kodunu manuel olarak girin</span>
+                  <span class="material-symbols-outlined chevron">expand_more</span>
+                </summary>
+                <form class="token-form" (submit)="onTokenManualSubmit($event)">
+                  <p class="token-help">
+                    E-postadaki bağlantının sonundaki 64 haneli kodu veya bağlantıyı buraya yapıştırabilirsiniz:
+                  </p>
+                  <div class="input-row">
+                    <input
+                      type="text"
+                      [value]="tokenInput()"
+                      (input)="updateTokenInput($event)"
+                      placeholder="Doğrulama kodunu veya linki yapıştırın…"
+                      aria-label="Doğrulama kodu"
+                    />
+                    <button
+                      type="submit"
+                      class="btn-submit-token"
+                      [disabled]="!tokenInput().trim()"
+                    >
+                      Doğrula
+                    </button>
+                  </div>
+                </form>
+              </details>
+
+              <div class="footer-links">
+                <a routerLink="/login">Giriş Yap</a>
+                <span class="sep">•</span>
+                <a routerLink="/register">Yeni Hesap Aç</a>
+              </div>
+            </div>
+          }
+
+          @case ('error') {
+            <div class="state-pane state-pane--error" aria-live="polite">
+              <div class="icon-bubble icon-bubble--error" aria-hidden="true">
+                <span class="material-symbols-outlined">link_off</span>
+              </div>
+              <div class="badge-error">Geçersiz Bağlantı</div>
+              <h2 id="verify-title">Doğrulama Tamamlanamadı</h2>
+              <p class="error-desc">{{ errorMessage() }}</p>
+
+              <div class="resend-input-box">
+                <label for="err-email">E-posta Adresiniz</label>
+                <div class="input-row">
+                  <input
+                    id="err-email"
+                    type="email"
+                    [value]="email()"
+                    (input)="updateEmailInput($event)"
+                    placeholder="E-posta adresiniz…"
+                  />
+                  <button
+                    type="button"
+                    class="btn-primary"
+                    [disabled]="!email().trim() || resending() || resendCooldown() > 0"
+                    (click)="resendLink()"
+                  >
+                    @if (resending()) {
+                      <span class="spinner-small" aria-hidden="true"></span>
+                    } @else if (resendCooldown() > 0) {
+                      <span>{{ resendCooldown() }}s</span>
+                    } @else {
+                      <span>Yeni Bağlantı İste</span>
+                    }
+                  </button>
+                </div>
+              </div>
+
+              @if (resendSuccess()) {
+                <div class="notice-box notice-box--success mt-3" role="status">
+                  <span class="material-symbols-outlined">check_circle</span>
+                  <span>Yeni doğrulama bağlantısı e-posta adresinize gönderildi!</span>
+                </div>
+              }
+
+              <div class="footer-links mt-4">
+                <a routerLink="/login">Giriş Sayfasına Dön</a>
+                <span class="sep">•</span>
+                <a routerLink="/register">Yeniden Kayıt Ol</a>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </section>
+</main>

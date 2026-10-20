@@ -19,10 +19,11 @@ export class Registration {
   private readonly auth = inject(Auth);
   private readonly apiBaseUrl = environment.apiBaseUrl.replace(/\/$/, '');
 
-  async createOwnerAccount(input: BeautyRegistration): Promise<void> {
+  async register(input: BeautyRegistration): Promise<{ email: string }> {
+    const normalizedEmail = input.email.trim().toLowerCase();
     await firstValueFrom(
       this.http.post(`${this.apiBaseUrl}/identity/register`, {
-        email: input.email.trim().toLowerCase(),
+        email: normalizedEmail,
         password: input.password,
         tenantName: input.businessName.trim(),
         module: 'beauty',
@@ -30,7 +31,28 @@ export class Registration {
         phone: input.phone.trim() || undefined,
       }),
     );
+    return { email: normalizedEmail };
+  }
 
+  async verifyEmail(token: string): Promise<{ success: boolean; email?: string }> {
+    return firstValueFrom(
+      this.http.post<{ success: boolean; email?: string }>(
+        `${this.apiBaseUrl}/identity/verify-email`,
+        { token: token.trim() },
+      ),
+    );
+  }
+
+  async resendVerification(email: string): Promise<{ success: boolean }> {
+    return firstValueFrom(
+      this.http.post<{ success: boolean }>(`${this.apiBaseUrl}/identity/resend-verification`, {
+        email: email.trim().toLowerCase(),
+      }),
+    );
+  }
+
+  async createOwnerAccount(input: BeautyRegistration): Promise<void> {
+    await this.register(input);
     await this.auth.authenticate(input.email.trim().toLowerCase(), input.password);
     await this.auth.token(true);
 
@@ -45,3 +67,4 @@ export class Registration {
     await this.auth.openDashboard();
   }
 }
+

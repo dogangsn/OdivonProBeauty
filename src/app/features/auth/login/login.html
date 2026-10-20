@@ -1,158 +1,129 @@
 <main>
-  <div class="ambient ambient--one" aria-hidden="true"></div>
-  <div class="ambient ambient--two" aria-hidden="true"></div>
-
-  <section class="showcase" aria-labelledby="showcase-title">
-    <a class="brand" routerLink="/login" aria-label="OdivonPro Beauty ana sayfa">
-      <span class="brand__mark">O</span>
-      <span><strong>OdivonPro</strong><small>Beauty Center</small></span>
-    </a>
-
-    <div class="showcase__copy">
-      <div class="eyebrow"><i></i> Güzellik merkezinizin yeni ritmi</div>
-      <h1 id="showcase-title">Güzelliği yönetmenin <em>en zarif hali.</em></h1>
-      <p>
-        Randevudan müşteri deneyimine, seanstan finans yönetimine kadar merkezinizi tek bir akışta
-        buluşturun.
-      </p>
-
-      <div class="capabilities" aria-label="Platform ozellikleri">
-        <span
-          ><i class="material-symbols-outlined" aria-hidden="true">calendar_month</i> Akıllı
-          takvim</span
-        >
-        <span><i class="material-symbols-outlined" aria-hidden="true">spa</i> Seans takibi</span>
-        <span
-          ><i class="material-symbols-outlined" aria-hidden="true">insights</i> Canlı raporlar</span
-        >
-      </div>
-    </div>
-
-    <div class="beauty-scene" aria-hidden="true">
-      <div class="halo"></div>
-      <div class="scene-card scene-card--appointment">
-        <div class="scene-card__top">
-          <span class="scene-icon">✦</span><small>SIRADAKİ BAKIM</small><i></i>
-        </div>
-        <strong>Cilt yenileme</strong>
-        <p><b>14:30</b><span>Uzman ve oda hazır</span></p>
-      </div>
-      <div class="scene-card scene-card--client">
-        <span class="mini-avatar">EA</span>
-        <div><small>MÜŞTERİ DENEYİMİ</small><strong>Kişisel bakım planı</strong></div>
-        <span class="heart">♥</span>
-      </div>
-      <div class="scene-card scene-card--pulse">
-        <div><small>BUGÜNÜN AKIŞI</small><strong>Merkeziniz hazır</strong></div>
-        <div class="pulse-bars"><i></i><i></i><i></i><i></i><i></i></div>
-      </div>
-      <span class="sparkle sparkle--one">✦</span><span class="sparkle sparkle--two">✧</span>
-    </div>
-
-    <footer>
-      <span><i></i> Güvenli altyapı</span><span>Firebase Auth</span><span>KVKK uyumlu akış</span>
-    </footer>
-  </section>
+  <app-login-showcase />
 
   <section class="login" aria-labelledby="login-title">
-    <div class="mobile-brand">
+    <div class="mobile-brand reveal">
       <span class="brand__mark">O</span
       ><span><strong>OdivonPro</strong><small>Beauty Center</small></span>
     </div>
 
-    <div class="card">
-      <div class="welcome-icon" aria-hidden="true"><span>✦</span></div>
-      <p class="card__eyebrow">YÖNETİM MERKEZİ</p>
-      <h2 id="login-title">Hoş geldiniz</h2>
-      <p class="card__lead">Merkezinizde güzel bir gün daha başlıyor.</p>
+    <div
+      class="card-frame reveal reveal--card"
+      (pointermove)="trackPointer($event)"
+      (pointerleave)="resetPointer()"
+      [style.--mx.%]="pointer().x"
+      [style.--my.%]="pointer().y"
+    >
+      <div class="card">
+        <div class="welcome-icon" aria-hidden="true"><span>✦</span></div>
+        <p class="card__eyebrow">YÖNETİM MERKEZİ</p>
+        <h2 id="login-title">Hoş geldiniz <span class="wave" aria-hidden="true">✨</span></h2>
+        <p class="card__lead">Merkezinizde güzel bir gün daha başlıyor.</p>
 
-      <form (submit)="login(); $event.preventDefault()">
-        <label for="login-email">E-posta adresi</label>
-        <div
-          class="field"
-          [class.field--invalid]="loginForm.email().touched() && loginForm.email().invalid()"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">mail</span>
-          <input
-            id="login-email"
-            type="email"
-            autocomplete="email"
-            [formField]="loginForm.email"
-            placeholder="siz@merkeziniz.com"
-          />
-        </div>
-        @if (loginForm.email().touched() && loginForm.email().errors().length) {
-          <small class="field-error">{{ loginForm.email().errors()[0].message }}</small>
-        }
-
-        <div class="password-heading">
-          <label for="login-password">Şifre</label
-          ><button type="button" (click)="resetPassword()">Şifremi unuttum</button>
-        </div>
-        <div
-          class="field"
-          [class.field--invalid]="loginForm.password().touched() && loginForm.password().invalid()"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">lock</span>
-          <input
-            id="login-password"
-            [type]="showPassword() ? 'text' : 'password'"
-            autocomplete="current-password"
-            [formField]="loginForm.password"
-            placeholder="Şifrenizi girin"
-          />
-          <button
-            class="password-toggle"
-            type="button"
-            [attr.aria-label]="showPassword() ? 'Şifreyi gizle' : 'Şifreyi göster'"
-            (click)="showPassword.update((value) => !value)"
-          >
-            <span class="material-symbols-outlined" aria-hidden="true">{{
-              showPassword() ? 'visibility_off' : 'visibility'
-            }}</span>
-          </button>
-        </div>
-        @if (loginForm.password().touched() && loginForm.password().errors().length) {
-          <small class="field-error">{{ loginForm.password().errors()[0].message }}</small>
-        }
-
-        @if (error()) {
-          <div class="error" role="alert">
-            <span class="material-symbols-outlined" aria-hidden="true">error</span>{{ error() }}
+        <form (submit)="login(); $event.preventDefault()">
+          <div class="step" style="--s: 1">
+            <label for="login-email">E-posta adresi</label>
+            <div
+              class="field"
+              [class.field--invalid]="loginForm.email().touched() && loginForm.email().invalid()"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+              <input
+                id="login-email"
+                type="email"
+                autocomplete="email"
+                [formField]="loginForm.email"
+                placeholder="siz@merkeziniz.com"
+              />
+              <i class="field__glow" aria-hidden="true"></i>
+            </div>
+            @if (loginForm.email().touched() && loginForm.email().errors().length) {
+              <small class="field-error">{{ loginForm.email().errors()[0].message }}</small>
+            }
           </div>
-        }
-        @if (notice()) {
-          <div class="notice" role="status">
-            <span class="material-symbols-outlined" aria-hidden="true">mark_email_read</span
-            >{{ notice() }}
-          </div>
-        }
 
-        <button class="submit" type="submit" [disabled]="loginForm().invalid() || isSubmitting()">
-          @if (isSubmitting()) {
-            <span class="spinner" aria-hidden="true"></span><span>Güvenli giriş yapılıyor…</span>
-          } @else {
-            <span>Merkezime giriş yap</span
-            ><i class="material-symbols-outlined" aria-hidden="true">arrow_forward</i>
+          <div class="step" style="--s: 2">
+            <div class="password-heading">
+              <label for="login-password">Şifre</label
+              ><button type="button" (click)="resetPassword()">Şifremi unuttum</button>
+            </div>
+            <div
+              class="field"
+              [class.field--invalid]="
+                loginForm.password().touched() && loginForm.password().invalid()
+              "
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+              <input
+                id="login-password"
+                [type]="showPassword() ? 'text' : 'password'"
+                autocomplete="current-password"
+                [formField]="loginForm.password"
+                placeholder="Şifrenizi girin"
+              />
+              <button
+                class="password-toggle"
+                type="button"
+                [attr.aria-label]="showPassword() ? 'Şifreyi gizle' : 'Şifreyi göster'"
+                (click)="showPassword.update((value) => !value)"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">{{
+                  showPassword() ? 'visibility_off' : 'visibility'
+                }}</span>
+              </button>
+              <i class="field__glow" aria-hidden="true"></i>
+            </div>
+            @if (loginForm.password().touched() && loginForm.password().errors().length) {
+              <small class="field-error">{{ loginForm.password().errors()[0].message }}</small>
+            }
+          </div>
+
+          @if (error()) {
+            <div class="error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>{{ error() }}
+            </div>
           }
-        </button>
-      </form>
+          @if (notice()) {
+            <div class="notice" role="status">
+              <span class="material-symbols-outlined" aria-hidden="true">mark_email_read</span
+              >{{ notice() }}
+            </div>
+          }
 
-      <div class="signup">
-        <span>OdivonPro Beauty ile yeni misiniz?</span
-        ><a routerLink="/register">Merkezinizi oluşturun <i aria-hidden="true">→</i></a>
-      </div>
-      <div class="portal">
-        <span class="material-symbols-outlined" aria-hidden="true">person_heart</span>
-        <div>
-          <strong>Müşteri misiniz?</strong
-          ><small>Randevularınız için müşteri portalını kullanın.</small>
+          <div class="step" style="--s: 3">
+            <button
+              class="submit"
+              type="submit"
+              [class.submit--busy]="isSubmitting()"
+              [disabled]="loginForm().invalid() || isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner" aria-hidden="true"></span
+                ><span>Güvenli giriş yapılıyor…</span>
+              } @else {
+                <span>Merkezime giriş yap</span
+                ><i class="material-symbols-outlined" aria-hidden="true">arrow_forward</i>
+              }
+            </button>
+          </div>
+        </form>
+
+        <div class="step signup" style="--s: 4">
+          <span>OdivonPro Beauty ile yeni misiniz?</span
+          ><a routerLink="/register">Merkezinizi oluşturun <i aria-hidden="true">→</i></a>
         </div>
-        <a routerLink="/portal" aria-label="Müşteri portalını aç">↗</a>
+        <a class="step portal" style="--s: 5" routerLink="/portal">
+          <span class="material-symbols-outlined" aria-hidden="true">person_heart</span>
+          <span class="portal__text"
+            ><strong>Müşteri misiniz?</strong
+            ><small>Randevularınız için müşteri portalını kullanın.</small></span
+          >
+          <i aria-hidden="true">↗</i>
+        </a>
       </div>
     </div>
 
-    <p class="legal">
+    <p class="legal reveal" style="--d: 0.7s">
       Devam ederek kullanım koşullarını ve gizlilik politikasını kabul etmiş olursunuz.
     </p>
   </section>

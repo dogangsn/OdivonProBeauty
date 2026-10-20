@@ -1,46 +1,243 @@
 <main>
-  <section class="story">
-    <a class="brand" routerLink="/login"><span>O</span><strong>OdivonPro Beauty</strong></a>
-    <div>
-      <p>14 GÜNLÜK DENEME</p>
-      <h1>Merkezinizi<br /><em>dakikalar içinde</em><br />yönetime açın.</h1>
-      <ul>
-        <li>Şube ve roller otomatik hazırlanır</li>
-        <li>Randevu, CRM ve kasa tek ekranda</li>
-        <li>Kredi kartı gerekmez</li>
-      </ul>
+  <app-auth-backdrop />
+
+  <section class="story" aria-labelledby="story-title">
+    <a class="brand" routerLink="/login" aria-label="OdivonPro Beauty giriş sayfası">
+      <span class="brand__mark">O</span>
+      <span><strong>OdivonPro</strong><small>Beauty Center</small></span>
+    </a>
+
+    <div class="story__copy">
+      <div class="eyebrow reveal" style="--d: 0.1s"><i></i> 14 günlük ücretsiz deneme</div>
+      <h1 id="story-title" class="reveal" style="--d: 0.2s">
+        Merkezinizi <em>dakikalar içinde</em> yönetime açın.
+      </h1>
+      <p class="reveal" style="--d: 0.3s">
+        Hesabınızı oluşturun, gerisini biz hazırlayalım. Kredi kartı gerekmez.
+      </p>
+
+      <ol class="setup reveal" style="--d: 0.4s" aria-label="Kurulum adımları">
+        <li style="--n: 0">
+          <span class="setup__dot" aria-hidden="true"
+            ><i class="material-symbols-outlined">check</i></span
+          >
+          <span
+            ><strong>Hesabınız açılır</strong
+            ><small>Siz merkez sahibi olarak atanırsınız</small></span
+          >
+        </li>
+        <li style="--n: 1">
+          <span class="setup__dot" aria-hidden="true"
+            ><i class="material-symbols-outlined">check</i></span
+          >
+          <span
+            ><strong>Şube ve roller hazırlanır</strong
+            ><small>Uzman, resepsiyon ve yönetici rolleri</small></span
+          >
+        </li>
+        <li style="--n: 2">
+          <span class="setup__dot" aria-hidden="true"
+            ><i class="material-symbols-outlined">check</i></span
+          >
+          <span
+            ><strong>Randevu, CRM ve kasa açılır</strong
+            ><small>Hepsi tek ekranda, hemen kullanıma hazır</small></span
+          >
+        </li>
+      </ol>
     </div>
-    <footer>Güvenli Firebase Auth · KVKK-ready</footer>
+
+    <footer class="reveal" style="--d: 0.6s">
+      <span><i></i> Güvenli Firebase Auth</span><span>KVKK uyumlu</span
+      ><span>İstediğiniz an iptal</span>
+    </footer>
   </section>
 
-  <section class="register">
-    <div class="card">
-      <div class="heading">
-        <p>MERKEZ HESABI</p>
-        <a routerLink="/login">Giriş yap</a>
-      </div>
-      <h2>Ücretsiz hesap oluşturun</h2>
-      <span>İlk kullanıcı merkez sahibi olarak atanır.</span>
+  <section class="register" aria-labelledby="register-title">
+    <div class="mobile-brand reveal">
+      <span class="brand__mark">O</span
+      ><span><strong>OdivonPro</strong><small>Beauty Center</small></span>
+    </div>
 
-      <form (submit)="register(); $event.preventDefault()">
-        <div class="grid">
-          <label>Ad soyad<input [formField]="registerForm.ownerName" autocomplete="name" /></label>
-          <label>Telefon <small>(opsiyonel)</small><input type="tel" [formField]="registerForm.phone" autocomplete="tel" /></label>
+    <div class="card-frame">
+      <div class="card">
+        <div class="heading step" style="--s: 0">
+          <p>MERKEZ HESABI</p>
+          <a routerLink="/login">Giriş yap <i aria-hidden="true">→</i></a>
         </div>
-        <label>Güzellik merkezi adı<input [formField]="registerForm.businessName" autocomplete="organization" /></label>
-        <label>İlk şube adı<input [formField]="registerForm.branchName" /></label>
-        <label>E-posta<input type="email" [formField]="registerForm.email" autocomplete="email" /></label>
-        <div class="grid">
-          <label>Şifre<input type="password" [formField]="registerForm.password" autocomplete="new-password" /></label>
-          <label>Şifre tekrarı<input type="password" [formField]="registerForm.confirmPassword" autocomplete="new-password" /></label>
-        </div>
-        <label class="consent"><input type="checkbox" [formField]="registerForm.acceptedTerms" /><span>KVKK aydınlatma metnini ve kullanım koşullarını okudum, kabul ediyorum.</span></label>
-        @if (error()) { <div class="error" role="alert">{{ error() }}</div> }
-        <button type="submit" [disabled]="registerForm().invalid() || isSubmitting()">
-          {{ isSubmitting() ? 'Hesap hazırlanıyor…' : 'Hesabımı oluştur' }}
-        </button>
-      </form>
-      <small class="customer-note">Müşteri misiniz? Online randevu için <a routerLink="/portal">müşteri portalını</a> kullanın.</small>
+        <h2 id="register-title" class="step" style="--s: 0">Ücretsiz hesap oluşturun</h2>
+        <p class="lead step" style="--s: 1">İlk kullanıcı merkez sahibi olarak atanır.</p>
+
+        <form (submit)="register(); $event.preventDefault()">
+          <div class="grid step" style="--s: 2">
+            <div class="control">
+              <label for="reg-owner">Ad soyad</label>
+              <div class="field" [class.field--invalid]="invalid(registerForm.ownerName)">
+                <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                <input
+                  id="reg-owner"
+                  [formField]="registerForm.ownerName"
+                  autocomplete="name"
+                  placeholder="Adınız Soyadınız"
+                />
+              </div>
+              @if (invalid(registerForm.ownerName)) {
+                <small class="field-error">{{
+                  registerForm.ownerName().errors()[0].message
+                }}</small>
+              }
+            </div>
+            <div class="control">
+              <label for="reg-phone">Telefon <small>(opsiyonel)</small></label>
+              <div class="field">
+                <span class="material-symbols-outlined" aria-hidden="true">call</span>
+                <input
+                  id="reg-phone"
+                  type="tel"
+                  [formField]="registerForm.phone"
+                  autocomplete="tel"
+                  placeholder="05xx xxx xx xx"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid step" style="--s: 3">
+            <div class="control">
+              <label for="reg-business">Güzellik merkezi adı</label>
+              <div class="field" [class.field--invalid]="invalid(registerForm.businessName)">
+                <span class="material-symbols-outlined" aria-hidden="true">spa</span>
+                <input
+                  id="reg-business"
+                  [formField]="registerForm.businessName"
+                  autocomplete="organization"
+                  placeholder="Merkezinizin adı"
+                />
+              </div>
+              @if (invalid(registerForm.businessName)) {
+                <small class="field-error">{{
+                  registerForm.businessName().errors()[0].message
+                }}</small>
+              }
+            </div>
+            <div class="control">
+              <label for="reg-branch">İlk şube adı</label>
+              <div class="field" [class.field--invalid]="invalid(registerForm.branchName)">
+                <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
+                <input id="reg-branch" [formField]="registerForm.branchName" />
+              </div>
+              @if (invalid(registerForm.branchName)) {
+                <small class="field-error">{{
+                  registerForm.branchName().errors()[0].message
+                }}</small>
+              }
+            </div>
+          </div>
+
+          <div class="control step" style="--s: 4">
+            <label for="reg-email">E-posta</label>
+            <div class="field" [class.field--invalid]="invalid(registerForm.email)">
+              <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+              <input
+                id="reg-email"
+                type="email"
+                [formField]="registerForm.email"
+                autocomplete="email"
+                placeholder="siz@merkeziniz.com"
+              />
+            </div>
+            @if (invalid(registerForm.email)) {
+              <small class="field-error">{{ registerForm.email().errors()[0].message }}</small>
+            }
+          </div>
+
+          <div class="grid step" style="--s: 5">
+            <div class="control">
+              <label for="reg-password">Şifre</label>
+              <div class="field" [class.field--invalid]="invalid(registerForm.password)">
+                <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                <input
+                  id="reg-password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  [formField]="registerForm.password"
+                  autocomplete="new-password"
+                  placeholder="En az 8 karakter"
+                />
+                <button
+                  class="password-toggle"
+                  type="button"
+                  [attr.aria-label]="showPassword() ? 'Şifreleri gizle' : 'Şifreleri göster'"
+                  (click)="showPassword.update((value) => !value)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">{{
+                    showPassword() ? 'visibility_off' : 'visibility'
+                  }}</span>
+                </button>
+              </div>
+            </div>
+            <div class="control">
+              <label for="reg-confirm">Şifre tekrarı</label>
+              <div class="field" [class.field--invalid]="invalid(registerForm.confirmPassword)">
+                <span class="material-symbols-outlined" aria-hidden="true">lock_reset</span>
+                <input
+                  id="reg-confirm"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  [formField]="registerForm.confirmPassword"
+                  autocomplete="new-password"
+                  placeholder="Şifrenizi tekrarlayın"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="strength step" style="--s: 5" [attr.data-level]="passwordStrength().level">
+            <div class="strength__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <small aria-live="polite">{{ passwordStrength().label }}</small>
+          </div>
+          @if (invalid(registerForm.password)) {
+            <small class="field-error">{{ registerForm.password().errors()[0].message }}</small>
+          } @else if (invalid(registerForm.confirmPassword)) {
+            <small class="field-error">{{
+              registerForm.confirmPassword().errors()[0].message
+            }}</small>
+          }
+
+          <label class="consent step" style="--s: 6">
+            <input type="checkbox" [formField]="registerForm.acceptedTerms" />
+            <span class="consent__box" aria-hidden="true"
+              ><i class="material-symbols-outlined">check</i></span
+            >
+            <span>KVKK aydınlatma metnini ve kullanım koşullarını okudum, kabul ediyorum.</span>
+          </label>
+
+          @if (error()) {
+            <div class="error" role="alert">
+              <span class="material-symbols-outlined" aria-hidden="true">error</span>{{ error() }}
+            </div>
+          }
+
+          <div class="step" style="--s: 7">
+            <button
+              class="submit"
+              type="submit"
+              [class.submit--busy]="isSubmitting()"
+              [disabled]="registerForm().invalid() || isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner" aria-hidden="true"></span><span>Hesap hazırlanıyor…</span>
+              } @else {
+                <span>Hesabımı oluştur</span
+                ><i class="material-symbols-outlined" aria-hidden="true">rocket_launch</i>
+              }
+            </button>
+          </div>
+        </form>
+
+        <p class="customer-note step" style="--s: 8">
+          Müşteri misiniz? Online randevu için
+          <a routerLink="/portal">müşteri portalını</a> kullanın.
+        </p>
+      </div>
     </div>
   </section>
 </main>

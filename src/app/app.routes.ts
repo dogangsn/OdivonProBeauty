@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, Routes } from '@angular/router';
 import { Auth } from './core/auth';
+import { subscriptionGuard } from './core/subscription/subscription.guard';
 import { WorkspaceDefinition } from './core/beauty.model';
 import { WORKSPACES } from './core/workspace-definitions';
 
@@ -80,8 +81,14 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
+    canActivateChild: [subscriptionGuard],
     loadComponent: () => import('./layout/shell/shell').then((m) => m.Shell),
     children: [
+      {
+        path: 'subscription',
+        loadComponent: () =>
+          import('./features/subscription/subscription').then((m) => m.Subscription),
+      },
       {
         path: 'dashboard',
         loadComponent: () =>

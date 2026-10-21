@@ -87,15 +87,34 @@
             <div class="space-y-0.5 p-1 pt-0">
               @for (item of section.items; track item.route) {
                 <a
-                  [routerLink]="item.route"
+                  [routerLink]="subscription.isLocked() && item.route !== '/subscription' ? '/subscription' : item.route"
                   routerLinkActive="active"
-                  (click)="menuOpen.set(false)"
-                  class="nav-link flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all no-underline"
+                  (click)="handleNavClick($event, item.route)"
+                  class="nav-link flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all no-underline"
+                  [class.text-slate-400]="!subscription.isLocked() || item.route === '/subscription'"
+                  [class.hover:text-white]="!subscription.isLocked() || item.route === '/subscription'"
+                  [class.hover:bg-slate-800/60]="!subscription.isLocked() || item.route === '/subscription'"
+                  [class.opacity-40]="subscription.isLocked() && item.route !== '/subscription'"
+                  [class.text-slate-500]="subscription.isLocked() && item.route !== '/subscription'"
+                  [class.bg-indigo-500/10]="item.route === '/subscription'"
+                  [class.text-indigo-300]="item.route === '/subscription'"
                 >
-                  <span class="material-symbols-outlined icon-size-4 nav-icon text-slate-400">
-                    {{ item.icon }}
-                  </span>
-                  <span class="truncate">{{ item.key | t }}</span>
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span
+                      class="material-symbols-outlined icon-size-4 nav-icon text-slate-400"
+                      [class.text-indigo-400]="item.route === '/subscription'"
+                    >
+                      {{ item.icon }}
+                    </span>
+                    <span class="truncate">{{ item.key | t }}</span>
+                  </div>
+
+                  @if (subscription.isLocked() && item.route !== '/subscription') {
+                    <span class="material-symbols-outlined icon-size-3.5 text-rose-400/80" title="Kilitli">lock</span>
+                  }
+                  @if (item.route === '/subscription' && subscription.isLocked()) {
+                    <span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[9px] font-black uppercase">Seçim Gerekli</span>
+                  }
                 </a>
               }
             </div>
@@ -105,7 +124,42 @@
     </nav>
 
     <!-- Bottom Actions & Customer Portal Link -->
-    <div class="sidebar-footer pt-3 border-t border-slate-800/80 mt-auto space-y-3">
+    <div class="sidebar-footer pt-3 border-t border-slate-800/80 mt-auto space-y-2">
+      <!-- Subscription & Plan Button -->
+      <a
+        routerLink="/subscription"
+        (click)="menuOpen.set(false)"
+        class="flex items-center justify-between p-2.5 rounded-xl text-xs font-bold no-underline transition-all group border"
+        [class.bg-rose-500/20]="subscription.isLocked()"
+        [class.text-rose-300]="subscription.isLocked()"
+        [class.border-rose-500/40]="subscription.isLocked()"
+        [class.animate-pulse]="subscription.isLocked()"
+        [class.bg-indigo-500/10]="!subscription.isLocked()"
+        [class.text-indigo-300]="!subscription.isLocked()"
+        [class.border-indigo-500/20]="!subscription.isLocked()"
+        [class.hover:bg-indigo-500/20]="!subscription.isLocked()"
+      >
+        <span class="flex items-center gap-2">
+          <span
+            class="material-symbols-outlined icon-size-4"
+            [class.text-rose-400]="subscription.isLocked()"
+            [class.text-indigo-400]="!subscription.isLocked()"
+          >
+            {{ subscription.isLocked() ? 'lock' : 'workspace_premium' }}
+          </span>
+          <span>Abonelik & Paketler</span>
+        </span>
+        <span
+          class="text-[10px] font-black px-1.5 py-0.5 rounded"
+          [class.bg-rose-500/30]="subscription.isLocked()"
+          [class.text-rose-200]="subscription.isLocked()"
+          [class.bg-indigo-500/20]="!subscription.isLocked()"
+          [class.text-indigo-300]="!subscription.isLocked()"
+        >
+          {{ subscription.isLocked() ? 'Kilitli' : subscription.daysLeft() + ' Gün' }}
+        </span>
+      </a>
+
       <a
         routerLink="/portal"
         class="portal-button flex items-center justify-between p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-bold no-underline transition-all group"
@@ -172,6 +226,36 @@
       </div>
 
       <div class="flex items-center gap-2.5">
+        <!-- SaaS Subscription / Trial Status Badge -->
+        @if (subscription.isLocked()) {
+          <a
+            routerLink="/subscription"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/40 text-xs font-black no-underline transition-all animate-pulse"
+            title="Abonelik süresi doldu - Menüler kilitli"
+          >
+            <span class="material-symbols-outlined icon-size-4">lock</span>
+            <span class="truncate">Süre Doldu (Kilitli)</span>
+          </a>
+        } @else if (subscription.isInTrial()) {
+          <a
+            routerLink="/subscription"
+            class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-black no-underline transition-all"
+            title="14 Günlük Ücretsiz Deneme - Paketinizi Seçin"
+          >
+            <span class="material-symbols-outlined icon-size-4 text-amber-500">hourglass_top</span>
+            <span class="truncate">Deneme: <strong>{{ subscription.daysLeft() }} gün kaldı</strong></span>
+          </a>
+        } @else {
+          <a
+            routerLink="/subscription"
+            class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 text-xs font-black no-underline transition-all"
+            title="Abonelik Yönetimi & Paketler"
+          >
+            <span class="material-symbols-outlined icon-size-4 text-indigo-500">verified</span>
+            <span class="truncate">{{ subscription.activePlan().name }}</span>
+          </a>
+        }
+
         <!-- Active Branch Context in Topbar -->
         @if ((branches.value() ?? []).length > 1) {
           <div class="relative flex items-center">
@@ -243,6 +327,22 @@
         </button>
       </div>
     </header>
+
+    <!-- Sticky Locked Alert Bar if expired -->
+    @if (subscription.isLocked()) {
+      <div class="sticky top-16 z-10 w-full bg-gradient-to-r from-rose-700 via-rose-600 to-amber-700 text-white px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs font-bold shadow-lg">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined icon-size-4 animate-bounce">lock</span>
+          <span>14 Günlük Ücretsiz Deneme Süreniz Sona Erdi! Salon menüleri kilitlenmiştir. Lütfen bir paket seçip aboneliğinizi başlatınız.</span>
+        </div>
+        <a
+          routerLink="/subscription"
+          class="px-3 py-1 rounded-lg bg-white text-rose-700 hover:bg-slate-100 font-black uppercase text-[11px] no-underline shadow-sm transition-colors"
+        >
+          Paket Seç & Kilidi Aç
+        </a>
+      </div>
+    }
 
     <!-- Page Content Container (Full Width / col-12) -->
     <section class="page-container flex-1 p-6 lg:p-8 w-full">

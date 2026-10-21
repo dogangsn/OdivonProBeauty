@@ -11,6 +11,7 @@ import { Theme } from '../../core/theme';
 import { LanguageSelector } from '../../shared/language-selector/language-selector';
 
 import { VersionService } from '../../core/version/version.service';
+import { SubscriptionService } from '../../core/subscription/subscription.service';
 
 interface CollapsibleNavSection {
   key: string;
@@ -31,6 +32,7 @@ export class Shell {
   protected readonly i18n = inject(I18nStore);
   protected readonly branchService = inject(BranchService);
   protected readonly version = inject(VersionService);
+  protected readonly subscription = inject(SubscriptionService);
   protected readonly menuOpen = signal(false);
   protected readonly activeBranchId = signal('');
 
@@ -101,6 +103,7 @@ export class Shell {
     {
       key: 'nav.section.financeStock',
       items: [
+        { key: 'nav.subscription', icon: 'workspace_premium', route: '/subscription' },
         { key: 'nav.purchasing', icon: 'shopping_cart_checkout', route: '/purchasing' },
         { key: 'nav.paymentLinks', icon: 'link', route: '/payment-links' },
         { key: 'nav.payments', icon: 'payments', route: '/payments' },
@@ -195,5 +198,14 @@ export class Shell {
     const id = (event.target as HTMLSelectElement).value;
     this.activeBranchId.set(id);
     this.branchService.selectBranch(id);
+  }
+
+  protected handleNavClick(event: MouseEvent, route: string): void {
+    if (this.subscription.isLocked() && route !== '/subscription') {
+      event.preventDefault();
+      this.router.navigateByUrl('/subscription');
+    } else {
+      this.menuOpen.set(false);
+    }
   }
 }

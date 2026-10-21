@@ -1,0 +1,676 @@
+<div class="subscription-page min-h-screen p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
+  <!-- Top Testing & Simulation Bar -->
+  <div class="simulation-bar flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 text-white shadow-xl">
+    <div class="flex items-center gap-3">
+      <span class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+        <span class="material-symbols-outlined icon-size-5">science</span>
+      </span>
+      <div>
+        <div class="text-xs font-black uppercase tracking-wider text-indigo-300">SaaS Test & Simülasyon Konsolu</div>
+        <div class="text-xs text-slate-300">
+          Kilit mekanizmasını test etmek için deneme süresini bitirebilir veya paketi anında aktifleştirebilirsiniz.
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        (click)="triggerSimulateExpire()"
+        class="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+        title="14 günlük denemeyi anında bitirir ve menüleri kilitler"
+      >
+        <span class="material-symbols-outlined icon-size-4">lock</span>
+        <span>Deneme Süresini Bitir (Menüleri Kilitle)</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="triggerSimulateReset()"
+        class="px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+        title="14 günlük deneme süresini yeniden başlatır"
+      >
+        <span class="material-symbols-outlined icon-size-4">refresh</span>
+        <span>14 Gün Denemeyi Yenile</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="triggerQuickActivatePro()"
+        class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/30 cursor-pointer transition-colors"
+        title="Pro paketi 1 yıllık olarak anında aktif eder"
+      >
+        <span class="material-symbols-outlined icon-size-4">auto_awesome</span>
+        <span>Hızlı Pro Paketi Aktif Et</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Locked Paywall Alert Banner (Shown when locked) -->
+  @if (subService.isLocked()) {
+    <div class="locked-banner relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-950/90 via-slate-900 to-amber-950/80 border-2 border-rose-500/60 p-6 sm:p-8 text-white shadow-2xl shadow-rose-950/50">
+      <div class="absolute -end-12 -top-12 w-48 h-48 rounded-full bg-rose-500/10 blur-3xl pointer-events-none"></div>
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+        <div class="flex items-start gap-5">
+          <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center flex-shrink-0 shadow-inner">
+            <span class="material-symbols-outlined text-3xl animate-bounce">lock</span>
+          </div>
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-extrabold uppercase tracking-widest border border-rose-500/30 mb-2">
+              <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+              Abonelik Süreniz Doldu & Menüler Kilitlendi
+            </div>
+            <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+              14 Günlük Ücretsiz Deneme Süreniz Sona Erdi
+            </h1>
+            <p class="text-sm text-slate-300 max-w-2xl mt-1.5 leading-relaxed">
+              Salon yönetim operasyonlarınıza (Randevu Takvimi, Müşteri CRM Kartları, Cilt & Seans Takibi, Kasa ve Tahsilatlar) kesintisiz devam edebilmek için lütfen işletmenize uygun bir paket seçip ödeme işlemini tamamlayınız.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="p-3 rounded-2xl bg-slate-900/80 border border-rose-500/30 text-center w-full md:w-44">
+            <div class="text-[10px] uppercase font-bold text-slate-400">Kalan Erişim</div>
+            <div class="text-2xl font-black text-rose-400 font-mono">0 GÜN</div>
+            <div class="text-[10px] text-rose-300 font-semibold mt-0.5">Ödeme Bekleniyor</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Active Status Card (When Trial is active or Subscription is active) -->
+    <div class="status-card rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <span class="material-symbols-outlined text-3xl">verified_user</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h2 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                Mevcut Durum: {{ subService.activePlan().name }}
+              </h2>
+              <span
+                class="px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider"
+                [class.bg-amber-100]="subService.isInTrial()"
+                [class.text-amber-800]="subService.isInTrial()"
+                [class.dark:bg-amber-950/50]="subService.isInTrial()"
+                [class.dark:text-amber-300]="subService.isInTrial()"
+                [class.bg-emerald-100]="!subService.isInTrial()"
+                [class.text-emerald-800]="!subService.isInTrial()"
+                [class.dark:bg-emerald-950/50]="!subService.isInTrial()"
+                [class.dark:text-emerald-300]="!subService.isInTrial()"
+              >
+                {{ subService.statusBadge().text }}
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              @if (subService.isInTrial()) {
+                14 günlük deneme sürümünüzün keyfini çıkarıyorsunuz. Tüm OdivonPro özellikleri tam erişime açıktır.
+              } @else {
+                Aboneliğiniz aktif durumdadır. Tüm şube ve uzman limitleriniz geçerlidir.
+              }
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <div class="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-center min-w-28">
+            <div class="text-[10px] font-bold uppercase text-slate-400">Kalan Süre</div>
+            <div class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">
+              {{ subService.daysLeft() }} Gün
+            </div>
+          </div>
+
+          <div class="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-center min-w-28">
+            <div class="text-[10px] font-bold uppercase text-slate-400">Şube Limiti</div>
+            <div class="text-xl font-black text-slate-800 dark:text-slate-200 font-mono">
+              {{ subService.activePlan().limits.maxBranches === 'unlimited' ? 'Sınırsız' : subService.activePlan().limits.maxBranches + ' Şube' }}
+            </div>
+          </div>
+
+          <div class="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-center min-w-28">
+            <div class="text-[10px] font-bold uppercase text-slate-400">SMS Bakiyesi</div>
+            <div class="text-xl font-black text-slate-800 dark:text-slate-200 font-mono">
+              {{ subService.activePlan().limits.smsCredits }} / Ay
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Header & Billing Cycle Selector -->
+  <div class="text-center space-y-4 max-w-2xl mx-auto pt-2">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-300 text-xs font-black uppercase tracking-wider">
+      <span class="material-symbols-outlined icon-size-4">workspace_premium</span>
+      Güzellik Merkezleri & Salonlar İçin Şeffaf Fiyatlandırma
+    </div>
+
+    <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+      İşletmenizi Büyütecek En Uygun Paketi Seçin
+    </h2>
+    <p class="text-sm text-slate-600 dark:text-slate-400">
+      Gizli ücret yok, taahhüt yok. İstediğiniz zaman paketinizi yükseltebilir veya iptal edebilirsiniz.
+    </p>
+
+    <!-- Cycle Switcher Pill -->
+    <div class="inline-flex items-center p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 shadow-inner mt-2">
+      <button
+        type="button"
+        (click)="setCycle('monthly')"
+        class="px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border-0"
+        [class.bg-white]="selectedCycle() === 'monthly'"
+        [class.dark:bg-slate-900]="selectedCycle() === 'monthly'"
+        [class.text-slate-900]="selectedCycle() === 'monthly'"
+        [class.dark:text-white]="selectedCycle() === 'monthly'"
+        [class.shadow-md]="selectedCycle() === 'monthly'"
+        [class.text-slate-500]="selectedCycle() !== 'monthly'"
+        [class.dark:text-slate-400]="selectedCycle() !== 'monthly'"
+        [class.bg-transparent]="selectedCycle() !== 'monthly'"
+      >
+        Aylık Faturalandırma
+      </button>
+
+      <button
+        type="button"
+        (click)="setCycle('yearly')"
+        class="relative px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border-0 flex items-center gap-2"
+        [class.bg-indigo-600]="selectedCycle() === 'yearly'"
+        [class.text-white]="selectedCycle() === 'yearly'"
+        [class.shadow-md]="selectedCycle() === 'yearly'"
+        [class.text-slate-500]="selectedCycle() !== 'yearly'"
+        [class.dark:text-slate-400]="selectedCycle() !== 'yearly'"
+        [class.bg-transparent]="selectedCycle() !== 'yearly'"
+      >
+        <span>Yıllık Faturalandırma</span>
+        <span
+          class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+          [class.bg-amber-400]="selectedCycle() === 'yearly'"
+          [class.text-slate-950]="selectedCycle() === 'yearly'"
+          [class.bg-amber-500/20]="selectedCycle() !== 'yearly'"
+          [class.text-amber-400]="selectedCycle() !== 'yearly'"
+        >
+          2 Ay Bedava (%20 İndirim)
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pricing Cards Matrix -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch pt-4">
+    @for (plan of subService.plans; track plan.id) {
+      <div
+        class="plan-card relative flex flex-col rounded-3xl p-6 sm:p-8 transition-all duration-300"
+        [class.bg-white]="!plan.popular"
+        [class.dark:bg-slate-900]="!plan.popular"
+        [class.border-slate-200]="!plan.popular"
+        [class.dark:border-slate-800]="!plan.popular"
+        [class.border]="!plan.popular"
+        [class.bg-gradient-to-b]="plan.popular"
+        [class.from-slate-900]="plan.popular"
+        [class.to-indigo-950]="plan.popular"
+        [class.border-2]="plan.popular"
+        [class.border-indigo-500]="plan.popular"
+        [class.text-white]="plan.popular"
+        [class.shadow-2xl]="plan.popular"
+        [class.shadow-indigo-500/20]="plan.popular"
+        [class.lg:-translate-y-2]="plan.popular"
+      >
+        <!-- Popular Badge -->
+        @if (plan.badge) {
+          <div class="absolute -top-3.5 start-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-black uppercase tracking-widest shadow-md">
+            {{ plan.badge }}
+          </div>
+        }
+
+        <!-- Card Header -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-black tracking-tight" [class.text-slate-900]="!plan.popular" [class.dark:text-white]="!plan.popular">
+              {{ plan.name }}
+            </h3>
+            <span class="text-xs font-bold px-2 py-0.5 rounded-lg" [class.bg-slate-100]="!plan.popular" [class.dark:bg-slate-800]="!plan.popular" [class.text-slate-600]="!plan.popular" [class.dark:text-slate-300]="!plan.popular" [class.bg-indigo-500/20]="plan.popular" [class.text-indigo-300]="plan.popular">
+              {{ plan.subtitle }}
+            </span>
+          </div>
+          <p class="text-xs leading-relaxed" [class.text-slate-500]="!plan.popular" [class.dark:text-slate-400]="!plan.popular" [class.text-slate-300]="plan.popular">
+            {{ plan.tagline }}
+          </p>
+        </div>
+
+        <!-- Pricing Block -->
+        <div class="my-6 pt-4 border-t" [class.border-slate-100]="!plan.popular" [class.dark:border-slate-800]="!plan.popular" [class.border-indigo-500/20]="plan.popular">
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-3xl sm:text-4xl font-black font-mono tracking-tight" [class.text-slate-900]="!plan.popular" [class.dark:text-white]="!plan.popular">
+              {{ (selectedCycle() === 'yearly' ? plan.yearlyMonthlyEquivalent : plan.monthlyPrice) | currency: 'TRY' : 'symbol-narrow' : '1.0-0' : 'tr' }}
+            </span>
+            <span class="text-xs font-semibold" [class.text-slate-500]="!plan.popular" [class.dark:text-slate-400]="!plan.popular" [class.text-slate-300]="plan.popular">
+              / ay
+            </span>
+          </div>
+
+          @if (selectedCycle() === 'yearly') {
+            <div class="text-[11px] font-bold text-amber-500 dark:text-amber-400 mt-1">
+              Yıllık tek fatura: {{ plan.yearlyPrice | currency: 'TRY' : 'symbol-narrow' : '1.0-0' : 'tr' }} (2 Ay Hediye!)
+            </div>
+          } @else {
+            <div class="text-[11px] text-slate-400 mt-1">
+              Aylık düzenli faturalandırılır
+            </div>
+          }
+        </div>
+
+        <!-- Key Limit Badges -->
+        <div class="grid grid-cols-3 gap-2 p-3 rounded-2xl mb-6 text-center text-xs" [class.bg-slate-50]="!plan.popular" [class.dark:bg-slate-800/50]="!plan.popular" [class.bg-slate-900/60]="plan.popular" [class.border]="plan.popular" [class.border-slate-800]="plan.popular">
+          <div>
+            <div class="text-[10px] text-slate-400 font-bold">Şube</div>
+            <div class="font-extrabold" [class.text-slate-800]="!plan.popular" [class.dark:text-slate-200]="!plan.popular">
+              {{ plan.limits.maxBranches === 'unlimited' ? 'Limitsiz' : plan.limits.maxBranches }}
+            </div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 font-bold">Uzman</div>
+            <div class="font-extrabold" [class.text-slate-800]="!plan.popular" [class.dark:text-slate-200]="!plan.popular">
+              {{ plan.limits.maxStaff === 'unlimited' ? 'Limitsiz' : plan.limits.maxStaff }}
+            </div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 font-bold">SMS</div>
+            <div class="font-extrabold" [class.text-slate-800]="!plan.popular" [class.dark:text-slate-200]="!plan.popular">
+              {{ plan.limits.smsCredits }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Checklist -->
+        <ul class="space-y-3 flex-1 mb-8 text-xs list-none p-0">
+          @for (f of plan.features; track f.text) {
+            <li class="flex items-start gap-2.5" [class.opacity-40]="!f.included">
+              @if (f.included) {
+                <span class="material-symbols-outlined icon-size-4 text-emerald-500 flex-shrink-0 mt-0.5">
+                  check_circle
+                </span>
+                <span [class.font-bold]="f.highlight" [class.text-white]="plan.popular && f.highlight">
+                  {{ f.text }}
+                </span>
+              } @else {
+                <span class="material-symbols-outlined icon-size-4 text-slate-400 flex-shrink-0 mt-0.5">
+                  cancel
+                </span>
+                <span class="line-through text-slate-400">
+                  {{ f.text }}
+                </span>
+              }
+            </li>
+          }
+        </ul>
+
+        <!-- Action CTA Button -->
+        <button
+          type="button"
+          (click)="openCheckout(plan)"
+          class="w-full py-3.5 px-6 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all border-0 shadow-lg"
+          [class.bg-gradient-to-r]="plan.popular"
+          [class.from-indigo-500]="plan.popular"
+          [class.to-purple-600]="plan.popular"
+          [class.hover:from-indigo-600]="plan.popular"
+          [class.hover:to-purple-700]="plan.popular"
+          [class.text-white]="plan.popular"
+          [class.shadow-indigo-500/30]="plan.popular"
+          [class.bg-slate-900]="!plan.popular"
+          [class.dark:bg-white]="!plan.popular"
+          [class.text-white]="!plan.popular"
+          [class.dark:text-slate-950]="!plan.popular"
+          [class.hover:bg-slate-800]="!plan.popular"
+          [class.dark:hover:bg-slate-100]="!plan.popular"
+        >
+          <span class="material-symbols-outlined icon-size-4">credit_card</span>
+          <span>{{ subService.isLocked() ? 'Hemen Başlat ve Kilidi Aç' : (subService.activePlan().id === plan.id ? 'Mevcut Planı Yenile' : 'Bu Pakete Geç') }}</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Invoices History Section -->
+  @if (subService.invoices().length > 0) {
+    <div class="invoices-section rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined icon-size-5 text-indigo-500">receipt_long</span>
+          <h3 class="text-base font-black text-slate-900 dark:text-white">Abonelik & Fatura Geçmişi</h3>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-extrabold uppercase">
+              <th class="py-3 px-4">Makbuz / Fatura No</th>
+              <th class="py-3 px-4">Tarih</th>
+              <th class="py-3 px-4">Paket & Periyot</th>
+              <th class="py-3 px-4">Tutar</th>
+              <th class="py-3 px-4">Durum</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            @for (inv of subService.invoices(); track inv.id) {
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                <td class="py-3 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                  {{ inv.receiptNo }}
+                </td>
+                <td class="py-3 px-4 text-slate-600 dark:text-slate-300">
+                  {{ inv.paidAt | date: 'dd.MM.yyyy HH:mm' }}
+                </td>
+                <td class="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">
+                  {{ inv.planName }} ({{ inv.billingCycle === 'yearly' ? 'Yıllık' : 'Aylık' }})
+                </td>
+                <td class="py-3 px-4 font-black font-mono text-slate-900 dark:text-white">
+                  {{ inv.amount | currency: 'TRY' : 'symbol-narrow' : '1.2-2' : 'tr' }}
+                </td>
+                <td class="py-3 px-4">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    Ödendi
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Checkout Drawer / Modal -->
+  @if (checkoutModalOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+      <div class="checkout-modal w-full max-w-2xl rounded-3xl bg-white dark:bg-[#0e1628] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center">
+              <span class="material-symbols-outlined icon-size-5">credit_card</span>
+            </span>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">Güvenli Abonelik Ödemesi</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">256-Bit SSL & 3D Secure Korumalı Tahsilat</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            (click)="closeCheckout()"
+            class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center border-0 bg-transparent cursor-pointer"
+          >
+            <span class="material-symbols-outlined icon-size-5">close</span>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto space-y-6 flex-1">
+          <!-- Success State -->
+          @if (paymentSuccess()) {
+            <div class="text-center py-8 space-y-4 animate-fade-in">
+              <div class="w-20 h-20 rounded-full bg-emerald-500/20 text-emerald-500 border-2 border-emerald-500/40 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/20">
+                <span class="material-symbols-outlined text-5xl">check_circle</span>
+              </div>
+              <div>
+                <h4 class="text-2xl font-black text-slate-900 dark:text-white">Aboneliğiniz Başarıyla Aktifleştirildi!</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-300 max-w-md mx-auto mt-2">
+                  Tebrikler, ödemeniz onaylandı. Tüm salon menüleri, müşteri kayıtları ve randevu takviminiz anında kullanıma açıldı.
+                </p>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 max-w-sm mx-auto text-left space-y-2 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Makbuz No:</span>
+                  <span class="font-mono font-bold text-indigo-500">{{ generatedReceiptNo() }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Paket:</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-200">{{ selectedPlanForCheckout()?.name }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Faturalandırma:</span>
+                  <span class="font-bold">{{ selectedCycle() === 'yearly' ? 'Yıllık (365 Gün)' : 'Aylık (30 Gün)' }}</span>
+                </div>
+              </div>
+
+              <div class="pt-4">
+                <button
+                  type="button"
+                  (click)="finishAndGoToDashboard()"
+                  class="py-3 px-8 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/30 cursor-pointer border-0"
+                >
+                  Yönetim Paneline Git
+                </button>
+              </div>
+            </div>
+          } @else {
+            <!-- Order Summary Card -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div class="text-[10px] font-bold uppercase text-indigo-500 tracking-wider">Seçilen Paket</div>
+                <div class="text-base font-black text-slate-900 dark:text-white">
+                  {{ selectedPlanForCheckout()?.name }} ({{ selectedCycle() === 'yearly' ? '12 Aylık Yıllık Plan' : '1 Aylık Plan' }})
+                </div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ selectedPlanForCheckout()?.limits.maxBranches === 'unlimited' ? 'Sınırsız Şube' : selectedPlanForCheckout()?.limits.maxBranches + ' Şube' }} • {{ selectedPlanForCheckout()?.limits.maxStaff === 'unlimited' ? 'Sınırsız Personel' : selectedPlanForCheckout()?.limits.maxStaff + ' Personel' }} • {{ selectedPlanForCheckout()?.limits.smsCredits }} SMS
+                </div>
+              </div>
+
+              <div class="text-right sm:text-end w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0">
+                <div class="text-[10px] font-bold uppercase text-slate-400">Ödenecek Tutar</div>
+                <div class="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400">
+                  {{ checkoutSummary().total | currency: 'TRY' : 'symbol-narrow' : '1.2-2' : 'tr' }}
+                </div>
+                <div class="text-[10px] text-slate-400">KDV Dahil</div>
+              </div>
+            </div>
+
+            <!-- Credit Card Form -->
+            <div class="space-y-4">
+              <h4 class="text-xs font-black uppercase tracking-wider text-slate-400">Kart Bilgileri</h4>
+
+              <div>
+                <label for="checkoutCardNumber" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Kart Numarası
+                </label>
+                <div class="relative">
+                  <input
+                    id="checkoutCardNumber"
+                    type="text"
+                    [value]="cardNumber()"
+                    (input)="formatCardNumber($event)"
+                    placeholder="4000 0000 0000 0000"
+                    maxlength="19"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                  <div class="absolute end-3 top-1/2 -translate-y-1/2">
+                    <span class="text-xs font-black uppercase text-indigo-500 font-mono">
+                      {{ cardBrand() }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="checkoutCardHolder" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Kart Üzerindeki İsim
+                  </label>
+                  <input
+                    id="checkoutCardHolder"
+                    type="text"
+                    [ngModel]="cardHolder()"
+                    (ngModelChange)="cardHolder.set($event)"
+                    placeholder="Ad Soyad"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label for="checkoutCardExpiry" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Son Kul. (AA/YY)
+                    </label>
+                    <input
+                      id="checkoutCardExpiry"
+                      type="text"
+                      [value]="cardExpiry()"
+                      (input)="formatExpiry($event)"
+                      placeholder="MM/YY"
+                      maxlength="5"
+                      class="w-full px-3 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label for="checkoutCardCvv" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      CVV
+                    </label>
+                    <input
+                      id="checkoutCardCvv"
+                      type="password"
+                      [ngModel]="cardCvv()"
+                      (ngModelChange)="cardCvv.set($event)"
+                      placeholder="•••"
+                      maxlength="4"
+                      class="w-full px-3 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoice Details Accordion -->
+            <div class="space-y-3 pt-2">
+              <h4 class="text-xs font-black uppercase tracking-wider text-slate-400">Fatura Bilgileri</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="checkoutCompanyTitle" class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Unvan / Şirket Adı</label>
+                  <input
+                    id="checkoutCompanyTitle"
+                    type="text"
+                    [ngModel]="companyTitle()"
+                    (ngModelChange)="companyTitle.set($event)"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label for="checkoutTaxNumber" class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Vergi / TC No</label>
+                  <input
+                    id="checkoutTaxNumber"
+                    type="text"
+                    [ngModel]="taxNumber()"
+                    (ngModelChange)="taxNumber.set($event)"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+              <button
+                type="button"
+                (click)="closeCheckout()"
+                class="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                Vazgeç
+              </button>
+
+              <button
+                type="button"
+                (click)="proceedTo3DSecure()"
+                [disabled]="paymentProcessing()"
+                class="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-50"
+              >
+                @if (paymentProcessing()) {
+                  <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  <span>Kart Doğrulanıyor...</span>
+                } @else {
+                  <span class="material-symbols-outlined icon-size-4">shield</span>
+                  <span>3D Secure ile {{ checkoutSummary().total | currency: 'TRY' : 'symbol-narrow' : '1.2-2' : 'tr' }} Öde</span>
+                }
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 3D Secure SMS Verification Modal -->
+  @if (threeDSecureModalOpen()) {
+    <div class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+      <div class="otp-modal w-full max-w-md rounded-3xl bg-white dark:bg-[#0e1628] border-2 border-indigo-500/40 shadow-2xl p-6 sm:p-8 space-y-6">
+        <div class="text-center space-y-2">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-500 border border-indigo-500/30 flex items-center justify-center mx-auto shadow-inner">
+            <span class="material-symbols-outlined text-3xl">sms</span>
+          </div>
+          <h3 class="text-lg font-black text-slate-900 dark:text-white">Banka 3D Secure SMS Onayı</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Telefonunuza gönderilen 6 haneli doğrulama kodunu giriniz.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between text-xs">
+          <div>
+            <div class="text-slate-400 font-bold">Ödeme Tutarı:</div>
+            <div class="font-black text-slate-900 dark:text-white text-base font-mono">
+              {{ checkoutSummary().total | currency: 'TRY' : 'symbol-narrow' : '1.2-2' : 'tr' }}
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="fillDemoOtp()"
+            class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold text-[11px] cursor-pointer border-0 hover:bg-indigo-500"
+          >
+            Örnek Kodu Doldur
+          </button>
+        </div>
+
+        <div class="space-y-2 text-center">
+          <label for="otpInput" class="block text-xs font-bold text-slate-600 dark:text-slate-400">SMS Doğrulama Kodu</label>
+          <input
+            id="otpInput"
+            type="text"
+            [ngModel]="otpCode()"
+            (ngModelChange)="otpCode.set($event)"
+            placeholder="549182"
+            maxlength="6"
+            class="w-48 mx-auto text-center px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-indigo-500 font-mono text-2xl font-black tracking-widest text-slate-900 dark:text-white focus:outline-none"
+          />
+          <div class="text-[11px] text-slate-400 font-mono">
+            Kalan Süre: {{ otpCountdown() }} saniye
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="threeDSecureModalOpen.set(false)"
+            class="w-1/3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            İptal
+          </button>
+          <button
+            type="button"
+            (click)="confirmOtpAndSubscribe()"
+            [disabled]="otpCode().length < 4 || paymentProcessing()"
+            class="w-2/3 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-50"
+          >
+            @if (paymentProcessing()) {
+              <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <span>Onaylanıyor...</span>
+            } @else {
+              <span class="material-symbols-outlined icon-size-4">lock_open</span>
+              <span>Onayla & Kilidi Aç</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

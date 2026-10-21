@@ -1,0 +1,910 @@
+<div class="sms-hub-page min-h-screen p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto animate-fade-in">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-wider mb-2">
+        <span class="material-symbols-outlined icon-size-4">cell_tower</span>
+        SMS Tanımları & Operatör Entegrasyonu
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+        SMS Şirketleri & İletişim Otomasyonu
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+        Netgsm, İleti Merkezi, Mutlucell ve Twilio entegrasyonlarıyla randevu onayları, hatırlatmalar ve kapora linklerini otomatik iletin.
+      </p>
+    </div>
+
+    <!-- Active Default Provider Pill -->
+    <div class="p-3 px-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3 shadow-xs">
+      <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
+        <span class="material-symbols-outlined icon-size-5">send</span>
+      </div>
+      <div>
+        <div class="text-[10px] font-extrabold uppercase text-slate-400">Aktif Gönderici Başlığı</div>
+        <div class="text-sm font-black text-slate-900 dark:text-white font-mono">
+          {{ defaultProvider().originator }}
+          <span class="text-xs font-normal text-slate-500">({{ defaultProvider().name }})</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Stats Summary Row -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat-card p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-bold uppercase">Bu Ay İletilen SMS</span>
+        <span class="material-symbols-outlined icon-size-4 text-indigo-500">outgoing_mail</span>
+      </div>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+        {{ stats().totalSentThisMonth | number }}
+      </div>
+      <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
+        +%18 seans hatırlatması
+      </div>
+    </div>
+
+    <div class="stat-card p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-bold uppercase">Başarılı İletim Oranı</span>
+        <span class="material-symbols-outlined icon-size-4 text-emerald-500">verified</span>
+      </div>
+      <div class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+        %{{ stats().deliveredRate }}
+      </div>
+      <div class="text-[11px] text-slate-500 mt-1">
+        Operatör teslim raporlu
+      </div>
+    </div>
+
+    <div class="stat-card p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-bold uppercase">Kalan Toplam SMS</span>
+        <span class="material-symbols-outlined icon-size-4 text-amber-500">toll</span>
+      </div>
+      <div class="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-indigo-400 font-mono">
+        {{ stats().totalCreditsRemaining | number }}
+      </div>
+      <div class="text-[11px] text-slate-500 mt-1">
+        Tüm sağlayıcılar toplamı
+      </div>
+    </div>
+
+    <div class="stat-card p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-bold uppercase">Aktif Sağlayıcı</span>
+        <span class="material-symbols-outlined icon-size-4 text-purple-500">hub</span>
+      </div>
+      <div class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+        {{ stats().activeProvidersCount }} / {{ providers().length }}
+      </div>
+      <div class="text-[11px] text-indigo-500 font-bold mt-1">
+        Yedekli yük dengeleme
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tab Bar -->
+  <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-200/70 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700/80 overflow-x-auto">
+    <button
+      type="button"
+      (click)="setTab('providers')"
+      class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-0 flex items-center gap-2 whitespace-nowrap"
+      [class.bg-white]="activeTab() === 'providers'"
+      [class.dark:bg-slate-900]="activeTab() === 'providers'"
+      [class.text-slate-900]="activeTab() === 'providers'"
+      [class.dark:text-white]="activeTab() === 'providers'"
+      [class.shadow-sm]="activeTab() === 'providers'"
+      [class.text-slate-600]="activeTab() !== 'providers'"
+      [class.dark:text-slate-400]="activeTab() !== 'providers'"
+      [class.bg-transparent]="activeTab() !== 'providers'"
+    >
+      <span class="material-symbols-outlined icon-size-4">dns</span>
+      <span>SMS Şirketleri Entegrasyonu</span>
+      <span class="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-black">
+        {{ providers().length }}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('templates')"
+      class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-0 flex items-center gap-2 whitespace-nowrap"
+      [class.bg-white]="activeTab() === 'templates'"
+      [class.dark:bg-slate-900]="activeTab() === 'templates'"
+      [class.text-slate-900]="activeTab() === 'templates'"
+      [class.dark:text-white]="activeTab() === 'templates'"
+      [class.shadow-sm]="activeTab() === 'templates'"
+      [class.text-slate-600]="activeTab() !== 'templates'"
+      [class.dark:text-slate-400]="activeTab() !== 'templates'"
+      [class.bg-transparent]="activeTab() !== 'templates'"
+    >
+      <span class="material-symbols-outlined icon-size-4">text_snippet</span>
+      <span>Otomatik SMS Şablonları & Tetikleyiciler</span>
+      <span class="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-black">
+        {{ templates().length }}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('logs')"
+      class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-0 flex items-center gap-2 whitespace-nowrap"
+      [class.bg-white]="activeTab() === 'logs'"
+      [class.dark:bg-slate-900]="activeTab() === 'logs'"
+      [class.text-slate-900]="activeTab() === 'logs'"
+      [class.dark:text-white]="activeTab() === 'logs'"
+      [class.shadow-sm]="activeTab() === 'logs'"
+      [class.text-slate-600]="activeTab() !== 'logs'"
+      [class.dark:text-slate-400]="activeTab() !== 'logs'"
+      [class.bg-transparent]="activeTab() !== 'logs'"
+    >
+      <span class="material-symbols-outlined icon-size-4">mark_chat_read</span>
+      <span>Gönderim Geçmişi & Raporlar</span>
+      <span class="px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-[10px] font-black">
+        {{ logs().length }}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('direct')"
+      class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-0 flex items-center gap-2 whitespace-nowrap"
+      [class.bg-white]="activeTab() === 'direct'"
+      [class.dark:bg-slate-900]="activeTab() === 'direct'"
+      [class.text-slate-900]="activeTab() === 'direct'"
+      [class.dark:text-white]="activeTab() === 'direct'"
+      [class.shadow-sm]="activeTab() === 'direct'"
+      [class.text-slate-600]="activeTab() !== 'direct'"
+      [class.dark:text-slate-400]="activeTab() !== 'direct'"
+      [class.bg-transparent]="activeTab() !== 'direct'"
+    >
+      <span class="material-symbols-outlined icon-size-4">send</span>
+      <span>Hızlı SMS Gönder</span>
+    </button>
+  </div>
+
+  <!-- TAB 1: SMS PROVIDERS GRID -->
+  @if (activeTab() === 'providers') {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (prov of providers(); track prov.id) {
+        <div
+          class="provider-card rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-xs transition-all hover:shadow-md"
+          [class.ring-2]="prov.isDefault"
+          [class.ring-indigo-500]="prov.isDefault"
+        >
+          <div>
+            <!-- Provider Card Top -->
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-500 flex items-center justify-center font-black text-base shadow-inner">
+                  {{ prov.name.substring(0, 2).toUpperCase() }}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-base font-black text-slate-900 dark:text-white">
+                      {{ prov.name }}
+                    </h3>
+                    @if (prov.badge) {
+                      <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase">
+                        {{ prov.badge }}
+                      </span>
+                    }
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                    {{ prov.tagline }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Default Badge -->
+              @if (prov.isDefault) {
+                <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 flex-shrink-0">
+                  <span class="material-symbols-outlined icon-size-3.5">star</span>
+                  Varsayılan
+                </span>
+              }
+            </div>
+
+            <!-- Details Box -->
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 space-y-2 text-xs mb-5">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-semibold">Gönderici Başlığı:</span>
+                <span class="font-mono font-bold text-slate-800 dark:text-slate-200">{{ prov.originator }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-semibold">Kalan SMS Kredisi:</span>
+                <span class="font-mono font-black text-indigo-600 dark:text-indigo-400">{{ prov.balance | number }} Kredi</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-semibold">Durum:</span>
+                <span
+                  class="font-bold flex items-center gap-1"
+                  [class.text-emerald-500]="prov.isActive"
+                  [class.text-slate-400]="!prov.isActive"
+                >
+                  <span class="w-2 h-2 rounded-full" [class.bg-emerald-500]="prov.isActive" [class.bg-slate-400]="!prov.isActive"></span>
+                  {{ prov.isActive ? 'Entegrasyon Aktif' : 'Devre Dışı' }}
+                </span>
+              </div>
+              @if (prov.lastTestedAt) {
+                <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/40">
+                  <span>Son Test:</span>
+                  <span>{{ prov.lastTestedAt | date: 'dd.MM.yyyy HH:mm' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Provider Actions -->
+          <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                (click)="openConfigModal(prov)"
+                class="py-2 px-3 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              >
+                <span class="material-symbols-outlined icon-size-4">settings</span>
+                <span>Ayarlar</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="openTestSmsModal(prov)"
+                [disabled]="!prov.isActive"
+                class="py-2 px-3 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40"
+              >
+                <span class="material-symbols-outlined icon-size-4">send_to_mobile</span>
+                <span>Test SMS</span>
+              </button>
+            </div>
+
+            @if (!prov.isDefault && prov.isActive) {
+              <button
+                type="button"
+                (click)="setDefaultProvider(prov.id)"
+                class="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors border-0"
+              >
+                <span class="material-symbols-outlined icon-size-4">check_circle</span>
+                <span>Varsayılan Yap</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- TAB 2: AUTOMATED TEMPLATES & TRIGGERS -->
+  @if (activeTab() === 'templates') {
+    <div class="space-y-4">
+      <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined icon-size-5 text-indigo-500">auto_fix_high</span>
+          <p class="text-xs text-slate-700 dark:text-slate-300">
+            Otomatik tetikleyiciler sayesinde randevu oluşturulduğunda veya seans tamamlandığında müşterilerinize SMS bildirimleri otomatik gönderilir.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        @for (tmpl of templates(); track tmpl.id) {
+          <div class="template-card rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-xs">
+            <div>
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-base font-black text-slate-900 dark:text-white">
+                      {{ tmpl.title }}
+                    </h3>
+                  </div>
+                  <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1">
+                    <span class="material-symbols-outlined icon-size-3.5 text-indigo-500">alarm</span>
+                    <span>{{ tmpl.triggerEvent }}</span>
+                  </div>
+                </div>
+
+                <!-- Auto Send Switch -->
+                <button
+                  type="button"
+                  (click)="toggleTemplateAutoSend(tmpl)"
+                  class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border-0 cursor-pointer transition-colors"
+                  [class.bg-emerald-500/15]="tmpl.isAutoSend"
+                  [class.text-emerald-600]="tmpl.isAutoSend"
+                  [class.dark:text-emerald-400]="tmpl.isAutoSend"
+                  [class.bg-slate-200]="!tmpl.isAutoSend"
+                  [class.dark:bg-slate-800]="!tmpl.isAutoSend"
+                  [class.text-slate-500]="!tmpl.isAutoSend"
+                >
+                  <span class="material-symbols-outlined icon-size-4">
+                    {{ tmpl.isAutoSend ? 'toggle_on' : 'toggle_off' }}
+                  </span>
+                  <span>{{ tmpl.isAutoSend ? 'Otomatik Aktif' : 'Pasif' }}</span>
+                </button>
+              </div>
+
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                {{ tmpl.description }}
+              </p>
+
+              <!-- Message Preview Balloon -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 text-xs font-sans text-slate-800 dark:text-slate-200 leading-relaxed relative">
+                <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Şablon İçeriği:</span>
+                "{{ tmpl.content }}"
+              </div>
+            </div>
+
+            <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <span class="text-[11px] text-slate-400 font-mono">
+                Başlık: <strong>{{ tmpl.defaultSenderTitle }}</strong>
+              </span>
+
+              <button
+                type="button"
+                (click)="openTemplateModal(tmpl)"
+                class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer border-0 transition-colors"
+              >
+                <span class="material-symbols-outlined icon-size-4">edit</span>
+                <span>Şablonu Düzenle</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: OUTBOX LOGS & DELIVERY REPORTS -->
+  @if (activeTab() === 'logs') {
+    <div class="space-y-4">
+      <!-- Search & Filters -->
+      <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="relative w-full sm:w-80">
+          <span class="material-symbols-outlined icon-size-4 absolute start-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+          <input
+            type="text"
+            [ngModel]="logSearchQuery()"
+            (ngModelChange)="logSearchQuery.set($event)"
+            placeholder="Alıcı adı, telefon veya içerik ara..."
+            class="w-full ps-9 pe-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-0 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          />
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            type="button"
+            (click)="logStatusFilter.set('all')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold border-0 cursor-pointer"
+            [class.bg-indigo-600]="logStatusFilter() === 'all'"
+            [class.text-white]="logStatusFilter() === 'all'"
+            [class.bg-slate-100]="logStatusFilter() !== 'all'"
+            [class.dark:bg-slate-800]="logStatusFilter() !== 'all'"
+            [class.text-slate-600]="logStatusFilter() !== 'all'"
+            [class.dark:text-slate-300]="logStatusFilter() !== 'all'"
+          >
+            Tümü ({{ logs().length }})
+          </button>
+          <button
+            type="button"
+            (click)="logStatusFilter.set('delivered')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold border-0 cursor-pointer"
+            [class.bg-emerald-600]="logStatusFilter() === 'delivered'"
+            [class.text-white]="logStatusFilter() === 'delivered'"
+            [class.bg-slate-100]="logStatusFilter() !== 'delivered'"
+            [class.dark:bg-slate-800]="logStatusFilter() !== 'delivered'"
+            [class.text-slate-600]="logStatusFilter() !== 'delivered'"
+            [class.dark:text-slate-300]="logStatusFilter() !== 'delivered'"
+          >
+            İletildi
+          </button>
+        </div>
+      </div>
+
+      <!-- Outbox Table -->
+      <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-extrabold uppercase">
+                <th class="py-3.5 px-4">Tarih</th>
+                <th class="py-3.5 px-4">Alıcı</th>
+                <th class="py-3.5 px-4">Sağlayıcı & Başlık</th>
+                <th class="py-3.5 px-4">Mesaj İçeriği</th>
+                <th class="py-3.5 px-4">SMS Adet</th>
+                <th class="py-3.5 px-4">Durum</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              @for (log of filteredLogs(); track log.id) {
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                  <td class="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
+                    {{ log.sentAt | date: 'dd.MM.yyyy HH:mm' }}
+                  </td>
+                  <td class="py-3 px-4 whitespace-nowrap">
+                    <strong class="block text-slate-900 dark:text-white">{{ log.recipientName }}</strong>
+                    <span class="font-mono text-slate-400 text-[11px]">{{ log.recipientPhone }}</span>
+                  </td>
+                  <td class="py-3 px-4 whitespace-nowrap">
+                    <span class="font-bold text-slate-800 dark:text-slate-200">{{ log.providerName }}</span>
+                    <span class="block text-[10px] font-mono text-indigo-500">{{ log.senderTitle }}</span>
+                  </td>
+                  <td class="py-3 px-4 max-w-md">
+                    <p class="text-xs text-slate-700 dark:text-slate-300 line-clamp-2">
+                      {{ log.messageContent }}
+                    </p>
+                    @if (log.templateTitle) {
+                      <span class="inline-block mt-0.5 text-[10px] text-slate-400">
+                        Şablon: {{ log.templateTitle }}
+                      </span>
+                    }
+                  </td>
+                  <td class="py-3 px-4 font-mono font-bold text-center">
+                    {{ log.smsCount }} SMS
+                  </td>
+                  <td class="py-3 px-4 whitespace-nowrap">
+                    <span
+                      class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider"
+                      [class.bg-emerald-100]="log.status === 'delivered'"
+                      [class.text-emerald-800]="log.status === 'delivered'"
+                      [class.dark:bg-emerald-950/60]="log.status === 'delivered'"
+                      [class.dark:text-emerald-300]="log.status === 'delivered'"
+                    >
+                      {{ log.status === 'delivered' ? 'İletildi' : 'Bekliyor' }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="py-8 text-center text-slate-400">
+                    Kayıtlı SMS gönderim logu bulunamadı.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 4: DIRECT SMS SENDER -->
+  @if (activeTab() === 'direct') {
+    <div class="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
+      <div class="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
+          <span class="material-symbols-outlined text-2xl">send</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-slate-900 dark:text-white">Doğrudan SMS Gönder</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Aktif sağlayıcı ({{ defaultProvider().name }}) üzerinden müşterinize anında başlıklı SMS iletin.
+          </p>
+        </div>
+      </div>
+
+      @if (directFeedback()) {
+        <div class="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-2">
+          <span class="material-symbols-outlined icon-size-5">check_circle</span>
+          <span>{{ directFeedback() }}</span>
+        </div>
+      }
+
+      <div class="space-y-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="directPhone" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Alıcı Telefon No</label>
+            <input
+              id="directPhone"
+              type="text"
+              [ngModel]="directPhone()"
+              (ngModelChange)="directPhone.set($event)"
+              placeholder="+90 532 000 00 00"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+
+          <div>
+            <label for="directName" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Müşteri Adı (Opsiyonel)</label>
+            <input
+              id="directName"
+              type="text"
+              [ngModel]="directName()"
+              (ngModelChange)="directName.set($event)"
+              placeholder="Selin Yılmaz"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="directTemplateSelect" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Hazır Şablondan Doldur</label>
+          <select
+            id="directTemplateSelect"
+            [ngModel]="directSelectedTemplateId()"
+            (ngModelChange)="onDirectTemplateChange($event)"
+            class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          >
+            <option value="">-- Serbest Metin Yazın veya Şablon Seçin --</option>
+            @for (t of templates(); track t.id) {
+              <option [value]="t.id">{{ t.title }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="directMessage" class="font-bold text-slate-700 dark:text-slate-300">Mesaj Metni</label>
+            <span class="text-[11px] font-mono text-slate-400">
+              {{ directMessageSmsCount().chars }} Karakter • {{ directMessageSmsCount().smsCount }} SMS ({{ directMessageSmsCount().remaining }} kaldı)
+            </span>
+          </div>
+          <textarea
+            id="directMessage"
+            rows="4"
+            [ngModel]="directMessage()"
+            (ngModelChange)="directMessage.set($event)"
+            placeholder="Müşterinize iletmek istediğiniz SMS metnini buraya yazınız..."
+            class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          ></textarea>
+        </div>
+
+        <button
+          type="button"
+          (click)="sendDirectSms()"
+          [disabled]="!directPhone() || !directMessage() || directSending()"
+          class="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-50 transition-all"
+        >
+          @if (directSending()) {
+            <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            <span>SMS İletiliyor...</span>
+          } @else {
+            <span class="material-symbols-outlined icon-size-4">send</span>
+            <span>SMS'i Hemen İlet ({{ defaultProvider().originator }})</span>
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: PROVIDER CONFIGURATION -->
+  @if (configModalOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+      <div class="w-full max-w-lg rounded-3xl bg-white dark:bg-[#0e1628] border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
+              <span class="material-symbols-outlined icon-size-5">tune</span>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                {{ selectedProvider()?.name }} Entegrasyon Ayarları
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">API Anahtarları ve Başlık Tanımları</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeConfigModal()"
+            class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center border-0 bg-transparent cursor-pointer"
+          >
+            <span class="material-symbols-outlined icon-size-5">close</span>
+          </button>
+        </div>
+
+        @if (testConnectionSuccess() === true) {
+          <div class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined icon-size-4">check_circle</span>
+            <span>API Bağlantısı Başarılı! Sağlayıcı sunucusuna ulaşıldı ve bakiye doğrulandı.</span>
+          </div>
+        }
+
+        <div class="space-y-4 text-xs">
+          <div>
+            <label for="modalOriginator" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Gönderici Başlığı (Originator / Header)
+            </label>
+            <input
+              id="modalOriginator"
+              type="text"
+              [ngModel]="configOriginator()"
+              (ngModelChange)="configOriginator.set($event)"
+              placeholder="ODIVONPRO"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm font-bold text-slate-900 dark:text-white focus:outline-none"
+            />
+            <span class="text-[10px] text-slate-400 mt-1 block">
+              Operatör tarafından onaylanmış resmi SMS başlığınız (maksimum 11 karakter).
+            </span>
+          </div>
+
+          @if (selectedProvider()?.id === 'netgsm' || selectedProvider()?.id === 'mutlucell' || selectedProvider()?.id === 'vatansms') {
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="modalUsername" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Kullanıcı Adı / Abone No</label>
+                <input
+                  id="modalUsername"
+                  type="text"
+                  [ngModel]="configUsername()"
+                  (ngModelChange)="configUsername.set($event)"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label for="modalPassword" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">API Şifresi</label>
+                <input
+                  id="modalPassword"
+                  type="password"
+                  [ngModel]="configPassword()"
+                  (ngModelChange)="configPassword.set($event)"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+          }
+
+          @if (selectedProvider()?.id === 'iletimerkezi' || selectedProvider()?.id === 'netgsm') {
+            <div>
+              <label for="modalApiKey" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">API Anahtarı (API Key / Public Key)</label>
+              <input
+                id="modalApiKey"
+                type="text"
+                [ngModel]="configApiKey()"
+                (ngModelChange)="configApiKey.set($event)"
+                class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-900 dark:text-white"
+              />
+            </div>
+          }
+
+          @if (selectedProvider()?.id === 'twilio') {
+            <div class="space-y-3">
+              <div>
+                <label for="modalAccountSid" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Twilio Account SID</label>
+                <input
+                  id="modalAccountSid"
+                  type="text"
+                  [ngModel]="configAccountSid()"
+                  (ngModelChange)="configAccountSid.set($event)"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label for="modalAuthToken" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Twilio Auth Token</label>
+                <input
+                  id="modalAuthToken"
+                  type="password"
+                  [ngModel]="configAuthToken()"
+                  (ngModelChange)="configAuthToken.set($event)"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            (click)="testProviderConnection()"
+            [disabled]="testingConnection()"
+            class="px-4 py-2.5 rounded-xl border border-indigo-500/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            @if (testingConnection()) {
+              <span class="w-3.5 h-3.5 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></span>
+              <span>Test Ediliyor...</span>
+            } @else {
+              <span class="material-symbols-outlined icon-size-4">network_ping</span>
+              <span>Bağlantıyı Test Et</span>
+            }
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              (click)="closeConfigModal()"
+              class="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            >
+              Vazgeç
+            </button>
+            <button
+              type="button"
+              (click)="saveProviderConfig()"
+              class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 cursor-pointer border-0"
+            >
+              Kaydet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: TEST SMS SENDER -->
+  @if (testSmsModalOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+      <div class="w-full max-w-md rounded-3xl bg-white dark:bg-[#0e1628] border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined icon-size-5 text-indigo-500">send_to_mobile</span>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">
+              {{ testSmsProvider()?.name }} Test SMS Gönder
+            </h3>
+          </div>
+          <button
+            type="button"
+            (click)="closeTestSmsModal()"
+            class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center border-0 bg-transparent cursor-pointer"
+          >
+            <span class="material-symbols-outlined icon-size-5">close</span>
+          </button>
+        </div>
+
+        @if (testSmsFeedback()) {
+          <div class="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined icon-size-4">check_circle</span>
+            <span>{{ testSmsFeedback() }}</span>
+          </div>
+        }
+
+        <div class="space-y-4 text-xs">
+          <div>
+            <label for="testPhoneInput" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Hedef Telefon Numarası</label>
+            <input
+              id="testPhoneInput"
+              type="text"
+              [ngModel]="testSmsPhone()"
+              (ngModelChange)="testSmsPhone.set($event)"
+              placeholder="+90 532 000 00 00"
+              class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm font-bold text-slate-900 dark:text-white focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="testMsgInput" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Test Mesajı</label>
+            <textarea
+              id="testMsgInput"
+              rows="3"
+              [ngModel]="testSmsMessage()"
+              (ngModelChange)="testSmsMessage.set($event)"
+              class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            (click)="closeTestSmsModal()"
+            class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          >
+            Kapat
+          </button>
+          <button
+            type="button"
+            (click)="sendTestSms()"
+            [disabled]="sendingTestSms()"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 cursor-pointer border-0 disabled:opacity-50"
+          >
+            @if (sendingTestSms()) {
+              <span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <span>İletiliyor...</span>
+            } @else {
+              <span class="material-symbols-outlined icon-size-4">send</span>
+              <span>Test SMS Gönder</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: TEMPLATE EDITOR WITH LIVE PHONE PREVIEW -->
+  @if (templateModalOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+      <div class="w-full max-w-3xl rounded-3xl bg-white dark:bg-[#0e1628] border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined icon-size-5 text-indigo-500">edit_note</span>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">
+              Şablonu Düzenle: {{ selectedTemplate()?.title }}
+            </h3>
+          </div>
+          <button
+            type="button"
+            (click)="closeTemplateModal()"
+            class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center border-0 bg-transparent cursor-pointer"
+          >
+            <span class="material-symbols-outlined icon-size-5">close</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Editor Form -->
+          <div class="space-y-4 text-xs">
+            <div>
+              <label for="templateTitleInput" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Şablon Başlığı</label>
+              <input
+                id="templateTitleInput"
+                type="text"
+                [ngModel]="templateTitle()"
+                (ngModelChange)="templateTitle.set($event)"
+                class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                Dinamik Değişken Ekle (Tıklayın)
+              </label>
+              <div class="flex flex-wrap gap-1.5">
+                @for (token of placeholderList; track token) {
+                  <button
+                    type="button"
+                    (click)="insertPlaceholder(token)"
+                    class="px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-[10px] font-mono font-bold cursor-pointer hover:bg-indigo-100"
+                  >
+                    {{ formatPlaceholder(token) }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label for="templateContentInput" class="font-bold text-slate-700 dark:text-slate-300">Mesaj Metni</label>
+                <span class="text-[11px] font-mono text-slate-400">
+                  {{ currentTemplateSmsCount().chars }} Karakter • {{ currentTemplateSmsCount().smsCount }} SMS
+                </span>
+              </div>
+              <textarea
+                id="templateContentInput"
+                rows="5"
+                [ngModel]="templateContent()"
+                (ngModelChange)="templateContent.set($event)"
+                class="w-full px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Live Phone SMS Mockup Preview -->
+          <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-3">
+              Müşteri Ekranı Önizlemesi
+            </span>
+            <div class="w-full max-w-xs rounded-3xl bg-slate-900 border-4 border-slate-800 p-3 shadow-xl space-y-3">
+              <div class="flex items-center justify-between text-[10px] text-slate-400 px-2">
+                <span>09:41</span>
+                <span class="material-symbols-outlined icon-size-3">battery_full</span>
+              </div>
+              <div class="text-center border-b border-slate-800 pb-2">
+                <strong class="text-xs text-white block">{{ templateSenderTitle() }}</strong>
+                <span class="text-[9px] text-slate-400">SMS / Metin Mesajı</span>
+              </div>
+              <div class="py-2">
+                <div class="rounded-2xl bg-indigo-600 text-white p-3 text-xs leading-relaxed shadow-sm">
+                  {{ templateContent() }}
+                </div>
+                <span class="text-[9px] text-slate-400 block text-end mt-1 me-1">Şimdi • İletildi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            (click)="closeTemplateModal()"
+            class="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            (click)="saveTemplate()"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 cursor-pointer border-0"
+          >
+            Şablonu Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

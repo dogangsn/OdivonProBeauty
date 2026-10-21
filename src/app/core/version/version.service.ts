@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { DestroyRef, Service, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Service, computed, inject, isDevMode, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 import { filter } from 'rxjs';
@@ -192,6 +192,7 @@ export class VersionService {
   }
 
   private async checkRemote(): Promise<void> {
+    if (isDevMode()) return;
     try {
       const response = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) return;

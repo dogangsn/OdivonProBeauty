@@ -126,6 +126,11 @@ export const routes: Routes = [
           import('./features/payment-links/payment-links').then((m) => m.PaymentLinks),
       },
       {
+        path: 'sms-settings',
+        loadComponent: () =>
+          import('./features/sms-settings/sms-settings').then((m) => m.SmsSettings),
+      },
+      {
         path: 'ai-recommendations',
         loadComponent: () =>
           import('./features/ai/recommendations/recommendations').then((m) => m.Recommendations),

@@ -84,6 +84,7 @@ export class Shell {
       key: 'nav.section.definitions',
       items: [
         { key: 'nav.definitions', icon: 'tune', route: '/definitions' },
+        { key: 'nav.smsSettings', icon: 'sms', route: '/sms-settings' },
         { key: 'nav.services', icon: 'auto_awesome', route: '/services' },
         { key: 'nav.serviceCategories', icon: 'category', route: '/service-categories' },
         { key: 'nav.servicePackages', icon: 'redeem', route: '/service-packages' },

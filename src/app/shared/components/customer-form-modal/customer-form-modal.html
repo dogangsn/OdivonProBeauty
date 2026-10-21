@@ -1,0 +1,751 @@
+@if (open()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/70 backdrop-blur-sm animate-fadeIn"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="customer-form-title"
+  >
+    <div
+      class="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden"
+    >
+      <!-- Header -->
+      <header class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-slate-50 to-indigo-50/30 dark:from-slate-900 dark:to-slate-800/80">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20">
+            <span class="material-symbols-outlined icon-size-5">person_add</span>
+          </div>
+          <div>
+            <h2 id="customer-form-title" class="text-lg font-black text-slate-900 dark:text-white m-0">
+              Yeni Müşteri Kaydı
+            </h2>
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+              Kimlik, sağlık, iletişim ve cüzdan bilgilerini eksiksiz tanımlayın.
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="close.emit()"
+          class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white border-0 bg-transparent cursor-pointer"
+          aria-label="Kapat"
+        >
+          <span class="material-symbols-outlined icon-size-5">close</span>
+        </button>
+      </header>
+
+      <!-- Error Toast -->
+      @if (error()) {
+        <div class="bg-rose-500 text-white px-5 py-2.5 text-xs font-semibold flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined icon-size-4">error</span>
+            <span>{{ error() }}</span>
+          </div>
+          <button type="button" (click)="error.set('')" class="text-white border-0 bg-transparent cursor-pointer">✕</button>
+        </div>
+      }
+
+      <!-- Lead / Inquiry Toggle Banner -->
+      <div class="px-5 py-2.5 bg-gradient-to-r from-amber-50 to-orange-50/50 dark:from-amber-950/40 dark:to-orange-950/20 border-b border-amber-200/60 dark:border-amber-900/40 flex items-center justify-between">
+        <label class="inline-flex items-center gap-2.5 cursor-pointer text-xs font-bold text-amber-950 dark:text-amber-200">
+          <input
+            type="checkbox"
+            [checked]="isLead()"
+            (change)="isLead.set(!isLead()); isLead() ? setTab('consultation') : null"
+            class="rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+          />
+          <span class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-4 text-amber-600">support_agent</span>
+            <span>🎯 Bu kayıt bilgi almaya gelen bir aday müşteri mi? (Ön Görüşme Kaydı)</span>
+          </span>
+        </label>
+        @if (isLead()) {
+          <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-100">
+            Aday Müşteri
+          </span>
+        }
+      </div>
+
+      <!-- Step / Tab Navigation -->
+      <nav class="flex border-b border-slate-200 dark:border-slate-800 px-5 gap-2 bg-slate-50/50 dark:bg-slate-800/30 overflow-x-auto">
+        <button
+          type="button"
+          (click)="setTab('identity')"
+          class="form-tab-btn"
+          [class.form-tab-btn-active]="activeTab() === 'identity'"
+        >
+          <span class="material-symbols-outlined icon-size-4">badge</span>
+          <span>1. Kimlik & Kişisel</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('contact')"
+          class="form-tab-btn"
+          [class.form-tab-btn-active]="activeTab() === 'contact'"
+        >
+          <span class="material-symbols-outlined icon-size-4">call</span>
+          <span>2. İletişim & Adres</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('health')"
+          class="form-tab-btn"
+          [class.form-tab-btn-active]="activeTab() === 'health'"
+        >
+          <span class="material-symbols-outlined icon-size-4">medical_services</span>
+          <span>3. Sağlık & Cilt</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('finance_crm')"
+          class="form-tab-btn"
+          [class.form-tab-btn-active]="activeTab() === 'finance_crm'"
+        >
+          <span class="material-symbols-outlined icon-size-4">account_balance_wallet</span>
+          <span>4. CRM & Cüzdan</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('consultation')"
+          class="form-tab-btn"
+          [class.form-tab-btn-active]="activeTab() === 'consultation'"
+        >
+          <span class="material-symbols-outlined icon-size-4 text-amber-500">support_agent</span>
+          <span>5. Ön Görüşme & Seans</span>
+          @if (consultationInquiredSession().trim()) {
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          }
+        </button>
+      </nav>
+
+      <!-- Form Body -->
+      <main class="flex-1 overflow-y-auto p-5 sm:p-6 custom-scroll">
+        <!-- TAB 1: Kimlik & Kişisel -->
+        @if (activeTab() === 'identity') {
+          <div class="space-y-4 animate-fadeIn">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Ad Soyad -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Ad Soyad *
+                </label>
+                <input
+                  type="text"
+                  [value]="fullName()"
+                  (input)="fullName.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Müşterinin tam adını giriniz"
+                  required
+                />
+              </div>
+
+              <!-- TCKN with Live Check -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    T.C. Kimlik Numarası
+                  </label>
+                  @if (identityNumber().trim()) {
+                    @if (isTcknValid()) {
+                      <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                        <span class="material-symbols-outlined icon-size-3">verified</span>
+                        Geçerli TCKN
+                      </span>
+                    } @else {
+                      <span class="text-[10px] font-bold text-rose-500 flex items-center gap-0.5">
+                        <span class="material-symbols-outlined icon-size-3">cancel</span>
+                        11 Haneli Hatalı TCKN
+                      </span>
+                    }
+                  }
+                </div>
+                <input
+                  type="text"
+                  maxlength="11"
+                  [value]="identityNumber()"
+                  (input)="identityNumber.set($any($event.target).value)"
+                  class="odv-input font-mono"
+                  placeholder="11 Haneli Kimlik No"
+                />
+              </div>
+
+              <!-- Doğum Tarihi & Live Age Calculation -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Doğum Tarihi
+                  </label>
+                  @if (computedAge(); as age) {
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 animate-fadeIn">
+                      🎂 {{ age }} Yaşında
+                    </span>
+                  }
+                </div>
+                <input
+                  type="date"
+                  [value]="birthDate()"
+                  (input)="birthDate.set($any($event.target).value)"
+                  class="odv-input"
+                />
+              </div>
+
+              <!-- Cinsiyet -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Cinsiyet
+                </label>
+                <select
+                  [value]="gender()"
+                  (change)="gender.set($any($event.target).value)"
+                  class="odv-input"
+                >
+                  <option value="female">Kadın</option>
+                  <option value="male">Erkek</option>
+                  <option value="other">Diğer</option>
+                  <option value="unspecified">Belirtmek İstemiyor</option>
+                </select>
+              </div>
+
+              <!-- Meslek -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Meslek
+                </label>
+                <input
+                  type="text"
+                  [value]="occupation()"
+                  (input)="occupation.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Mimar, Avukat, Öğrenci vb."
+                />
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- TAB 2: İletişim & Lokasyon -->
+        @if (activeTab() === 'contact') {
+          <div class="space-y-4 animate-fadeIn">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Telefon -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Telefon Numarası *
+                </label>
+                <input
+                  type="tel"
+                  [value]="phone()"
+                  (input)="phone.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="+90 5xx xxx xx xx"
+                  required
+                />
+              </div>
+
+              <!-- Acil Durum Telefonu -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Acil Durum / Yakın Telefonu
+                </label>
+                <input
+                  type="tel"
+                  [value]="emergencyPhone()"
+                  (input)="emergencyPhone.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="+90 5xx xxx xx xx"
+                />
+              </div>
+
+              <!-- E-Posta -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  E-Posta Adresi
+                </label>
+                <input
+                  type="email"
+                  [value]="email()"
+                  (input)="email.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="musteri@example.com"
+                />
+              </div>
+
+              <!-- Şehir -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Şehir
+                </label>
+                <input
+                  type="text"
+                  [value]="city()"
+                  (input)="city.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="İstanbul, Ankara vb."
+                />
+              </div>
+
+              <!-- İlçe -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  İlçe
+                </label>
+                <input
+                  type="text"
+                  [value]="district()"
+                  (input)="district.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Kadıköy, Çankaya vb."
+                />
+              </div>
+
+              <!-- Açık Adres -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Açık Adres
+                </label>
+                <textarea
+                  rows="2"
+                  [value]="address()"
+                  (input)="address.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Mahalle, Cadde, No, Daire"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- TAB 3: Sağlık & Cilt -->
+        @if (activeTab() === 'health') {
+          <div class="space-y-4 animate-fadeIn">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Cilt Tipi -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Cilt Tipi
+                </label>
+                <select
+                  [value]="skinType()"
+                  (change)="skinType.set($any($event.target).value)"
+                  class="odv-input"
+                >
+                  <option value="kuru">Kuru</option>
+                  <option value="yagli">Yağlı</option>
+                  <option value="karma">Karma</option>
+                  <option value="normal">Normal</option>
+                  <option value="hassas">Hassas</option>
+                  <option value="akneye-meyilli">Akneye Meyilli</option>
+                </select>
+              </div>
+
+              <!-- Fitzpatrick Skalası -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Fitzpatrick Cilt Tonu Skalası
+                </label>
+                <select
+                  [value]="fitzpatrick()"
+                  (change)="fitzpatrick.set($any($event.target).value)"
+                  class="odv-input"
+                >
+                  <option value="tip-1">Tip I - Çok Açık / Beyaz</option>
+                  <option value="tip-2">Tip II - Açık / Kumral</option>
+                  <option value="tip-3">Tip III - Buğday / Orta</option>
+                  <option value="tip-4">Tip IV - Esmer / Akdeniz</option>
+                  <option value="tip-5">Tip V - Koyu Esmer</option>
+                  <option value="tip-6">Tip VI - Çok Koyu / Siyah</option>
+                </select>
+              </div>
+
+              <!-- Kan Grubu -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Kan Grubu
+                </label>
+                <input
+                  type="text"
+                  [value]="bloodType()"
+                  (input)="bloodType.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="A Rh+, 0 Rh- vb."
+                />
+              </div>
+
+              <!-- Checkbox Kontroller: Hamile, Emziren, İmplant -->
+              <div class="sm:col-span-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 flex flex-wrap gap-4">
+                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-rose-700 dark:text-rose-300">
+                  <input
+                    type="checkbox"
+                    [checked]="isPregnant()"
+                    (change)="isPregnant.set($any($event.target).checked)"
+                    class="rounded text-rose-600 w-4 h-4"
+                  />
+                  <span>⚠️ Hamilelik Mevcut</span>
+                </label>
+
+                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-700 dark:text-amber-300">
+                  <input
+                    type="checkbox"
+                    [checked]="isNursing()"
+                    (change)="isNursing.set($any($event.target).checked)"
+                    class="rounded text-amber-600 w-4 h-4"
+                  />
+                  <span>ℹ️ Emzirme Dönemi</span>
+                </label>
+
+                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-rose-700 dark:text-rose-300">
+                  <input
+                    type="checkbox"
+                    [checked]="hasImplant()"
+                    (change)="hasImplant.set($any($event.target).checked)"
+                    class="rounded text-rose-600 w-4 h-4"
+                  />
+                  <span>⛔ Metal İmplant / Kalp Pili</span>
+                </label>
+              </div>
+
+              <!-- Alerjiler -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Alerjiler
+                </label>
+                <input
+                  type="text"
+                  [value]="allergies()"
+                  (input)="allergies.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Latex, kozmetik esans, nikel vb."
+                />
+              </div>
+
+              <!-- Kronik Hastalıklar -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Kronik Hastalıklar
+                </label>
+                <input
+                  type="text"
+                  [value]="chronicDiseases()"
+                  (input)="chronicDiseases.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Diyabet, tiroid, astım vb."
+                />
+              </div>
+
+              <!-- Düzenli Kullanılan İlaçlar -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Düzenli Kullanılan İlaçlar (Roaccutane, Kan Sulandırıcı vb.)
+                </label>
+                <input
+                  type="text"
+                  [value]="medications()"
+                  (input)="medications.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Lazer için kontrendike ilaçlar"
+                />
+              </div>
+
+              <!-- Sağlık Notları -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Klinik & Sağlık Notları
+                </label>
+                <textarea
+                  rows="2"
+                  [value]="healthNotes()"
+                  (input)="healthNotes.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Uzman için ek uyarılar ve klinik gözlemler"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- TAB 4: CRM & Cüzdan -->
+        @if (activeTab() === 'finance_crm') {
+          <div class="space-y-4 animate-fadeIn">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Segment -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Müşteri Segmenti
+                </label>
+                <select
+                  [value]="segment()"
+                  (change)="segment.set($any($event.target).value)"
+                  class="odv-input"
+                >
+                  <option value="vip">VIP</option>
+                  <option value="gold">Gold</option>
+                  <option value="sadik">Sadık Müşteri</option>
+                  <option value="yeni">Yeni Müşteri</option>
+                  <option value="standart">Standart</option>
+                </select>
+              </div>
+
+              <!-- Referans / Kaynak -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Referans / Nereden Duydu?
+                </label>
+                <input
+                  type="text"
+                  [value]="referralSource()"
+                  (input)="referralSource.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Instagram, Google, Tavsiye vb."
+                />
+              </div>
+
+              <!-- Tercih Edilen Uzman -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Tercih Edilen Uzman / Estetisyen
+                </label>
+                <input
+                  type="text"
+                  [value]="preferredStaffName()"
+                  (input)="preferredStaffName.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Uzman adı"
+                />
+              </div>
+
+              <!-- Açılış Cüzdan Bakiyesi -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Açılış Cüzdan Bakiyesi (₺)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  [value]="initialWalletBalance()"
+                  (input)="initialWalletBalance.set(+$any($event.target).value)"
+                  class="odv-input font-mono font-bold"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <!-- Operasyon Notu -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Operasyonel Notlar
+                </label>
+                <textarea
+                  rows="2"
+                  [value]="notes()"
+                  (input)="notes.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Ekip için özel müşteri talimatları veya notlar"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- TAB 5: Ön Görüşme & Seans Bilgi Talebi -->
+        @if (activeTab() === 'consultation') {
+          <div class="space-y-4 animate-fadeIn">
+            <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-amber-600 icon-size-5 flex-shrink-0">support_agent</span>
+              <span>
+                Adayın bilgi aldığı seans/paket detayı, teklif edilen fiyat ve takip planı. Bu veriler müşterinin danışmanlık geçmişinde saklanacaktır.
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Kategori -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Hizmet Kategorisi *
+                </label>
+                <select
+                  [value]="consultationCategory()"
+                  (change)="consultationCategory.set($any($event.target).value)"
+                  class="odv-input"
+                >
+                  <option value="Lazer Epilasyon">Lazer Epilasyon</option>
+                  <option value="Medikal Cilt Bakımı">Medikal Cilt Bakımı</option>
+                  <option value="Bölgesel İncelme">Bölgesel İncelme</option>
+                  <option value="Tırnak & El-Ayak">Tırnak & El-Ayak</option>
+                  <option value="Spa & Masaj">Spa & Masaj</option>
+                  <option value="Kalıcı Makyaj">Kalıcı Makyaj</option>
+                  <option value="Diğer">Diğer</option>
+                </select>
+              </div>
+
+              <!-- İletişim Kanalı -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Bilgi Alma Kanalı
+                </label>
+                <select
+                  [value]="consultationChannel()"
+                  (change)="consultationChannel.set($any($event.target).value)"
+                  class="odv-input"
+                >
+                  <option value="Yüz Yüze">Yüz Yüze (Merkeze Geldi)</option>
+                  <option value="Telefon">Telefon</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="Instagram">Instagram DM</option>
+                  <option value="Web">Web Formu</option>
+                </select>
+              </div>
+
+              <!-- İlgilenilen Seans / Paket Detayı -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  İlgilenilen Seans / Paket Detayı *
+                </label>
+                <input
+                  type="text"
+                  [value]="consultationInquiredSession()"
+                  (input)="consultationInquiredSession.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Örn: Buz Lazer Tüm Vücut (8 Seans), Hydrafacial 4 Seans, G5 Masajı vb."
+                />
+              </div>
+
+              <!-- Önerilen Seans Sayısı -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Önerilen Seans Sayısı
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  [value]="consultationTargetCount()"
+                  (input)="consultationTargetCount.set(+$any($event.target).value)"
+                  class="odv-input font-bold"
+                />
+              </div>
+
+              <!-- Verilen Teklif Fiyatı -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Verilen Teklif Tutarı (₺)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  [value]="consultationQuotedPrice()"
+                  (input)="consultationQuotedPrice.set(+$any($event.target).value)"
+                  class="odv-input font-mono font-bold text-emerald-600"
+                />
+              </div>
+
+              <!-- Görüşen Uzman -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Görüşmeyi Yapan Uzman
+                </label>
+                <input
+                  type="text"
+                  [value]="consultationStaff()"
+                  (input)="consultationStaff.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Estetisyen / Uzman Adı"
+                />
+              </div>
+
+              <!-- İlgi Düzeyi -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Adayın İlgi Düzeyi
+                </label>
+                <select
+                  [value]="consultationInterest()"
+                  (change)="consultationInterest.set($any($event.target).value)"
+                  class="odv-input"
+                >
+                  <option value="high">🔥 Yüksek / Sıcak Aday</option>
+                  <option value="medium">⚡ Orta / Düşünüyor</option>
+                  <option value="low">❄️ Düşük / Sadece Bilgi Aldı</option>
+                </select>
+              </div>
+
+              <!-- Sonraki Takip Tarihi -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Sonraki Takip / Geri Arama Tarihi
+                </label>
+                <input
+                  type="date"
+                  [value]="consultationFollowUpDate()"
+                  (input)="consultationFollowUpDate.set($any($event.target).value)"
+                  class="odv-input"
+                />
+              </div>
+
+              <!-- Ön Görüşme Notları -->
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Ön Görüşme ve Talep Notları
+                </label>
+                <textarea
+                  rows="3"
+                  [value]="consultationNotes()"
+                  (input)="consultationNotes.set($any($event.target).value)"
+                  class="odv-input"
+                  placeholder="Müşterinin seans ile ilgili sorduğu sorular, cilt hassasiyetleri, fiyat teklifi notları..."
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        }
+      </main>
+
+      <!-- Footer Buttons -->
+      <footer class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+        <button
+          type="button"
+          (click)="close.emit()"
+          class="odv-btn-ghost text-xs"
+        >
+          İptal
+        </button>
+
+        <div class="flex items-center gap-2">
+          @if (activeTab() !== 'identity') {
+            <button
+              type="button"
+              (click)="setTab(activeTab() === 'consultation' ? 'finance_crm' : activeTab() === 'finance_crm' ? 'health' : activeTab() === 'health' ? 'contact' : 'identity')"
+              class="odv-btn-ghost text-xs"
+            >
+              Geri
+            </button>
+          }
+
+          @if (activeTab() !== 'consultation') {
+            <button
+              type="button"
+              (click)="setTab(activeTab() === 'identity' ? 'contact' : activeTab() === 'contact' ? 'health' : activeTab() === 'health' ? 'finance_crm' : 'consultation')"
+              class="odv-btn-secondary text-xs"
+            >
+              <span>İleri</span>
+              <span class="material-symbols-outlined icon-size-4">arrow_forward</span>
+            </button>
+          }
+
+          <button
+            type="button"
+            [disabled]="saving()"
+            (click)="submit()"
+            class="odv-btn-primary text-xs"
+          >
+            <span class="material-symbols-outlined icon-size-4">
+              {{ saving() ? 'sync' : 'person_add' }}
+            </span>
+            <span>{{ saving() ? 'Kaydediliyor…' : 'Müşteriyi Kaydet' }}</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+  </div>
+}

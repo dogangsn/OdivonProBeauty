@@ -1,0 +1,941 @@
+<div class="nail-studio-container">
+  <!-- Toast Notification -->
+  @if (notification()) {
+    <div class="toast-banner" role="status" aria-live="polite">
+      <span class="material-symbols-outlined">verified</span>
+      <span>{{ notification() }}</span>
+    </div>
+  }
+
+  <!-- Header -->
+  <div class="nail-header">
+    <div class="nail-header-titles">
+      <div class="nail-badge">
+        <span class="material-symbols-outlined">brush</span>
+        <span>ODIVON NAIL ART & PROTEZ TIRNAK SUITE</span>
+      </div>
+      <h1 class="nail-title">Tırnak Tasarım, Garanti ve Sterilizasyon Merkezi</h1>
+      <p class="nail-subtitle">
+        İnteraktif tırnak tasarım simülatörü, 40+ oje renk skalası, 7 günlük kırılma garantisi ve B-Class otoklav güvenlik kütüğü.
+      </p>
+    </div>
+
+    <div class="nail-header-actions">
+      <button type="button" class="btn-secondary" (click)="setTab('warranty')">
+        <span class="material-symbols-outlined">verified_user</span>
+        <span>Garanti & Onarım</span>
+      </button>
+      <button type="button" class="btn-primary" (click)="setTab('customizer')">
+        <span class="material-symbols-outlined">auto_fix_high</span>
+        <span>Tırnak Tasarımcısı</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="nail-tabs">
+    <button
+      type="button"
+      class="nail-tab-btn"
+      [class.active]="activeTab() === 'customizer'"
+      (click)="setTab('customizer')"
+    >
+      <span class="material-symbols-outlined">palette</span>
+      <span>İnteraktif Tırnak Tasarımcısı & Renkler</span>
+    </button>
+
+    <button
+      type="button"
+      class="nail-tab-btn"
+      [class.active]="activeTab() === 'warranty'"
+      (click)="setTab('warranty')"
+    >
+      <span class="material-symbols-outlined">verified_user</span>
+      <span>7 Gün Tırnak Koruma Garantisi</span>
+      @if (activeWarrantiesCount() > 0) {
+        <span class="tab-counter">{{ activeWarrantiesCount() }}</span>
+      }
+    </button>
+
+    <button
+      type="button"
+      class="nail-tab-btn"
+      [class.active]="activeTab() === 'health'"
+      (click)="setTab('health')"
+    >
+      <span class="material-symbols-outlined">health_and_safety</span>
+      <span>Tırnak Sağlık & HEMA Alerji Kartı</span>
+    </button>
+
+    <button
+      type="button"
+      class="nail-tab-btn"
+      [class.active]="activeTab() === 'hygiene'"
+      (click)="setTab('hygiene')"
+    >
+      <span class="material-symbols-outlined">sanitizer</span>
+      <span>Otoklav & Sterilizasyon Pasaportu</span>
+      <span class="tab-badge-ok">B-Class 134°C</span>
+    </button>
+  </div>
+
+  <!-- TAB 1: INTERACTIVE NAIL BUILDER & SWATCH MATCHER -->
+  @if (activeTab() === 'customizer') {
+    <div class="customizer-layout">
+      <!-- Left: Interactive Canvas & Realistic 3D Nail Preview -->
+      <div class="canvas-panel">
+        <div class="canvas-header">
+          <div class="canvas-tag">
+            <span class="live-dot"></span>
+            <span>CANLI TIRNAK SİMÜLATÖRÜ</span>
+          </div>
+
+          <div class="view-switchers">
+            <button
+              type="button"
+              class="switch-btn"
+              [class.active]="previewMode() === 'single'"
+              (click)="previewMode.set('single')"
+            >
+              Tek Tırnak
+            </button>
+            <button
+              type="button"
+              class="switch-btn"
+              [class.active]="previewMode() === 'hand'"
+              (click)="previewMode.set('hand')"
+            >
+              5 Parmak
+            </button>
+          </div>
+        </div>
+
+        <!-- The Virtual Hand / Nail Display -->
+        <div class="nail-stage">
+          <div class="lighting-glow" [style.background-color]="currentSwatch().hex"></div>
+
+          @if (previewMode() === 'single') {
+            <!-- Single Finger Focus View -->
+            <div class="finger-simulation single-view">
+              <!-- Soft Skin Finger Base -->
+              <div class="finger-body">
+                <div class="finger-cuticle-shadow"></div>
+                <div class="finger-cuticle-line"></div>
+
+                <!-- The Actual Dynamic Nail -->
+                <div
+                  class="nail-plate"
+                  [class]="'shape-' + selectedShape() + ' length-' + selectedLength() + ' finish-' + selectedFinish()"
+                  [style.background-color]="currentSwatch().hex"
+                >
+                  <!-- Gloss / Shine Layer -->
+                  <div class="nail-shine-overlay"></div>
+
+                  <!-- Cat-Eye Magnetic Reflection Ray -->
+                  @if (selectedFinish() === 'cat-eye') {
+                    <div class="nail-cat-eye-ray"></div>
+                  }
+
+                  <!-- Chrome / Holographic Pearlescent Layer -->
+                  @if (selectedFinish() === 'chrome') {
+                    <div class="nail-chrome-iridescent"></div>
+                  }
+
+                  <!-- Glitter Sparkle Particles -->
+                  @if (selectedFinish() === 'glitter') {
+                    <div class="nail-glitter-layer"></div>
+                  }
+
+                  <!-- Nail Art Layer -->
+                  @if (selectedArtTier() === 'tier-1') {
+                    <!-- French / Babyboomer smile line -->
+                    <div class="nail-art-french" [style.border-top-color]="frenchColor()"></div>
+                  } @else if (selectedArtTier() === 'tier-2') {
+                    <!-- Marble / Chrome Graphic Art -->
+                    <div class="nail-art-marble"></div>
+                  } @else if (selectedArtTier() === 'tier-3') {
+                    <!-- 3D Crystals & Stones cluster -->
+                    <div class="nail-art-jewels">
+                      <span class="rhinestone center-jewel"></span>
+                      <span class="rhinestone left-jewel"></span>
+                      <span class="rhinestone right-jewel"></span>
+                      <span class="rhinestone micro-jewel-1"></span>
+                      <span class="rhinestone micro-jewel-2"></span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          } @else {
+            <!-- Full 5-Fingers Hand View -->
+            <div class="hand-simulation">
+              @for (finger of ['thumb', 'index', 'middle', 'ring', 'pinky']; track finger) {
+                <div class="finger-body hand-finger" [class]="'finger-' + finger">
+                  <div
+                    class="nail-plate mini-nail"
+                    [class]="'shape-' + selectedShape() + ' length-' + selectedLength() + ' finish-' + selectedFinish()"
+                    [style.background-color]="currentSwatch().hex"
+                  >
+                    <div class="nail-shine-overlay"></div>
+                    @if (selectedArtTier() === 'tier-1') {
+                      <div class="nail-art-french" [style.border-top-color]="frenchColor()"></div>
+                    } @else if (selectedArtTier() === 'tier-2') {
+                      <div class="nail-art-marble"></div>
+                    } @else if (selectedArtTier() === 'tier-3') {
+                      <div class="nail-art-jewels mini">
+                        <span class="rhinestone center-jewel"></span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Live Selection Specs Bar -->
+        <div class="canvas-footer">
+          <div class="spec-pill">
+            <span class="spec-label">Form:</span>
+            <span class="spec-val">{{ currentShape().nameTr }}</span>
+          </div>
+          <div class="spec-pill">
+            <span class="spec-label">Boy:</span>
+            <span class="spec-val">{{ currentLength().label }}</span>
+          </div>
+          <div class="spec-pill">
+            <span class="spec-label">Renk:</span>
+            <span class="spec-val">
+              <span class="color-dot" [style.background-color]="currentSwatch().hex"></span>
+              {{ currentSwatch().name }}
+            </span>
+          </div>
+          <div class="spec-pill">
+            <span class="spec-label">Finiş:</span>
+            <span class="spec-val">{{ selectedFinish() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Detailed Customizer Controls & Live Pricing -->
+      <div class="controls-panel">
+        <!-- 1. Tırnak Formu Seçimi -->
+        <div class="control-section">
+          <div class="section-title">
+            <span class="material-symbols-outlined">crop_free</span>
+            <span>1. Tırnak Formu (Nail Shape)</span>
+          </div>
+          <div class="shape-grid">
+            @for (shape of shapes; track shape.key) {
+              <button
+                type="button"
+                class="shape-btn"
+                [class.active]="selectedShape() === shape.key"
+                (click)="selectShape(shape.key)"
+              >
+                <span class="shape-icon">{{ shape.nameTr }}</span>
+                <span class="shape-meta">{{ shape.idealFor }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- 2. Tırnak Uzunluğu -->
+        <div class="control-section">
+          <div class="section-title">
+            <span class="material-symbols-outlined">straighten</span>
+            <span>2. Tırnak Uzunluğu (Length & Surcharge)</span>
+          </div>
+          <div class="length-pills">
+            @for (len of lengths; track len.key) {
+              <button
+                type="button"
+                class="length-pill-btn"
+                [class.active]="selectedLength() === len.key"
+                (click)="selectLength(len.key)"
+              >
+                <span class="len-label">{{ len.label }}</span>
+                <span class="len-surcharge">
+                  @if (len.surcharge > 0) {
+                    +{{ len.surcharge }} ₺ (+{{ len.extraMinutes }} dk)
+                  } @else {
+                    Dahil
+                  }
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- 3. Uygulama Tekniği -->
+        <div class="control-section">
+          <div class="section-title">
+            <span class="material-symbols-outlined">layers</span>
+            <span>3. Protez / Güçlendirme Tekniği</span>
+          </div>
+          <div class="technique-list">
+            @for (tech of techniques; track tech.id) {
+              <div
+                class="technique-card"
+                [class.active]="selectedTechniqueId() === tech.id"
+                (click)="selectTechnique(tech.id)"
+              >
+                <div class="tech-radio">
+                  <span class="dot"></span>
+                </div>
+                <div class="tech-info">
+                  <div class="tech-name">
+                    {{ tech.name }}
+                    @if (tech.popular) {
+                      <span class="pop-badge">Çok Tercih Edilen</span>
+                    }
+                  </div>
+                  <div class="tech-desc">{{ tech.description }}</div>
+                </div>
+                <div class="tech-meta">
+                  <div class="tech-price">{{ tech.basePrice }} ₺</div>
+                  <div class="tech-duration">{{ tech.durationMin }} dk</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- 4. Renk & Oje Kataloğu (Swatch Library) -->
+        <div class="control-section">
+          <div class="section-title space-between">
+            <div class="title-left">
+              <span class="material-symbols-outlined">colorize</span>
+              <span>4. Oje & Renk Skalası (Swatch Palette)</span>
+            </div>
+            <div class="color-category-filter">
+              <select
+                class="cat-select"
+                [value]="selectedColorCategory()"
+                (change)="selectedColorCategory.set($any($event.target).value)"
+              >
+                <option value="all">Tüm Tonlar (40+ Renk)</option>
+                <option value="nude">Nude & Doğal</option>
+                <option value="red">Kırmızı & Bordo</option>
+                <option value="pastel">Pastel & Bahar</option>
+                <option value="dark">Gece & Koyu</option>
+                <option value="glitter">Glitter & Krom</option>
+                <option value="cat-eye">Manyetik Kedi Gözü</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Swatch Color Grid -->
+          <div class="swatches-grid">
+            @for (swatch of filteredSwatches(); track swatch.id) {
+              <button
+                type="button"
+                class="swatch-item"
+                [class.active]="selectedSwatchId() === swatch.id"
+                [title]="swatch.brand + ' - ' + swatch.name + ' (' + swatch.code + ')'"
+                (click)="selectSwatch(swatch)"
+              >
+                <div class="swatch-circle" [style.background-color]="swatch.hex">
+                  @if (selectedSwatchId() === swatch.id) {
+                    <span class="material-symbols-outlined checkmark">check</span>
+                  }
+                </div>
+                <div class="swatch-code">{{ swatch.code }}</div>
+              </button>
+            }
+          </div>
+
+          <!-- Finish Type (Glossy, Matte, Chrome, Cat-Eye) -->
+          <div class="finish-selector">
+            <span class="sub-label">Bitiş Kaplaması (Top Coat):</span>
+            <div class="finish-buttons">
+              @for (fin of ['glossy', 'matte', 'chrome', 'cat-eye', 'glitter']; track fin) {
+                <button
+                  type="button"
+                  class="fin-btn"
+                  [class.active]="selectedFinish() === fin"
+                  (click)="selectFinish($any(fin))"
+                >
+                  {{ fin === 'glossy' ? 'Parlak Cam' : fin === 'matte' ? 'Kadife Mat' : fin === 'chrome' ? 'Krom Efekt' : fin === 'cat-eye' ? 'Kedi Gözü' : 'Simli' }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Nail Art Seviyesi -->
+        <div class="control-section">
+          <div class="section-title">
+            <span class="material-symbols-outlined">auto_awesome</span>
+            <span>5. Tırnak Sanatı (Nail Art Tier)</span>
+          </div>
+          <div class="art-tier-grid">
+            @for (tier of artTiers; track tier.tier) {
+              <div
+                class="art-tier-card"
+                [class.active]="selectedArtTier() === tier.tier"
+                (click)="selectArtTier(tier.tier)"
+              >
+                <div class="tier-top">
+                  <span class="tier-label">{{ tier.label }}</span>
+                  <span class="tier-price">
+                    @if (tier.surcharge > 0) {
+                      +{{ tier.surcharge }} ₺
+                    } @else {
+                      Ücretsiz
+                    }
+                  </span>
+                </div>
+                <div class="tier-subtitle">{{ tier.subtitle }}</div>
+                <div class="tier-examples">{{ tier.examples }}</div>
+                <div class="tier-time">+{{ tier.extraMinutes }} dakika ek süre</div>
+              </div>
+            }
+          </div>
+
+          <!-- Safe Removal Option -->
+          <div class="removal-toggle-box" (click)="toggleSafeRemoval()">
+            <input type="checkbox" [checked]="needsSafeRemoval()" />
+            <div class="toggle-text">
+              <span class="title">Önceki Jel / Akrilik Tırnak Çıkarma (De-aplikasyon)</span>
+              <span class="desc">Tırnakta mevcut protez varsa freze ile doğal tırnak korunarak temizlenir (+250 ₺, +25 dk).</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Price & Action Bar -->
+        <div class="summary-checkout-card">
+          <div class="summary-left">
+            <div class="summary-eyebrow">TOPLAM HİZMET HESAPLAMASI</div>
+            <div class="summary-price-tag">
+              <span class="big-price">{{ totalPrice() }} ₺</span>
+              <span class="summary-duration">
+                <span class="material-symbols-outlined">schedule</span>
+                {{ totalDurationMin() }} Dakika
+              </span>
+            </div>
+            <div class="summary-breakdown">
+              {{ currentTechnique().name }} • {{ currentShape().nameTr }} • {{ currentSwatch().name }}
+            </div>
+          </div>
+
+          <div class="summary-actions">
+            <button type="button" class="btn-save-cust" (click)="saveDesignToCustomer()">
+              <span class="material-symbols-outlined">bookmark_add</span>
+              <span>Reçeteyi Kaydet</span>
+            </button>
+            <button type="button" class="btn-book-now" (click)="bookThisDesign()">
+              <span class="material-symbols-outlined">event_available</span>
+              <span>Randevuya Aktar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: 7-DAY NAIL WARRANTY & EMERGENCY REPAIR -->
+  @if (activeTab() === 'warranty') {
+    <div class="tab-content-container">
+      <div class="warranty-hero-banner">
+        <div class="hero-icon-box">
+          <span class="material-symbols-outlined">verified</span>
+        </div>
+        <div class="hero-text">
+          <h2>7 Günlük Tırnak Koruma & Düşme Garantisi</h2>
+          <p>
+            Her protez tırnak ve kalıcı oje işleminden sonra ilk 7 gün içinde kırılan, çatlayan veya hava alan tırnaklar
+            merkezimizde <strong>ücretsiz 15 dakikalık acil onarım</strong> garantisi altındadır.
+          </p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-bubble">
+            <div class="stat-number">{{ activeWarrantiesCount() }}</div>
+            <div class="stat-title">Aktif Garantili Müşteri</div>
+          </div>
+          <div class="stat-bubble">
+            <div class="stat-number">{{ claimedRepairsCount() }}</div>
+            <div class="stat-title">Tamamlanan Onarım</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warranty Search and Filter -->
+      <div class="filter-toolbar">
+        <div class="search-input-box">
+          <span class="material-symbols-outlined">search</span>
+          <input
+            type="text"
+            placeholder="Müşteri adı, telefon veya tırnak tekniği ara…"
+            [value]="warrantySearch()"
+            (input)="warrantySearch.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="status-filters">
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="warrantyStatusFilter() === 'all'"
+            (click)="warrantyStatusFilter.set('all')"
+          >
+            Tümü
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="warrantyStatusFilter() === 'active'"
+            (click)="warrantyStatusFilter.set('active')"
+          >
+            Aktif Garantiler
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="warrantyStatusFilter() === 'claimed'"
+            (click)="warrantyStatusFilter.set('claimed')"
+          >
+            Onarım Yapılanlar
+          </button>
+        </div>
+      </div>
+
+      <!-- Warranty Grid -->
+      <div class="warranty-grid">
+        @for (item of filteredWarranties(); track item.id) {
+          <div class="warranty-card" [class]="'status-' + item.status">
+            <div class="card-head">
+              <div class="cust-name-phone">
+                <span class="cust-name">{{ item.customerName }}</span>
+                <span class="cust-phone">{{ item.phone }}</span>
+              </div>
+
+              @if (item.status === 'active') {
+                <span class="warranty-countdown-badge">
+                  <span class="material-symbols-outlined">timer</span>
+                  {{ getWarrantyDaysRemaining(item.warrantyExpireDate) }} Gün Kaldı
+                </span>
+              } @else if (item.status === 'claimed') {
+                <span class="warranty-claimed-badge">
+                  <span class="material-symbols-outlined">check_circle</span>
+                  Onarım Yapıldı
+                </span>
+              } @else {
+                <span class="warranty-expired-badge">Süresi Doldu</span>
+              }
+            </div>
+
+            <div class="card-body">
+              <div class="info-row">
+                <span class="label">Uygulama:</span>
+                <span class="value">{{ item.technique }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Form & Renk:</span>
+                <span class="value">{{ item.nailShape }} • {{ item.swatchCode }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Yapan Uzman:</span>
+                <span class="value">{{ item.technicianStaffName }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Uygulama Tarihi:</span>
+                <span class="value">{{ item.appliedDate | date: 'dd MMMM yyyy' }}</span>
+              </div>
+
+              @if (item.damagedFinger) {
+                <div class="repair-detail-box">
+                  <span class="material-symbols-outlined">build</span>
+                  <div>
+                    <strong>Onarılan Tırnak:</strong> {{ getFingerLabel(item.damagedFinger) }}
+                    <p class="repair-note">{{ item.repairNotes }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="card-footer">
+              @if (item.status === 'active') {
+                <button type="button" class="btn-repair" (click)="openRepairDialog(item)">
+                  <span class="material-symbols-outlined">build_circle</span>
+                  <span>Kırık Bildir & Onarım Randevusu Ver</span>
+                </button>
+              } @else {
+                <div class="footer-msg">Garanti süreci tamamlandı.</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: NAIL HEALTH & HEMA ALLERGY ASSESSMENT -->
+  @if (activeTab() === 'health') {
+    <div class="tab-content-container">
+      <div class="section-action-header">
+        <div>
+          <h2>Tırnak Sağlık, Deformasyon & HEMA Alerji Kartları</h2>
+          <p>Müşterinin tırnak kalınlığı, onikoliz (boşalma), mantar şüphesi ve HEMA hassasiyetine göre güvenli protez protokolü.</p>
+        </div>
+        <button type="button" class="btn-primary" (click)="openHealthDialog()">
+          <span class="material-symbols-outlined">add_moderator</span>
+          <span>Yeni Tırnak Sağlık Taraması</span>
+        </button>
+      </div>
+
+      <!-- Health Cards Grid -->
+      <div class="health-cards-grid">
+        @for (record of healthAssessments(); track record.customerId) {
+          <div class="health-card">
+            <div class="health-head">
+              <div>
+                <h3 class="cust-title">{{ record.customerName }}</h3>
+                <span class="date-tag">{{ record.assessedAt | date: 'dd MMMM yyyy' }} • {{ record.assessedByStaffName }}</span>
+              </div>
+              <span class="thickness-badge" [class]="'thick-' + record.nailPlateThickness">
+                Tırnak: {{ record.nailPlateThickness === 'normal' ? 'Normal' : record.nailPlateThickness === 'thin' ? 'İnce' : 'Aşırı İnce / Hasarlı' }}
+              </span>
+            </div>
+
+            <!-- Risks & Contraindications Checklist -->
+            <div class="risk-flags-list">
+              <div class="flag-item" [class.alert]="record.hasHemaAllergy">
+                <span class="material-symbols-outlined">{{ record.hasHemaAllergy ? 'warning' : 'check_circle' }}</span>
+                <span>HEMA / Jel Alerjisi: {{ record.hasHemaAllergy ? 'VAR (HEMA-Free Şart)' : 'Yok' }}</span>
+              </div>
+              <div class="flag-item" [class.alert]="record.hasOnycholysis">
+                <span class="material-symbols-outlined">{{ record.hasOnycholysis ? 'warning' : 'check_circle' }}</span>
+                <span>Onikoliz (Tırnak Boşalması): {{ record.hasOnycholysis ? 'Tespit Edildi' : 'Yok' }}</span>
+              </div>
+              <div class="flag-item" [class.alert]="record.hasRemovalDamage">
+                <span class="material-symbols-outlined">{{ record.hasRemovalDamage ? 'warning' : 'check_circle' }}</span>
+                <span>Geçmiş Söküm / Freze Hasarı: {{ record.hasRemovalDamage ? 'Mevcut' : 'Temiz' }}</span>
+              </div>
+              <div class="flag-item" [class.alert]="record.hasFungalSuspicion">
+                <span class="material-symbols-outlined">{{ record.hasFungalSuspicion ? 'dangerous' : 'check_circle' }}</span>
+                <span>Mantar / Renk Değişimi: {{ record.hasFungalSuspicion ? 'Şüpheli (Dermatolog Konsültasyonu)' : 'Temiz' }}</span>
+              </div>
+            </div>
+
+            <!-- Recommended protocol -->
+            <div class="recommended-protocol">
+              <span class="label">Önerilen Koruma Protokolü:</span>
+              <p class="protocol-text">{{ record.recommendedTechnique }}</p>
+            </div>
+
+            <div class="contraindication-box">
+              <span class="label">Uygulama Notları & Kontrendikasyonlar:</span>
+              <p class="notes-text">{{ record.carePlanNotes }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 4: AUTOCLAVE & STERILIZATION SAFETY REGISTRY -->
+  @if (activeTab() === 'hygiene') {
+    <div class="tab-content-container">
+      <div class="sterilization-hero">
+        <div class="steril-badge">
+          <span class="material-symbols-outlined">medical_services</span>
+          <span>B-CLASS MEDİKAL STANDART (EN 13060)</span>
+        </div>
+        <h2>Alet Sterilizasyon & Hijyen Pasaport Kütüğü</h2>
+        <p>
+          Merkezimizde tüm metal freze uçları, tırnak pensleri ve iticiler 134°C sıcaklık ve 2.15 bar buhar basıncında otoklavda
+          sterilize edilir. Her müşterinin önünde açılan tekli sterilizasyon poşetinin parti barkodu ve kimyasal indikatör onayı
+          kayıt altına alınır.
+        </p>
+
+        <div class="live-autoclave-radar">
+          <div class="sensor-pill">
+            <span class="sensor-name">Sıcaklık:</span>
+            <span class="sensor-val highlight">134.2 °C</span>
+          </div>
+          <div class="sensor-pill">
+            <span class="sensor-name">Buhar Basıncı:</span>
+            <span class="sensor-val highlight">2.15 Bar</span>
+          </div>
+          <div class="sensor-pill">
+            <span class="sensor-name">Döngü Süresi:</span>
+            <span class="sensor-val">18 Dakika</span>
+          </div>
+          <div class="sensor-pill">
+            <span class="sensor-name">Filtre Durumu:</span>
+            <span class="sensor-val text-green">HEPA Bakteri Tutucu %100</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-action-header">
+        <div>
+          <h3>Günlük Otoklav Döngüleri ve Poşet Barkodları</h3>
+          <p>Denetim ve müşteri güvenliği için dijital indikatör arşivi.</p>
+        </div>
+        <button type="button" class="btn-primary" (click)="openSterilizationDialog()">
+          <span class="material-symbols-outlined">add_task</span>
+          <span>Yeni Otoklav Döngüsü Başlat / Kaydet</span>
+        </button>
+      </div>
+
+      <!-- Sterilization Table -->
+      <div class="sterilization-table-wrapper">
+        <table class="sterilization-table">
+          <thead>
+            <tr>
+              <th>Döngü No</th>
+              <th>Cihaz</th>
+              <th>Tarih & Saat</th>
+              <th>Sıcaklık / Basınç</th>
+              <th>İndikatör Şeridi</th>
+              <th>Poşet Barkodu</th>
+              <th>Alet Sayısı</th>
+              <th>İşlemi Yapan</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of sterilizations(); track row.id) {
+              <tr>
+                <td class="bold-cell">{{ row.cycleNumber }}</td>
+                <td>{{ row.autoclaveDeviceName }}</td>
+                <td>{{ row.sterilizedAt }}</td>
+                <td>
+                  <span class="param-badge">{{ row.temperatureCelsius }}°C / {{ row.pressureBar }} bar</span>
+                </td>
+                <td>
+                  @if (row.indicatorStripPassed) {
+                    <span class="strip-ok">
+                      <span class="material-symbols-outlined">check_circle</span>
+                      Başarılı (Kahverengi)
+                    </span>
+                  } @else {
+                    <span class="strip-fail">İptal Edildi</span>
+                  }
+                </td>
+                <td class="barcode-cell">
+                  <code>{{ row.batchPouchBarcode }}</code>
+                </td>
+                <td>{{ row.instrumentCount }} parça</td>
+                <td>{{ row.sterilizedByStaffName }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: Kırık Bildir & Acil Onarım Formu -->
+  @if (showRepairModal() && selectedWarrantyForRepair()) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3>
+            <span class="material-symbols-outlined">build_circle</span>
+            Tek Tırnak Onarım Randevusu (Garanti Kapsamında)
+          </h3>
+          <button type="button" class="close-x" (click)="closeRepairDialog()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="cust-info-alert">
+            <strong>Müşteri:</strong> {{ selectedWarrantyForRepair()?.customerName }} ({{ selectedWarrantyForRepair()?.phone }})<br />
+            <strong>Orijinal Uygulama:</strong> {{ selectedWarrantyForRepair()?.technique }} • {{ selectedWarrantyForRepair()?.nailShape }}
+          </div>
+
+          <div class="form-group">
+            <label>Hangi Tırnak Hasar Gördü / Kırıldı?</label>
+            <select
+              class="form-control"
+              [value]="repairFinger()"
+              (change)="repairFinger.set($any($event.target).value)"
+            >
+              <option value="right-thumb">Sağ El - Başparmak</option>
+              <option value="right-index">Sağ El - İşaret Parmağı</option>
+              <option value="right-middle">Sağ El - Orta Parmak</option>
+              <option value="right-ring">Sağ El - Yüzük Parmağı</option>
+              <option value="right-pinky">Sağ El - Serçe Parmak</option>
+              <option value="left-thumb">Sol El - Başparmak</option>
+              <option value="left-index">Sol El - İşaret Parmağı</option>
+              <option value="left-middle">Sol El - Orta Parmak</option>
+              <option value="left-ring">Sol El - Yüzük Parmağı</option>
+              <option value="left-pinky">Sol El - Serçe Parmak</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Onarım Notu & Tırnak Durumu:</label>
+            <textarea
+              class="form-control"
+              rows="3"
+              placeholder="Örn: Darbe sonucu köşe kırılmış, doğal tırnak hasarsız. Jel ile yeniden inşa edildi."
+              [value]="repairNotes()"
+              (input)="repairNotes.set($any($event.target).value)"
+            ></textarea>
+          </div>
+
+          <div class="guarantee-status-box">
+            <span class="material-symbols-outlined text-green">verified</span>
+            <div>
+              <strong>Ücretsiz 7 Günlük Garanti Kapsamında</strong>
+              <p>Müşteriden herhangi bir onarım veya malzeme ücreti talep edilmeyecektir (15 Dk Hızlı Slot).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" (click)="closeRepairDialog()">Vazgeç</button>
+          <button type="button" class="btn-primary" (click)="saveRepairClaim()">Onarımı Onayla ve Kaydet</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: Yeni Otoklav Döngüsü -->
+  @if (showSterilizationModal()) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3>
+            <span class="material-symbols-outlined">sanitizer</span>
+            Yeni Otoklav Sterilizasyon Döngüsü Başlat
+          </h3>
+          <button type="button" class="close-x" (click)="closeSterilizationDialog()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Otoklav Cihazı:</label>
+            <input type="text" class="form-control" [value]="newCycleDevice()" (input)="newCycleDevice.set($any($event.target).value)" />
+          </div>
+
+          <div class="grid-2-col">
+            <div class="form-group">
+              <label>Sıcaklık (°C):</label>
+              <input type="number" class="form-control" [value]="newCycleTemp()" (input)="newCycleTemp.set(+$any($event.target).value)" />
+            </div>
+            <div class="form-group">
+              <label>Buhar Basıncı (Bar):</label>
+              <input type="number" step="0.05" class="form-control" [value]="newCyclePressure()" (input)="newCyclePressure.set(+$any($event.target).value)" />
+            </div>
+          </div>
+
+          <div class="grid-2-col">
+            <div class="form-group">
+              <label>Poşet Barkodu:</label>
+              <input type="text" class="form-control" [value]="newCyclePouchBarcode()" (input)="newCyclePouchBarcode.set($any($event.target).value)" />
+            </div>
+            <div class="form-group">
+              <label>Steril Edilen Alet Sayısı:</label>
+              <input type="number" class="form-control" [value]="newCyclePouchCount()" (input)="newCyclePouchCount.set(+$any($event.target).value)" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>İşlemi Yapan Uzman / Hemşire:</label>
+            <input type="text" class="form-control" [value]="newCycleStaff()" (input)="newCycleStaff.set($any($event.target).value)" />
+          </div>
+
+          <div class="form-group checkbox-row">
+            <input type="checkbox" id="indCheck" [checked]="newCyclePassed()" (change)="newCyclePassed.set($any($event.target).checked)" />
+            <label for="indCheck">Kimyasal İndikatör Şeridi Rengi Başarıyla Değişti (134°C Onaylandı)</label>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" (click)="closeSterilizationDialog()">Vazgeç</button>
+          <button type="button" class="btn-primary" (click)="saveSterilizationCycle()">Kütüğe Mühürle</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: Yeni Tırnak Sağlık Taraması -->
+  @if (showHealthModal()) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3>
+            <span class="material-symbols-outlined">health_and_safety</span>
+            Tırnak Sağlık & Kontrendikasyon Taraması
+          </h3>
+          <button type="button" class="close-x" (click)="closeHealthDialog()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Müşteri Adı Soyadı:</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Örn: Ayşe Demir"
+              [value]="healthCustomerName()"
+              (input)="healthCustomerName.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Tırnak Plağı Kalınlığı & Yapısı:</label>
+            <select
+              class="form-control"
+              [value]="healthThickness()"
+              (change)="healthThickness.set($any($event.target).value)"
+            >
+              <option value="normal">Normal & Sağlıklı Plak</option>
+              <option value="thin">İnce & Hassas (Apex Desteği Gerekli)</option>
+              <option value="very-thin">Aşırı İnce / Esnek (Kat Kat Soyulan)</option>
+              <option value="damaged">Aşırı Freze / Koparma Hasarlı</option>
+            </select>
+          </div>
+
+          <div class="health-checklist">
+            <label class="check-item">
+              <input type="checkbox" [checked]="healthHasHemaAllergy()" (change)="healthHasHemaAllergy.set($any($event.target).checked)" />
+              <span>HEMA / Jel Alerjisi Geçmişi Var (HEMA-Free Baz Kullanılmalı)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" [checked]="healthHasOnycholysis()" (change)="healthHasOnycholysis.set($any($event.target).checked)" />
+              <span>Onikoliz (Tırnak Yatağından Ayrılma / Boşalma) Mevcut</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" [checked]="healthHasFungal()" (change)="healthHasFungal.set($any($event.target).checked)" />
+              <span>Mantar Şüphesi / Sarı-Yeşil Renk Değişimi Var</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" [checked]="healthHasRemovalDamage()" (change)="healthHasRemovalDamage.set($any($event.target).checked)" />
+              <span>Önceki Protez Tırnağı Kendi Kendine Koparma Hasarı</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Önerilen Bakım Protokolü:</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="healthRecommendedTech()"
+              (input)="healthRecommendedTech.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Özel Notlar:</label>
+            <textarea
+              class="form-control"
+              rows="2"
+              placeholder="Asitsiz primer kullanılmalı, IBX kürü uygulandı..."
+              [value]="healthCareNotes()"
+              (input)="healthCareNotes.set($any($event.target).value)"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" (click)="closeHealthDialog()">Vazgeç</button>
+          <button type="button" class="btn-primary" (click)="saveHealthAssessment()">Sağlık Kartını Kaydet</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

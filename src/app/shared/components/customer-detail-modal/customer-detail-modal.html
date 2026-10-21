@@ -1,0 +1,2399 @@
+@if (open() && currentCustomer(); as cust) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto bg-slate-950/70 backdrop-blur-sm animate-fadeIn"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="cust.fullName + ' Müşteri Detayı'"
+  >
+    <!-- Modal Window -->
+    <div
+      class="relative w-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden"
+    >
+      <!-- Feedback / Notification Toast -->
+      @if (feedback()) {
+        <div
+          class="bg-emerald-500 text-white px-5 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-between shadow-md z-20 animate-slideDown"
+        >
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined icon-size-4.5">check_circle</span>
+            <span>{{ feedback() }}</span>
+          </div>
+          <button
+            type="button"
+            (click)="feedback.set('')"
+            class="hover:opacity-75 bg-transparent border-0 text-white cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      }
+
+      @if (error()) {
+        <div
+          class="bg-rose-500 text-white px-5 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-between shadow-md z-20 animate-slideDown"
+        >
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined icon-size-4.5">error</span>
+            <span>{{ error() }}</span>
+          </div>
+          <button
+            type="button"
+            (click)="error.set('')"
+            class="hover:opacity-75 bg-transparent border-0 text-white cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      }
+
+      <!-- 1. Executive Customer Header Banner -->
+      <header
+        class="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 via-indigo-50/20 to-purple-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-800/80"
+      >
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <!-- Avatar & Primary Info -->
+          <div class="flex items-start sm:items-center gap-4">
+            <div
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center text-lg sm:text-xl font-black shadow-lg shadow-indigo-500/25 flex-shrink-0"
+            >
+              {{ getInitials(cust.fullName) }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white m-0">
+                  {{ cust.fullName }}
+                </h2>
+                <app-status-badge [status]="cust.status || 'active'" />
+
+                @if (cust.segment) {
+                  <span
+                    class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wide bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                  >
+                    ⭐ {{ cust.segment }}
+                  </span>
+                }
+
+                @if (cust.nailProfile; as nail) {
+                  <span
+                    class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wide bg-pink-100 dark:bg-pink-950/80 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800 inline-flex items-center gap-1"
+                    title="Tırnak Tercihi: {{ nail.preferredShape }} - {{ nail.lastColorCode }}"
+                  >
+                    <span class="material-symbols-outlined icon-size-3.5">brush</span>
+                    💅 {{ nail.preferredShape }} • {{ nail.lastColorCode }}
+                  </span>
+                }
+              </div>
+
+              <!-- Badges: TCKN, Yaş, Doğum Tarihi, Meslek -->
+              <div class="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+                @if (cust.identityNumber) {
+                  <span
+                    class="inline-flex items-center gap-1 font-mono font-bold px-2 py-0.5 rounded-md border"
+                    [class.bg-emerald-50]="isTcknValid()"
+                    [class.text-emerald-700]="isTcknValid()"
+                    [class.border-emerald-200]="isTcknValid()"
+                    [class.dark:bg-emerald-950/40]="isTcknValid()"
+                    [class.dark:text-emerald-300]="isTcknValid()"
+                    [class.dark:border-emerald-800]="isTcknValid()"
+                    [class.bg-slate-100]="!isTcknValid()"
+                    [class.text-slate-600]="!isTcknValid()"
+                    [class.border-slate-200]="!isTcknValid()"
+                  >
+                    <span class="material-symbols-outlined icon-size-3.5">
+                      {{ isTcknValid() ? 'verified_user' : 'badge' }}
+                    </span>
+                    TC: {{ cust.identityNumber }}
+                  </span>
+                }
+
+                @if (computedAge(); as age) {
+                  <span
+                    class="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+                  >
+                    <span class="material-symbols-outlined icon-size-3.5">cake</span>
+                    {{ age }} Yaşında
+                  </span>
+                }
+
+                @if (cust.phone) {
+                  <a
+                    [href]="'tel:' + cust.phone"
+                    class="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-decoration-none"
+                  >
+                    <span class="material-symbols-outlined icon-size-3.5 text-slate-400">call</span>
+                    {{ cust.phone }}
+                  </a>
+                }
+
+                @if (cust.city || cust.district) {
+                  <span class="inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined icon-size-3.5 text-slate-400">location_on</span>
+                    {{ cust.district ? cust.district + ' / ' : '' }}{{ cust.city || '' }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Header Quick Action Buttons & Close -->
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <button
+              type="button"
+              (click)="openDepositModal()"
+              class="odv-btn-soft text-xs"
+              title="Cüzdana Avans / Para Yükle"
+            >
+              <span class="material-symbols-outlined icon-size-4 text-emerald-600 dark:text-emerald-400"
+                >add_card</span
+              >
+              <span>+ Cüzdan</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="close.emit()"
+              class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 border-0 cursor-pointer transition-colors"
+              aria-label="Kapat"
+            >
+              <span class="material-symbols-outlined icon-size-5">close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Operational Metrics Ribbon (Finans, Seans, Sağlık) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800">
+          <!-- Cüzdan Bakiyesi -->
+          <div
+            (click)="setTab('wallet')"
+            class="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 cursor-pointer hover:border-emerald-400 transition-all shadow-2xs"
+          >
+            <div class="flex items-center justify-between text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+              <span>Cüzdan Bakiye</span>
+              <span class="material-symbols-outlined icon-size-4 text-emerald-500">account_balance_wallet</span>
+            </div>
+            <strong class="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 block mt-1">
+              ₺{{ (cust.walletBalance || 0) | number: '1.2-2' }}
+            </strong>
+          </div>
+
+          <!-- Taksit Durumu -->
+          <div
+            (click)="setTab('installments')"
+            class="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 cursor-pointer hover:border-indigo-400 transition-all shadow-2xs"
+          >
+            <div class="flex items-center justify-between text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+              <span>Kalan Taksit Borcu</span>
+              <span class="material-symbols-outlined icon-size-4 text-indigo-500">receipt_long</span>
+            </div>
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <strong class="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                ₺{{ totalInstallmentDebt() | number: '1.2-2' }}
+              </strong>
+              @if (overdueInstallmentCount() > 0) {
+                <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+                  {{ overdueInstallmentCount() }} Gecikmiş
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Aktif Seans / Paketler -->
+          <div
+            (click)="setTab('sessions')"
+            class="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 cursor-pointer hover:border-purple-400 transition-all shadow-2xs"
+          >
+            <div class="flex items-center justify-between text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+              <span>Paket & Seans</span>
+              <span class="material-symbols-outlined icon-size-4 text-purple-500">spa</span>
+            </div>
+            <strong class="text-base sm:text-lg font-black text-slate-900 dark:text-white block mt-1">
+              {{ cust.packages?.length || 0 }} Paket
+            </strong>
+          </div>
+
+          <!-- Cilt Tipi & Medikal -->
+          <div
+            (click)="setTab('health')"
+            class="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 cursor-pointer hover:border-rose-400 transition-all shadow-2xs"
+          >
+            <div class="flex items-center justify-between text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+              <span>Cilt & Medikal</span>
+              <span class="material-symbols-outlined icon-size-4 text-rose-500">medical_services</span>
+            </div>
+            <div class="flex items-center gap-1.5 mt-1 truncate">
+              <strong class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 capitalize truncate">
+                {{ cust.health?.skinType || 'Belirtilmedi' }}
+              </strong>
+              @if (cust.health?.fitzpatrick) {
+                <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 uppercase">
+                  {{ cust.health?.fitzpatrick }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Critical Health Alerts Strip (If Any) -->
+        @if (healthAlerts().length > 0) {
+          <div class="mt-3.5 space-y-1.5">
+            @for (alert of healthAlerts(); track alert.text) {
+              <div
+                class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border animate-fadeIn"
+                [class.bg-rose-50]="alert.severity === 'critical'"
+                [class.text-rose-800]="alert.severity === 'critical'"
+                [class.border-rose-200]="alert.severity === 'critical'"
+                [class.dark:bg-rose-950/60]="alert.severity === 'critical'"
+                [class.dark:text-rose-200]="alert.severity === 'critical'"
+                [class.dark:border-rose-900]="alert.severity === 'critical'"
+                [class.bg-amber-50]="alert.severity === 'warning'"
+                [class.text-amber-800]="alert.severity === 'warning'"
+                [class.border-amber-200]="alert.severity === 'warning'"
+                [class.dark:bg-amber-950/60]="alert.severity === 'warning'"
+                [class.dark:text-amber-200]="alert.severity === 'warning'"
+                [class.bg-blue-50]="alert.severity === 'info'"
+                [class.text-blue-800]="alert.severity === 'info'"
+                [class.border-blue-200]="alert.severity === 'info'"
+                [class.dark:bg-blue-950/60]="alert.severity === 'info'"
+                [class.dark:text-blue-200]="alert.severity === 'info'"
+              >
+                <span class="material-symbols-outlined icon-size-4">
+                  {{ alert.severity === 'critical' ? 'warning' : alert.severity === 'warning' ? 'error' : 'info' }}
+                </span>
+                <span>{{ alert.text }}</span>
+              </div>
+            }
+          </div>
+        }
+      </header>
+
+      <!-- 4. Navigation Tab Bar -->
+      <nav
+        class="flex items-center px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-x-auto custom-scroll gap-2 flex-shrink-0"
+        aria-label="Müşteri Detay Sekmeleri"
+      >
+        <button
+          type="button"
+          (click)="setTab('overview')"
+          class="tab-btn"
+          [class.tab-btn-active]="activeTab() === 'overview'"
+        >
+          <span class="material-symbols-outlined icon-size-4">person</span>
+          <span>Genel Bilgiler</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('health')"
+          class="tab-btn relative"
+          [class.tab-btn-active]="activeTab() === 'health'"
+        >
+          <span class="material-symbols-outlined icon-size-4">medical_information</span>
+          <span>Sağlık & Medikal</span>
+          @if (healthAlerts().length > 0) {
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+          }
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('wallet')"
+          class="tab-btn"
+          [class.tab-btn-active]="activeTab() === 'wallet'"
+        >
+          <span class="material-symbols-outlined icon-size-4">account_balance_wallet</span>
+          <span>Cüzdan & Ekstre</span>
+          <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">
+            ₺{{ (cust.walletBalance || 0) | number: '1.0-0' }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('installments')"
+          class="tab-btn"
+          [class.tab-btn-active]="activeTab() === 'installments'"
+        >
+          <span class="material-symbols-outlined icon-size-4">receipt_long</span>
+          <span>Taksit Takvimi</span>
+          @if (cust.installments?.length) {
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 font-bold">
+              {{ cust.installments?.length }}
+            </span>
+          }
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('sessions')"
+          class="tab-btn"
+          [class.tab-btn-active]="activeTab() === 'sessions'"
+        >
+          <span class="material-symbols-outlined icon-size-4">event_available</span>
+          <span>Seans Takibi</span>
+          @if (cust.packages?.length) {
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 font-bold">
+              {{ cust.packages?.length }}
+            </span>
+          }
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('consultations')"
+          class="tab-btn"
+          [class.tab-btn-active]="activeTab() === 'consultations'"
+        >
+          <span class="material-symbols-outlined icon-size-4">support_agent</span>
+          <span>Ön Görüşmeler & Bilgi Talepleri</span>
+          @if (cust.consultations?.length) {
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-bold">
+              {{ cust.consultations?.length }}
+            </span>
+          }
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('edit')"
+          class="tab-btn"
+          [class.tab-btn-active]="activeTab() === 'edit'"
+        >
+          <span class="material-symbols-outlined icon-size-4">edit_note</span>
+          <span>Bilgileri Düzenle</span>
+        </button>
+      </nav>
+
+      <!-- 5. Tab Contents Area -->
+      <main class="flex-1 overflow-y-auto p-5 sm:p-6 custom-scroll bg-slate-50/50 dark:bg-slate-900/50">
+        <!-- ================= TAB 1: OVERVIEW ================= -->
+        @if (activeTab() === 'overview') {
+          <div class="space-y-5 animate-fadeIn">
+            <!-- Kimlik & Kişisel Kartı -->
+            <div class="odv-card p-5">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined icon-size-4 text-indigo-500">badge</span>
+                <span>Kimlik & Kişisel Bilgiler</span>
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">T.C. Kimlik Numarası</span>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <strong class="font-mono text-slate-900 dark:text-white">
+                      {{ cust.identityNumber || 'Belirtilmedi' }}
+                    </strong>
+                    @if (cust.identityNumber && isTcknValid()) {
+                      <span class="material-symbols-outlined text-emerald-500 icon-size-4" title="11 Haneli TCKN Algoritması Doğrulandı">
+                        check_circle
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Doğum Tarihi & Yaş</span>
+                  <strong class="text-slate-900 dark:text-white mt-0.5 block">
+                    {{ cust.birthDate ? (cust.birthDate | date: 'dd MMMM yyyy') : 'Belirtilmedi' }}
+                    @if (computedAge(); as age) {
+                      <span class="text-indigo-600 dark:text-indigo-400 font-bold ml-1">({{ age }} Yaşında)</span>
+                    }
+                  </strong>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Cinsiyet</span>
+                  <strong class="text-slate-900 dark:text-white mt-0.5 block capitalize">
+                    {{ cust.gender === 'female' ? 'Kadın' : cust.gender === 'male' ? 'Erkek' : cust.gender || 'Belirtilmedi' }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Meslek</span>
+                  <strong class="text-slate-900 dark:text-white mt-0.5 block">
+                    {{ cust.occupation || 'Belirtilmedi' }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Kayıt Tarihi</span>
+                  <strong class="text-slate-900 dark:text-white mt-0.5 block">
+                    {{ cust.createdAt ? (cust.createdAt | date: 'dd.MM.yyyy HH:mm') : '—' }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Müşteri Numarası</span>
+                  <span class="font-mono text-slate-500 mt-0.5 block">#{{ cust.id }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- İletişim & Lokasyon Kartı -->
+            <div class="odv-card p-5">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined icon-size-4 text-emerald-500">contacts</span>
+                <span>İletişim & Adres Detayları</span>
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Birincil Telefon</span>
+                  <a
+                    [href]="'tel:' + cust.phone"
+                    class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 mt-0.5 inline-block text-decoration-none"
+                  >
+                    {{ cust.phone }}
+                  </a>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Acil Durum / Yakın Telefonu</span>
+                  @if (cust.emergencyPhone) {
+                    <a
+                      [href]="'tel:' + cust.emergencyPhone"
+                      class="font-bold text-rose-600 dark:text-rose-400 mt-0.5 inline-block text-decoration-none"
+                    >
+                      🚨 {{ cust.emergencyPhone }}
+                    </a>
+                  } @else {
+                    <span class="text-slate-400 mt-0.5 block">Belirtilmedi</span>
+                  }
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">E-Posta Adresi</span>
+                  @if (cust.email) {
+                    <a
+                      [href]="'mailto:' + cust.email"
+                      class="text-indigo-600 dark:text-indigo-400 font-medium mt-0.5 inline-block text-decoration-none truncate max-w-full"
+                    >
+                      {{ cust.email }}
+                    </a>
+                  } @else {
+                    <span class="text-slate-400 mt-0.5 block">Belirtilmedi</span>
+                  }
+                </div>
+
+                <div class="sm:col-span-3">
+                  <span class="block text-slate-400 text-xs font-semibold">Açık Adres</span>
+                  <p class="text-slate-800 dark:text-slate-200 mt-0.5 leading-relaxed m-0 font-medium">
+                    {{ cust.address || 'Adres kaydı bulunmuyor.' }}
+                    @if (cust.district || cust.city) {
+                      <span class="font-bold text-slate-500"> ({{ cust.district ? cust.district + ' / ' : '' }}{{ cust.city || '' }})</span>
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- CRM & Danışman Kartı -->
+            <div class="odv-card p-5">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined icon-size-4 text-purple-500">loyalty</span>
+                <span>CRM & Tercihler</span>
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Segment</span>
+                  <span class="px-2.5 py-1 rounded-lg text-xs font-bold inline-block mt-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+                    {{ cust.segment || 'Standart' }}
+                  </span>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Referans / Kaynak</span>
+                  <strong class="text-slate-900 dark:text-white mt-1 block">
+                    {{ cust.referralSource || 'Doğrudan Başvuru' }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span class="block text-slate-400 text-xs font-semibold">Tercih Edilen Uzman</span>
+                  <strong class="text-slate-900 dark:text-white mt-1 block">
+                    {{ cust.preferredStaffName || 'Herhangi Bir Uzman' }}
+                  </strong>
+                </div>
+
+                @if (cust.notes) {
+                  <div class="sm:col-span-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span class="block text-slate-400 text-xs font-semibold">Operasyon Notları</span>
+                    <p class="text-slate-700 dark:text-slate-300 mt-1 italic text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60 m-0">
+                      “{{ cust.notes }}”
+                    </p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ================= TAB 2: HEALTH & MEDICAL ================= -->
+        @if (activeTab() === 'health') {
+          <div class="space-y-5 animate-fadeIn">
+            <!-- Fitzpatrick Cilt Skalası & Cilt Tipi Görsel Kartı -->
+            <div class="odv-card p-5 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800/80">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined icon-size-4 text-amber-500">palette</span>
+                  <span>Fitzpatrick Cilt Tonu Skalası & Cilt Yapısı</span>
+                </div>
+                <span class="text-xs text-slate-400 font-normal">
+                  Son Güncelleme: {{ cust.health?.lastUpdated ? (cust.health?.lastUpdated | date: 'dd.MM.yyyy') : 'Kayıtlı' }}
+                </span>
+              </h3>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 mb-5">
+                <!-- Tip 1 -->
+                <div
+                  class="p-3 rounded-xl border text-center transition-all"
+                  [class.border-indigo-600]="cust.health?.fitzpatrick === 'tip-1'"
+                  [class.ring-2]="cust.health?.fitzpatrick === 'tip-1'"
+                  [class.ring-indigo-500/20]="cust.health?.fitzpatrick === 'tip-1'"
+                  [class.bg-indigo-50/50]="cust.health?.fitzpatrick === 'tip-1'"
+                  [class.dark:bg-indigo-950/40]="cust.health?.fitzpatrick === 'tip-1'"
+                  [class.border-slate-200]="cust.health?.fitzpatrick !== 'tip-1'"
+                  [class.dark:border-slate-800]="cust.health?.fitzpatrick !== 'tip-1'"
+                >
+                  <div class="w-8 h-8 rounded-full mx-auto mb-2 shadow-inner border border-slate-300" style="background-color: #fcece2"></div>
+                  <strong class="block text-xs font-bold text-slate-800 dark:text-slate-200">Tip I</strong>
+                  <span class="text-[10px] text-slate-400 block">Çok Açık / Beyaz</span>
+                </div>
+
+                <!-- Tip 2 -->
+                <div
+                  class="p-3 rounded-xl border text-center transition-all"
+                  [class.border-indigo-600]="cust.health?.fitzpatrick === 'tip-2'"
+                  [class.ring-2]="cust.health?.fitzpatrick === 'tip-2'"
+                  [class.ring-indigo-500/20]="cust.health?.fitzpatrick === 'tip-2'"
+                  [class.bg-indigo-50/50]="cust.health?.fitzpatrick === 'tip-2'"
+                  [class.dark:bg-indigo-950/40]="cust.health?.fitzpatrick === 'tip-2'"
+                  [class.border-slate-200]="cust.health?.fitzpatrick !== 'tip-2'"
+                  [class.dark:border-slate-800]="cust.health?.fitzpatrick !== 'tip-2'"
+                >
+                  <div class="w-8 h-8 rounded-full mx-auto mb-2 shadow-inner border border-slate-300" style="background-color: #f7d8bb"></div>
+                  <strong class="block text-xs font-bold text-slate-800 dark:text-slate-200">Tip II</strong>
+                  <span class="text-[10px] text-slate-400 block">Açık / Kumral</span>
+                </div>
+
+                <!-- Tip 3 -->
+                <div
+                  class="p-3 rounded-xl border text-center transition-all"
+                  [class.border-indigo-600]="cust.health?.fitzpatrick === 'tip-3'"
+                  [class.ring-2]="cust.health?.fitzpatrick === 'tip-3'"
+                  [class.ring-indigo-500/20]="cust.health?.fitzpatrick === 'tip-3'"
+                  [class.bg-indigo-50/50]="cust.health?.fitzpatrick === 'tip-3'"
+                  [class.dark:bg-indigo-950/40]="cust.health?.fitzpatrick === 'tip-3'"
+                  [class.border-slate-200]="cust.health?.fitzpatrick !== 'tip-3'"
+                  [class.dark:border-slate-800]="cust.health?.fitzpatrick !== 'tip-3'"
+                >
+                  <div class="w-8 h-8 rounded-full mx-auto mb-2 shadow-inner border border-slate-300" style="background-color: #e5b88f"></div>
+                  <strong class="block text-xs font-bold text-slate-800 dark:text-slate-200">Tip III</strong>
+                  <span class="text-[10px] text-slate-400 block">Buğday / Orta</span>
+                </div>
+
+                <!-- Tip 4 -->
+                <div
+                  class="p-3 rounded-xl border text-center transition-all"
+                  [class.border-indigo-600]="cust.health?.fitzpatrick === 'tip-4'"
+                  [class.ring-2]="cust.health?.fitzpatrick === 'tip-4'"
+                  [class.ring-indigo-500/20]="cust.health?.fitzpatrick === 'tip-4'"
+                  [class.bg-indigo-50/50]="cust.health?.fitzpatrick === 'tip-4'"
+                  [class.dark:bg-indigo-950/40]="cust.health?.fitzpatrick === 'tip-4'"
+                  [class.border-slate-200]="cust.health?.fitzpatrick !== 'tip-4'"
+                  [class.dark:border-slate-800]="cust.health?.fitzpatrick !== 'tip-4'"
+                >
+                  <div class="w-8 h-8 rounded-full mx-auto mb-2 shadow-inner border border-slate-300" style="background-color: #b58150"></div>
+                  <strong class="block text-xs font-bold text-slate-800 dark:text-slate-200">Tip IV</strong>
+                  <span class="text-[10px] text-slate-400 block">Esmer / Akdeniz</span>
+                </div>
+
+                <!-- Tip 5 -->
+                <div
+                  class="p-3 rounded-xl border text-center transition-all"
+                  [class.border-indigo-600]="cust.health?.fitzpatrick === 'tip-5'"
+                  [class.ring-2]="cust.health?.fitzpatrick === 'tip-5'"
+                  [class.ring-indigo-500/20]="cust.health?.fitzpatrick === 'tip-5'"
+                  [class.bg-indigo-50/50]="cust.health?.fitzpatrick === 'tip-5'"
+                  [class.dark:bg-indigo-950/40]="cust.health?.fitzpatrick === 'tip-5'"
+                  [class.border-slate-200]="cust.health?.fitzpatrick !== 'tip-5'"
+                  [class.dark:border-slate-800]="cust.health?.fitzpatrick !== 'tip-5'"
+                >
+                  <div class="w-8 h-8 rounded-full mx-auto mb-2 shadow-inner border border-slate-300" style="background-color: #8c542b"></div>
+                  <strong class="block text-xs font-bold text-slate-800 dark:text-slate-200">Tip V</strong>
+                  <span class="text-[10px] text-slate-400 block">Koyu Esmer</span>
+                </div>
+
+                <!-- Tip 6 -->
+                <div
+                  class="p-3 rounded-xl border text-center transition-all"
+                  [class.border-indigo-600]="cust.health?.fitzpatrick === 'tip-6'"
+                  [class.ring-2]="cust.health?.fitzpatrick === 'tip-6'"
+                  [class.ring-indigo-500/20]="cust.health?.fitzpatrick === 'tip-6'"
+                  [class.bg-indigo-50/50]="cust.health?.fitzpatrick === 'tip-6'"
+                  [class.dark:bg-indigo-950/40]="cust.health?.fitzpatrick === 'tip-6'"
+                  [class.border-slate-200]="cust.health?.fitzpatrick !== 'tip-6'"
+                  [class.dark:border-slate-800]="cust.health?.fitzpatrick !== 'tip-6'"
+                >
+                  <div class="w-8 h-8 rounded-full mx-auto mb-2 shadow-inner border border-slate-300" style="background-color: #4b2d18"></div>
+                  <strong class="block text-xs font-bold text-slate-800 dark:text-slate-200">Tip VI</strong>
+                  <span class="text-[10px] text-slate-400 block">Çok Koyu / Siyah</span>
+                </div>
+              </div>
+
+              <!-- Cilt Tipi & Kan Grubu Özet -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+                <div class="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 flex items-center justify-between">
+                  <div>
+                    <span class="text-xs text-slate-400 font-semibold block">Cilt Tipi Sınıflandırması</span>
+                    <strong class="text-sm font-bold text-slate-900 dark:text-white capitalize mt-0.5 block">
+                      {{ cust.health?.skinType || 'Belirtilmedi' }}
+                    </strong>
+                  </div>
+                  <span class="material-symbols-outlined text-indigo-500 icon-size-6">face</span>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 flex items-center justify-between">
+                  <div>
+                    <span class="text-xs text-slate-400 font-semibold block">Kan Grubu</span>
+                    <strong class="text-sm font-bold text-rose-600 dark:text-rose-400 mt-0.5 block">
+                      {{ cust.health?.bloodType || 'Bilinmiyor' }}
+                    </strong>
+                  </div>
+                  <span class="material-symbols-outlined text-rose-500 icon-size-6">bloodtype</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kontrendikasyon & Klinik Durum Detayları -->
+            <div class="odv-card p-5">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined icon-size-4 text-rose-500">warning</span>
+                <span>Kontrendikasyon & Klinik Risk Beyanı</span>
+              </h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <!-- Hamilelik -->
+                <div
+                  class="p-3 rounded-xl border flex items-center justify-between"
+                  [class.bg-rose-50]="cust.health?.isPregnant"
+                  [class.border-rose-200]="cust.health?.isPregnant"
+                  [class.dark:bg-rose-950/40]="cust.health?.isPregnant"
+                  [class.dark:border-rose-900]="cust.health?.isPregnant"
+                  [class.bg-slate-50]="!cust.health?.isPregnant"
+                  [class.border-slate-200]="!cust.health?.isPregnant"
+                  [class.dark:bg-slate-800/40]="!cust.health?.isPregnant"
+                  [class.dark:border-slate-800]="!cust.health?.isPregnant"
+                >
+                  <div>
+                    <span class="text-xs font-bold block" [class.text-rose-800]="cust.health?.isPregnant" [class.dark:text-rose-300]="cust.health?.isPregnant">
+                      Hamilelik Durumu
+                    </span>
+                    <strong class="text-xs" [class.text-rose-600]="cust.health?.isPregnant">
+                      {{ cust.health?.isPregnant ? '⚠️ Evet (Hamile)' : 'Hayır' }}
+                    </strong>
+                  </div>
+                  <span class="material-symbols-outlined icon-size-5" [class.text-rose-600]="cust.health?.isPregnant" [class.text-slate-400]="!cust.health?.isPregnant">
+                    pregnant_woman
+                  </span>
+                </div>
+
+                <!-- Emzirme -->
+                <div
+                  class="p-3 rounded-xl border flex items-center justify-between"
+                  [class.bg-amber-50]="cust.health?.isNursing"
+                  [class.border-amber-200]="cust.health?.isNursing"
+                  [class.dark:bg-amber-950/40]="cust.health?.isNursing"
+                  [class.bg-slate-50]="!cust.health?.isNursing"
+                  [class.border-slate-200]="!cust.health?.isNursing"
+                  [class.dark:bg-slate-800/40]="!cust.health?.isNursing"
+                  [class.dark:border-slate-800]="!cust.health?.isNursing"
+                >
+                  <div>
+                    <span class="text-xs font-bold block" [class.text-amber-800]="cust.health?.isNursing" [class.dark:text-amber-300]="cust.health?.isNursing">
+                      Emzirme Durumu
+                    </span>
+                    <strong class="text-xs" [class.text-amber-600]="cust.health?.isNursing">
+                      {{ cust.health?.isNursing ? 'ℹ️ Evet (Emziriyor)' : 'Hayır' }}
+                    </strong>
+                  </div>
+                  <span class="material-symbols-outlined icon-size-5" [class.text-amber-600]="cust.health?.isNursing" [class.text-slate-400]="!cust.health?.isNursing">
+                    child_care
+                  </span>
+                </div>
+
+                <!-- Kalp Pili / Metal İmplant -->
+                <div
+                  class="p-3 rounded-xl border flex items-center justify-between"
+                  [class.bg-rose-50]="cust.health?.hasImplant"
+                  [class.border-rose-200]="cust.health?.hasImplant"
+                  [class.dark:bg-rose-950/40]="cust.health?.hasImplant"
+                  [class.dark:border-rose-900]="cust.health?.hasImplant"
+                  [class.bg-slate-50]="!cust.health?.hasImplant"
+                  [class.border-slate-200]="!cust.health?.hasImplant"
+                  [class.dark:bg-slate-800/40]="!cust.health?.hasImplant"
+                  [class.dark:border-slate-800]="!cust.health?.hasImplant"
+                >
+                  <div>
+                    <span class="text-xs font-bold block" [class.text-rose-800]="cust.health?.hasImplant" [class.dark:text-rose-300]="cust.health?.hasImplant">
+                      Metal İmplant / Kalp Pili
+                    </span>
+                    <strong class="text-xs" [class.text-rose-600]="cust.health?.hasImplant">
+                      {{ cust.health?.hasImplant ? '⛔ Mevcut (RF Uyarısı)' : 'Yok' }}
+                    </strong>
+                  </div>
+                  <span class="material-symbols-outlined icon-size-5" [class.text-rose-600]="cust.health?.hasImplant" [class.text-slate-400]="!cust.health?.hasImplant">
+                    monitor_heart
+                  </span>
+                </div>
+              </div>
+
+              <!-- Alerjiler, Kronik Hastalıklar, İlaçlar -->
+              <div class="space-y-3 text-xs sm:text-sm">
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                  <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    🌿 Bilinen Alerjiler:
+                  </span>
+                  <p class="m-0 text-slate-600 dark:text-slate-300">
+                    {{ cust.health?.allergies || 'Bilinen bir alerjisi bulunmuyor.' }}
+                  </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                  <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    🩺 Kronik Hastalıklar:
+                  </span>
+                  <p class="m-0 text-slate-600 dark:text-slate-300">
+                    {{ cust.health?.chronicDiseases || 'Kayıtlı kronik rahatsızlık yok.' }}
+                  </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                  <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    💊 Düzenli Kullanılan İlaçlar (Roaccutane vb.):
+                  </span>
+                  <p class="m-0 text-slate-600 dark:text-slate-300">
+                    {{ cust.health?.medications || 'Düzenli ilaç kullanımı bildirilmedi.' }}
+                  </p>
+                </div>
+
+                @if (cust.health?.healthNotes) {
+                  <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
+                    <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      📝 Uzman Klinik Notları:
+                    </span>
+                    <p class="m-0 text-slate-600 dark:text-slate-300 italic">
+                      {{ cust.health?.healthNotes }}
+                    </p>
+                  </div>
+                }
+              </div>
+
+              <div class="mt-4 pt-3 flex justify-end">
+                <button type="button" (click)="setTab('edit')" class="odv-btn-ghost text-xs">
+                  <span class="material-symbols-outlined icon-size-4">edit</span>
+                  <span>Sağlık Bilgilerini Güncelle</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ================= TAB 3: WALLET & TRANSACTIONS ================= -->
+        @if (activeTab() === 'wallet') {
+          <div class="space-y-5 animate-fadeIn">
+            <!-- Cüzdan Bakiye Hero Kartı -->
+            <div class="odv-card p-6 bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white shadow-xl relative overflow-hidden">
+              <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span class="text-xs uppercase font-extrabold tracking-wider text-indigo-300">
+                    Odivon Müşteri Cüzdanı
+                  </span>
+                  <div class="text-3xl sm:text-4xl font-black mt-1 text-white">
+                    ₺{{ (cust.walletBalance || 0) | number: '1.2-2' }}
+                  </div>
+                  <span class="text-xs text-slate-300 mt-1 block">
+                    Ön ödemeli bakiye seans, paket ve taksit ödemelerinde anında kullanılabilir.
+                  </span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2.5 flex-wrap">
+                  <button
+                    type="button"
+                    (click)="openDepositModal()"
+                    class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 border-0 cursor-pointer transition-all"
+                  >
+                    <span class="material-symbols-outlined icon-size-4">add</span>
+                    <span>+ Para / Avans Yükle</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="openSpendModal()"
+                    class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 border border-white/20 cursor-pointer transition-all"
+                  >
+                    <span class="material-symbols-outlined icon-size-4">remove</span>
+                    <span>- Cüzdandan Harca</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hesap Özeti / Ekstre Tablosu -->
+            <div class="odv-card p-5">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined icon-size-4 text-indigo-500">receipt</span>
+                  <span>Cüzdan Hareket Geçmişi & Ekstre</span>
+                </div>
+                <span class="text-xs font-normal text-slate-400">
+                  Toplam {{ cust.walletTransactions?.length || 0 }} işlem
+                </span>
+              </h3>
+
+              @if ((cust.walletTransactions?.length || 0) === 0) {
+                <div class="p-8 text-center text-slate-400 text-xs">
+                  <span class="material-symbols-outlined icon-size-8 text-slate-300 block mb-2">account_balance_wallet</span>
+                  Henüz cüzdan hareketi bulunmuyor. Yukarıdaki "+ Para Yükle" butonunu kullanarak ilk bakiyeyi tanımlayabilirsiniz.
+                </div>
+              } @else {
+                <div class="overflow-x-auto custom-scroll">
+                  <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                      <tr class="border-b border-slate-200 dark:border-slate-800 odv-th">
+                        <th class="py-2.5 px-4">Tarih</th>
+                        <th class="py-2.5 px-4">İşlem Türü</th>
+                        <th class="py-2.5 px-4">Açıklama</th>
+                        <th class="py-2.5 px-4">Yöntem</th>
+                        <th class="py-2.5 px-4 text-right">Tutar</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      @for (tx of cust.walletTransactions; track tx.id) {
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                          <td class="py-3 px-4 font-mono text-slate-500">
+                            {{ tx.date | date: 'dd.MM.yyyy' }}
+                          </td>
+                          <td class="py-3 px-4">
+                            @if (tx.type === 'deposit') {
+                              <span class="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                                <span class="material-symbols-outlined icon-size-3.5">arrow_downward</span>
+                                Yükleme
+                              </span>
+                            } @else if (tx.type === 'spend') {
+                              <span class="inline-flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300">
+                                <span class="material-symbols-outlined icon-size-3.5 text-rose-500">arrow_upward</span>
+                                Harcama
+                              </span>
+                            } @else {
+                              <span class="font-bold text-purple-600">İade</span>
+                            }
+                          </td>
+                          <td class="py-3 px-4 text-slate-700 dark:text-slate-300">
+                            {{ tx.description }}
+                          </td>
+                          <td class="py-3 px-4 text-slate-500">
+                            {{ tx.paymentMethod }}
+                          </td>
+                          <td class="py-3 px-4 text-right font-mono font-bold" [class.text-emerald-600]="tx.type === 'deposit'" [class.text-slate-900]="tx.type !== 'deposit'" [class.dark:text-white]="tx.type !== 'deposit'">
+                            {{ tx.type === 'deposit' ? '+' : '-' }}₺{{ tx.amount | number: '1.2-2' }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ================= TAB 4: INSTALLMENTS ================= -->
+        @if (activeTab() === 'installments') {
+          <div class="space-y-5 animate-fadeIn">
+            <!-- Header with New Plan Action -->
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white m-0">Taksitli Ödeme Planları</h3>
+                <span class="text-xs text-slate-500">Paket ve hizmet taksitlerini buradan yönetin ve tahsil edin.</span>
+              </div>
+              <button
+                type="button"
+                (click)="openNewInstallmentPlanModal()"
+                class="odv-btn-primary text-xs"
+              >
+                <span class="material-symbols-outlined icon-size-4">add_circle</span>
+                <span>+ Yeni Taksit Planı</span>
+              </button>
+            </div>
+
+            @if ((cust.installments?.length || 0) === 0) {
+              <div class="odv-card p-10 text-center text-slate-400">
+                <span class="material-symbols-outlined icon-size-8 text-slate-300 block mb-2">receipt_long</span>
+                <strong class="block text-sm text-slate-800 dark:text-slate-200">Kayıtlı Taksit Planı Yok</strong>
+                <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  Müşteriye henüz vadeli veya taksitli bir ödeme planı tanımlanmamış. "+ Yeni Taksit Planı" ile hemen plan oluşturabilirsiniz.
+                </p>
+                <button
+                  type="button"
+                  (click)="openNewInstallmentPlanModal()"
+                  class="mt-4 odv-btn-primary text-xs inline-flex"
+                >
+                  Taksit Planı Tanımla
+                </button>
+              </div>
+            } @else {
+              @for (plan of cust.installments; track plan.id) {
+                <div class="odv-card p-5 mb-5 border-l-4 border-l-indigo-600">
+                  <!-- Plan Header Summary -->
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                      <h4 class="text-base font-bold text-slate-900 dark:text-white m-0">
+                        {{ plan.title }}
+                      </h4>
+                      <span class="text-xs text-slate-400 mt-0.5 block">
+                        Oluşturulma: {{ plan.createdAt | date: 'dd.MM.yyyy' }} • {{ plan.installmentCount }} Taksit
+                      </span>
+                    </div>
+
+                    <!-- Amounts Strip -->
+                    <div class="flex items-center gap-4 text-xs">
+                      <div>
+                        <span class="text-slate-400 block font-semibold text-[11px]">Toplam Tutar</span>
+                        <strong class="text-slate-900 dark:text-white font-mono text-sm">
+                          ₺{{ plan.totalAmount | number: '1.2-2' }}
+                        </strong>
+                      </div>
+                      <div>
+                        <span class="text-emerald-500 block font-semibold text-[11px]">Tahsil Edilen</span>
+                        <strong class="text-emerald-600 dark:text-emerald-400 font-mono text-sm">
+                          ₺{{ plan.paidAmount | number: '1.2-2' }}
+                        </strong>
+                      </div>
+                      <div>
+                        <span class="text-rose-500 block font-semibold text-[11px]">Kalan Borç</span>
+                        <strong class="text-rose-600 dark:text-rose-400 font-mono text-sm">
+                          ₺{{ plan.remainingAmount | number: '1.2-2' }}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Progress Bar -->
+                  <div class="mb-4">
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div
+                        class="h-full bg-gradient-to-r from-emerald-500 to-indigo-600 transition-all duration-500"
+                        [style.width.%]="getProgressPercent(plan.paidAmount, plan.totalAmount)"
+                      ></div>
+                    </div>
+                    <div class="flex justify-between text-[11px] font-semibold text-slate-400 mt-1">
+                      <span>Ödeme İlerlemesi: %{{ getProgressPercent(plan.paidAmount, plan.totalAmount) }}</span>
+                      <span>{{ plan.remainingAmount === 0 ? 'Tamamı Ödendi 🎉' : 'Ödemeler Devam Ediyor' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Installments Schedule Table -->
+                  <div class="overflow-x-auto custom-scroll">
+                    <table class="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr class="border-b border-slate-200 dark:border-slate-800 odv-th">
+                          <th class="py-2 px-3">Taksit No</th>
+                          <th class="py-2 px-3">Vade Tarihi</th>
+                          <th class="py-2 px-3">Tutar</th>
+                          <th class="py-2 px-3">Durum</th>
+                          <th class="py-2 px-3">Ödeme Detayı</th>
+                          <th class="py-2 px-3 text-right">İşlem</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        @for (item of plan.schedule; track item.installmentNo) {
+                          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                            <td class="py-2.5 px-3 font-bold text-slate-800 dark:text-slate-200">
+                              {{ item.installmentNo }}. Taksit
+                            </td>
+                            <td class="py-2.5 px-3 font-mono text-slate-600 dark:text-slate-300">
+                              {{ item.dueDate | date: 'dd.MM.yyyy' }}
+                            </td>
+                            <td class="py-2.5 px-3 font-mono font-bold text-slate-900 dark:text-white">
+                              ₺{{ item.amount | number: '1.2-2' }}
+                            </td>
+                            <td class="py-2.5 px-3">
+                              @if (item.status === 'paid') {
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                                  ✓ Ödendi
+                                </span>
+                              } @else if (item.status === 'overdue') {
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300">
+                                  ⚠️ Gecikmede
+                                </span>
+                              } @else {
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                                  ⏳ Bekliyor
+                                </span>
+                              }
+                            </td>
+                            <td class="py-2.5 px-3 text-slate-500">
+                              @if (item.status === 'paid') {
+                                <span>{{ item.paidAt | date: 'dd.MM.yyyy' }} ({{ item.paymentMethod }})</span>
+                              } @else {
+                                <span>—</span>
+                              }
+                            </td>
+                            <td class="py-2.5 px-3 text-right">
+                              @if (item.status !== 'paid') {
+                                <button
+                                  type="button"
+                                  (click)="openCollectModal(plan.id, item)"
+                                  class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[11px] cursor-pointer border-0 shadow-2xs transition-colors"
+                                >
+                                  Tahsil Et
+                                </button>
+                              } @else {
+                                <span class="text-emerald-500 font-bold text-[11px]">Tahsil Edildi</span>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        }
+
+        <!-- ================= TAB 5: SESSIONS ================= -->
+        @if (activeTab() === 'sessions') {
+          <div class="space-y-5 animate-fadeIn">
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white m-0">Paket & Seans Takibi</h3>
+                <span class="text-xs text-slate-500">Satın alınan paketlerin seanslarını düşebilir ve loglarını inceleyebilirsiniz.</span>
+              </div>
+            </div>
+
+            @if ((cust.packages?.length || 0) === 0) {
+              <div class="odv-card p-10 text-center text-slate-400">
+                <span class="material-symbols-outlined icon-size-8 text-slate-300 block mb-2">spa</span>
+                <strong class="block text-sm text-slate-800 dark:text-slate-200">Tanımlı Paket Bulunmuyor</strong>
+                <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  Bu müşteriye ait aktif bir seans paketi bulunmamaktadır.
+                </p>
+              </div>
+            } @else {
+              @for (pkg of cust.packages; track pkg.id) {
+                <div class="odv-card p-5 mb-5 border-l-4 border-l-purple-600">
+                  <!-- Package Header -->
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <h4 class="text-base font-bold text-slate-900 dark:text-white m-0">
+                          {{ pkg.packageName }}
+                        </h4>
+                        <span
+                          class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                          [class.bg-emerald-100]="pkg.status === 'active'"
+                          [class.text-emerald-800]="pkg.status === 'active'"
+                          [class.bg-purple-100]="pkg.status === 'completed'"
+                          [class.text-purple-800]="pkg.status === 'completed'"
+                        >
+                          {{ pkg.status === 'completed' ? 'Tamamlandı' : 'Aktif' }}
+                        </span>
+                      </div>
+                      <span class="text-xs text-slate-400 mt-0.5 block">
+                        Başlangıç: {{ pkg.startDate | date: 'dd.MM.yyyy' }}
+                      </span>
+                    </div>
+
+                    <!-- Progress Counts & Quick Deduct Action -->
+                    <div class="flex items-center gap-3">
+                      <div class="text-right">
+                        <span class="text-xs text-slate-400 block font-semibold">Seans Durumu</span>
+                        <strong class="text-sm font-bold text-slate-900 dark:text-white">
+                          {{ pkg.completedSessions }} / {{ pkg.totalSessions }} Tamamlandı
+                          <span class="text-purple-600 font-bold ml-1">({{ pkg.remainingSessions }} Kalan)</span>
+                        </strong>
+                      </div>
+
+                      @if (pkg.remainingSessions > 0) {
+                        <button
+                          type="button"
+                          (click)="quickDeductSession(pkg)"
+                          class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-purple-500/20 border-0 cursor-pointer transition-all"
+                        >
+                          <span class="material-symbols-outlined icon-size-4">check</span>
+                          <span>Seans Düş</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Visual Progress Bar -->
+                  <div class="mb-5">
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                      <div
+                        class="h-full bg-gradient-to-r from-purple-500 to-indigo-600 transition-all duration-500"
+                        [style.width.%]="getProgressPercent(pkg.completedSessions, pkg.totalSessions)"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <!-- Sessions List -->
+                  <div class="space-y-2">
+                    <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                      Seans Geçmişi & Notlar
+                    </h5>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                      @for (ses of pkg.sessions; track ses.sessionNo) {
+                        <div
+                          class="p-3 rounded-xl border text-xs"
+                          [class.bg-emerald-50/40]="ses.status === 'completed'"
+                          [class.border-emerald-200]="ses.status === 'completed'"
+                          [class.dark:bg-emerald-950/20]="ses.status === 'completed'"
+                          [class.dark:border-emerald-900/60]="ses.status === 'completed'"
+                          [class.bg-indigo-50/40]="ses.status === 'scheduled'"
+                          [class.border-indigo-200]="ses.status === 'scheduled'"
+                          [class.dark:bg-indigo-950/20]="ses.status === 'scheduled'"
+                          [class.bg-slate-50]="ses.status === 'pending'"
+                          [class.border-slate-200]="ses.status === 'pending'"
+                          [class.dark:bg-slate-800/40]="ses.status === 'pending'"
+                          [class.dark:border-slate-800]="ses.status === 'pending'"
+                        >
+                          <div class="flex items-center justify-between mb-1">
+                            <strong class="font-bold text-slate-900 dark:text-white">
+                              {{ ses.sessionNo }}. Seans
+                            </strong>
+                            @if (ses.status === 'completed') {
+                              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                                <span class="material-symbols-outlined icon-size-3">check_circle</span>
+                                Tamamlandı
+                              </span>
+                            } @else if (ses.status === 'scheduled') {
+                              <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                                Randevulu
+                              </span>
+                            } @else {
+                              <span class="text-[10px] font-bold text-slate-400">
+                                Bekliyor
+                              </span>
+                            }
+                          </div>
+
+                          <div class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                            @if (ses.date) {
+                              <div>📅 {{ ses.date | date: 'dd.MM.yyyy' }}</div>
+                            }
+                            <div>📍 Bölge: {{ ses.zone }}</div>
+                            @if (ses.staffName) {
+                              <div>👤 Uzman: {{ ses.staffName }}</div>
+                            }
+                            @if (ses.notes) {
+                              <div class="mt-1 pt-1 border-t border-slate-200/60 dark:border-slate-700/60 italic text-slate-600 dark:text-slate-300">
+                                “{{ ses.notes }}”
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        }
+
+        <!-- ================= TAB 6: EDIT PROFILE & HEALTH ================= -->
+        @if (activeTab() === 'edit') {
+          <div class="space-y-5 animate-fadeIn">
+            <div class="odv-card p-5">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined icon-size-4 text-indigo-500">edit_square</span>
+                <span>Müşteri Bilgilerini Düzenle</span>
+              </h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Ad Soyad -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Ad Soyad *
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().fullName || ''"
+                    (input)="updateDraftField('fullName', $event)"
+                    class="odv-input"
+                    placeholder="Müşterinin tam adı"
+                  />
+                </div>
+
+                <!-- TCKN -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    TC Kimlik Numarası (11 Hane)
+                  </label>
+                  <input
+                    type="text"
+                    maxlength="11"
+                    [value]="editDraft().identityNumber || ''"
+                    (input)="updateDraftField('identityNumber', $event)"
+                    class="odv-input font-mono"
+                    placeholder="11 Haneli TCKN"
+                  />
+                </div>
+
+                <!-- Doğum Tarihi -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Doğum Tarihi
+                  </label>
+                  <input
+                    type="date"
+                    [value]="editDraft().birthDate || ''"
+                    (input)="updateDraftField('birthDate', $event)"
+                    class="odv-input"
+                  />
+                </div>
+
+                <!-- Cinsiyet -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Cinsiyet
+                  </label>
+                  <select
+                    [value]="editDraft().gender || 'female'"
+                    (change)="updateDraftField('gender', $event)"
+                    class="odv-input"
+                  >
+                    <option value="female">Kadın</option>
+                    <option value="male">Erkek</option>
+                    <option value="other">Diğer</option>
+                    <option value="unspecified">Belirtmek İstemiyor</option>
+                  </select>
+                </div>
+
+                <!-- Telefon -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Telefon *
+                  </label>
+                  <input
+                    type="tel"
+                    [value]="editDraft().phone || ''"
+                    (input)="updateDraftField('phone', $event)"
+                    class="odv-input"
+                    placeholder="+90 5xx xxx xx xx"
+                  />
+                </div>
+
+                <!-- Acil Durum Telefonu -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Acil Durum Telefonu
+                  </label>
+                  <input
+                    type="tel"
+                    [value]="editDraft().emergencyPhone || ''"
+                    (input)="updateDraftField('emergencyPhone', $event)"
+                    class="odv-input"
+                    placeholder="+90 5xx xxx xx xx"
+                  />
+                </div>
+
+                <!-- E-Posta -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    E-Posta
+                  </label>
+                  <input
+                    type="email"
+                    [value]="editDraft().email || ''"
+                    (input)="updateDraftField('email', $event)"
+                    class="odv-input"
+                    placeholder="ornek@alanadi.com"
+                  />
+                </div>
+
+                <!-- Meslek -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Meslek
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().occupation || ''"
+                    (input)="updateDraftField('occupation', $event)"
+                    class="odv-input"
+                    placeholder="Mimar, Doktor, Avukat vb."
+                  />
+                </div>
+
+                <!-- Segment -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Segment
+                  </label>
+                  <select
+                    [value]="editDraft().segment || 'standart'"
+                    (change)="updateDraftField('segment', $event)"
+                    class="odv-input"
+                  >
+                    <option value="vip">VIP</option>
+                    <option value="gold">Gold</option>
+                    <option value="sadik">Sadık Müşteri</option>
+                    <option value="yeni">Yeni Müşteri</option>
+                    <option value="standart">Standart</option>
+                  </select>
+                </div>
+
+                <!-- Şehir & İlçe -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Şehir
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().city || ''"
+                    (input)="updateDraftField('city', $event)"
+                    class="odv-input"
+                    placeholder="İstanbul, Ankara vb."
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    İlçe
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().district || ''"
+                    (input)="updateDraftField('district', $event)"
+                    class="odv-input"
+                    placeholder="Kadıköy, Beşiktaş vb."
+                  />
+                </div>
+
+                <!-- Tercih Edilen Uzman -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Tercih Edilen Uzman
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().preferredStaffName || ''"
+                    (input)="updateDraftField('preferredStaffName', $event)"
+                    class="odv-input"
+                    placeholder="Estetisyen / Uzman adı"
+                  />
+                </div>
+
+                <!-- Açık Adres -->
+                <div class="sm:col-span-3">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Açık Adres
+                  </label>
+                  <textarea
+                    rows="2"
+                    [value]="editDraft().address || ''"
+                    (input)="updateDraftField('address', $event)"
+                    class="odv-input"
+                    placeholder="Mahalle, Cadde, No, Daire"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Sağlık ve Medikal Bölümü -->
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-3 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined icon-size-4 text-rose-500">health_and_safety</span>
+                <span>Sağlık, Cilt & Kontrendikasyon Beyanları</span>
+              </h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Cilt Tipi -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Cilt Tipi
+                  </label>
+                  <select
+                    [value]="editDraft().health?.skinType || 'karma'"
+                    (change)="updateHealthField('skinType', $event)"
+                    class="odv-input"
+                  >
+                    <option value="kuru">Kuru</option>
+                    <option value="yagli">Yağlı</option>
+                    <option value="karma">Karma</option>
+                    <option value="normal">Normal</option>
+                    <option value="hassas">Hassas</option>
+                    <option value="akneye-meyilli">Akneye Meyilli</option>
+                  </select>
+                </div>
+
+                <!-- Fitzpatrick Skalası -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Fitzpatrick Tonu
+                  </label>
+                  <select
+                    [value]="editDraft().health?.fitzpatrick || 'tip-3'"
+                    (change)="updateHealthField('fitzpatrick', $event)"
+                    class="odv-input"
+                  >
+                    <option value="tip-1">Tip I - Çok Açık / Beyaz</option>
+                    <option value="tip-2">Tip II - Açık / Kumral</option>
+                    <option value="tip-3">Tip III - Buğday / Orta</option>
+                    <option value="tip-4">Tip IV - Esmer / Akdeniz</option>
+                    <option value="tip-5">Tip V - Koyu Esmer</option>
+                    <option value="tip-6">Tip VI - Çok Koyu / Siyah</option>
+                  </select>
+                </div>
+
+                <!-- Kan Grubu -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Kan Grubu
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().health?.bloodType || ''"
+                    (input)="updateHealthField('bloodType', $event)"
+                    class="odv-input"
+                    placeholder="A Rh+, 0 Rh- vb."
+                  />
+                </div>
+
+                <!-- Checkbox Kontroller: Hamile, Emziren, İmplant -->
+                <div class="sm:col-span-3 flex flex-wrap gap-4 py-2">
+                  <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      [checked]="editDraft().health?.isPregnant || false"
+                      (change)="updateHealthField('isPregnant', $event)"
+                      class="rounded text-rose-600 w-4 h-4"
+                    />
+                    <span>Hamilelik Mevcut</span>
+                  </label>
+
+                  <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      [checked]="editDraft().health?.isNursing || false"
+                      (change)="updateHealthField('isNursing', $event)"
+                      class="rounded text-amber-600 w-4 h-4"
+                    />
+                    <span>Emzirme Dönemi</span>
+                  </label>
+
+                  <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      [checked]="editDraft().health?.hasImplant || false"
+                      (change)="updateHealthField('hasImplant', $event)"
+                      class="rounded text-rose-600 w-4 h-4"
+                    />
+                    <span>Metal İmplant / Kalp Pili</span>
+                  </label>
+                </div>
+
+                <!-- Alerjiler -->
+                <div class="sm:col-span-3">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Alerjiler
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().health?.allergies || ''"
+                    (input)="updateHealthField('allergies', $event)"
+                    class="odv-input"
+                    placeholder="Latex, kozmetik parfüm, nikel vb."
+                  />
+                </div>
+
+                <!-- Kronik Hastalıklar -->
+                <div class="sm:col-span-3">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Kronik Hastalıklar
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().health?.chronicDiseases || ''"
+                    (input)="updateHealthField('chronicDiseases', $event)"
+                    class="odv-input"
+                    placeholder="Diyabet, astım, tansiyon vb."
+                  />
+                </div>
+
+                <!-- Kullanılan İlaçlar -->
+                <div class="sm:col-span-3">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Düzenli Kullanılan İlaçlar (Roaccutane, Kan Sulandırıcı vb.)
+                  </label>
+                  <input
+                    type="text"
+                    [value]="editDraft().health?.medications || ''"
+                    (input)="updateHealthField('medications', $event)"
+                    class="odv-input"
+                    placeholder="Lazer öncesi kritik ilaçlar"
+                  />
+                </div>
+
+                <!-- Operasyon Notları -->
+                <div class="sm:col-span-3">
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Operasyonel & Klinik Notlar
+                  </label>
+                  <textarea
+                    rows="2"
+                    [value]="editDraft().notes || ''"
+                    (input)="updateDraftField('notes', $event)"
+                    class="odv-input"
+                    placeholder="Müşteri için özel talimatlar"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Save Button -->
+              <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  (click)="setTab('overview')"
+                  class="odv-btn-ghost text-xs"
+                >
+                  İptal
+                </button>
+
+                <button
+                  type="button"
+                  [disabled]="saving()"
+                  (click)="saveDraft()"
+                  class="odv-btn-primary text-xs"
+                >
+                  <span class="material-symbols-outlined icon-size-4">
+                    {{ saving() ? 'sync' : 'save' }}
+                  </span>
+                  <span>{{ saving() ? 'Kaydediliyor…' : 'Değişiklikleri Kaydet' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ================= TAB: CONSULTATIONS & PRELIMINARY INQUIRIES ================= -->
+        @if (activeTab() === 'consultations') {
+          <div class="space-y-5 animate-fadeIn">
+            <!-- Header Card with Action -->
+            <div class="odv-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-2">
+                  <span class="material-symbols-outlined icon-size-4 text-amber-500">support_agent</span>
+                  <span>Ön Görüşmeler & Seans Bilgi Talepleri</span>
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 m-0">
+                  Müşterinin merkezimize gelerek veya telefonla bilgi aldığı seanslar, verilen teklifler ve takip takvimi.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                (click)="openNewConsultationModal()"
+                class="odv-btn-primary text-xs self-start sm:self-center"
+              >
+                <span class="material-symbols-outlined icon-size-4">add_comment</span>
+                <span>+ Yeni Ön Görüşme Ekle</span>
+              </button>
+            </div>
+
+            <!-- List of Consultations -->
+            @if ((cust.consultations?.length || 0) > 0) {
+              <div class="space-y-3.5">
+                @for (cns of cust.consultations; track cns.id) {
+                  <div
+                    class="odv-card p-5 border-l-4 transition-all"
+                    [class.border-l-rose-500]="cns.interestLevel === 'high'"
+                    [class.border-l-amber-500]="cns.interestLevel === 'medium'"
+                    [class.border-l-slate-400]="cns.interestLevel === 'low'"
+                  >
+                    <!-- Top Bar: Category, Inquired Session, Badges -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+                      <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                            {{ cns.serviceCategory }}
+                          </span>
+                          <strong class="text-base font-black text-slate-900 dark:text-white">
+                            {{ cns.inquiredSession }}
+                          </strong>
+                          @if (cns.interestLevel === 'high') {
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+                              🔥 Sıcak / Yüksek İlgi
+                            </span>
+                          } @else if (cns.interestLevel === 'medium') {
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                              ⚡ Orta / Düşünüyor
+                            </span>
+                          } @else {
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                              ❄️ Düşük / Bilgi Aldı
+                            </span>
+                          }
+                        </div>
+                        <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-3 flex-wrap">
+                          <span>Görüşme Tarihi: <strong class="text-slate-600 dark:text-slate-300">{{ cns.consultationDate ? (cns.consultationDate | date: 'dd.MM.yyyy') : '—' }}</strong></span>
+                          <span>Kanal: <strong class="text-slate-600 dark:text-slate-300">{{ cns.channel }}</strong></span>
+                          @if (cns.consultantStaffName) {
+                            <span>Görüşen: <strong class="text-slate-600 dark:text-slate-300">{{ cns.consultantStaffName }}</strong></span>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Status & Actions -->
+                      <div class="flex items-center gap-2 self-end sm:self-center">
+                        @if (cns.status === 'inquiry') {
+                          <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-900">
+                            Bilgi Aldı / Düşünüyor
+                          </span>
+                        } @else if (cns.status === 'scheduled') {
+                          <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-900">
+                            Randevu Verildi
+                          </span>
+                        } @else if (cns.status === 'converted') {
+                          <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-900">
+                            Satışa Dönüştü
+                          </span>
+                        } @else {
+                          <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                            Vazgeçti
+                          </span>
+                        }
+
+                        <button
+                          type="button"
+                          class="odv-icon-btn odv-icon-btn-danger"
+                          title="Sil"
+                          (click)="removeConsultation(cns.id)"
+                        >
+                          <span class="material-symbols-outlined icon-size-4">delete</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Metrics Grid: Sessions, Price, Follow-up -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 my-3">
+                      <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                        <span class="block text-[10px] font-bold uppercase text-slate-400">Önerilen Seans Sayısı</span>
+                        <strong class="text-sm font-black text-slate-900 dark:text-white mt-0.5 block">
+                          {{ cns.targetSessionsCount }} Seans
+                        </strong>
+                      </div>
+
+                      <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                        <span class="block text-[10px] font-bold uppercase text-slate-400">Teklif Edilen Fiyat</span>
+                        <strong class="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block font-mono">
+                          ₺{{ (cns.quotedPrice || 0) | number: '1.2-2' }}
+                        </strong>
+                      </div>
+
+                      <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 col-span-2 sm:col-span-1">
+                        <span class="block text-[10px] font-bold uppercase text-slate-400">Sonraki Takip / Arama</span>
+                        <strong class="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
+                          {{ cns.nextFollowUpDate ? (cns.nextFollowUpDate | date: 'dd MMMM yyyy') : 'Belirtilmedi' }}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <!-- Notes Section -->
+                    @if (cns.notes) {
+                      <div class="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 text-xs text-slate-700 dark:text-slate-300">
+                        <span class="font-bold text-amber-800 dark:text-amber-300 block mb-0.5">Görüşme ve Bilgi Notu:</span>
+                        <p class="m-0 leading-relaxed">{{ cns.notes }}</p>
+                      </div>
+                    }
+
+                    <!-- Quick Status Converters -->
+                    @if (cns.status !== 'converted') {
+                      <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2 text-xs flex-wrap">
+                        <span class="text-slate-400 text-[11px]">Durum Değiştir:</span>
+                        <button
+                          type="button"
+                          (click)="updateConsultationStatus(cns.id, 'scheduled')"
+                          class="px-2.5 py-1 rounded-lg font-bold text-[11px] bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300 border-0 cursor-pointer"
+                        >
+                          Randevu Verildi
+                        </button>
+                        <button
+                          type="button"
+                          (click)="updateConsultationStatus(cns.id, 'converted')"
+                          class="px-2.5 py-1 rounded-lg font-bold text-[11px] bg-emerald-600 text-white hover:bg-emerald-700 border-0 cursor-pointer"
+                        >
+                          ✓ Satışa Dönüştür
+                        </button>
+                        <button
+                          type="button"
+                          (click)="updateConsultationStatus(cns.id, 'cancelled')"
+                          class="px-2.5 py-1 rounded-lg font-bold text-[11px] bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 border-0 cursor-pointer"
+                        >
+                          Vazgeçti
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <!-- Empty State -->
+              <div class="odv-card p-10 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3">
+                  <span class="material-symbols-outlined icon-size-7">support_agent</span>
+                </div>
+                <h4 class="text-base font-bold text-slate-900 dark:text-white m-0">Henüz Ön Görüşme Kaydı Yok</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-4 max-w-sm mx-auto">
+                  Müşterinin merkezimize gelerek veya telefonla bilgi aldığı seansları ve verilen fiyat tekliflerini buradan takip edebilirsiniz.
+                </p>
+                <button
+                  type="button"
+                  (click)="openNewConsultationModal()"
+                  class="odv-btn-primary text-xs"
+                >
+                  <span class="material-symbols-outlined icon-size-4">add_comment</span>
+                  <span>İlk Ön Görüşmeyi Kaydet</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </main>
+
+      <!-- 6. Modal Footer -->
+      <footer
+        class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between text-xs text-slate-500"
+      >
+        <span>Müşteri ID: <strong class="font-mono">{{ cust.id }}</strong></span>
+        <button
+          type="button"
+          (click)="close.emit()"
+          class="odv-btn-ghost text-xs"
+        >
+          Kapat
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- SUB-MODAL 1: Cüzdan Bakiye Yükleme Dialog -->
+  @if (showDepositModal()) {
+    <div
+      class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-500 icon-size-5">add_card</span>
+            <span>Cüzdana Para / Avans Yükle</span>
+          </h3>
+          <button
+            type="button"
+            (click)="showDepositModal.set(false)"
+            class="text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Yüklenecek Tutar (₺) *
+          </label>
+          <input
+            type="number"
+            min="1"
+            [value]="depositAmount()"
+            (input)="depositAmount.set(+$any($event.target).value)"
+            class="odv-input font-mono text-lg font-bold"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Ödeme Yöntemi
+          </label>
+          <select
+            [value]="depositMethod()"
+            (change)="depositMethod.set($any($event.target).value)"
+            class="odv-input"
+          >
+            <option value="Kredi Kartı">Kredi Kartı</option>
+            <option value="Nakit">Nakit</option>
+            <option value="Havale / EFT">Havale / EFT</option>
+            <option value="Diğer">Diğer</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Açıklama
+          </label>
+          <input
+            type="text"
+            [value]="depositDescription()"
+            (input)="depositDescription.set($any($event.target).value)"
+            class="odv-input"
+            placeholder="İşlem açıklaması"
+          />
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3">
+          <button
+            type="button"
+            (click)="showDepositModal.set(false)"
+            class="odv-btn-ghost text-xs"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            [disabled]="saving()"
+            (click)="confirmDeposit()"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 border-0 cursor-pointer"
+          >
+            <span class="material-symbols-outlined icon-size-4">check</span>
+            <span>{{ saving() ? 'Yükleniyor…' : 'Yüklemeyi Onayla' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- SUB-MODAL 2: Cüzdan Harcama Dialog -->
+  @if (showSpendModal()) {
+    <div
+      class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-rose-500 icon-size-5">shopping_bag</span>
+            <span>Cüzdandan Harcama Yap</span>
+          </h3>
+          <button
+            type="button"
+            (click)="showSpendModal.set(false)"
+            class="text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+          Mevcut Bakiye: <strong class="text-emerald-600 font-mono text-sm ml-1">₺{{ (cust.walletBalance || 0) | number: '1.2-2' }}</strong>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Tahsil Edilecek Harcama Tutarı (₺) *
+          </label>
+          <input
+            type="number"
+            min="1"
+            [max]="cust.walletBalance || 0"
+            [value]="spendAmount()"
+            (input)="spendAmount.set(+$any($event.target).value)"
+            class="odv-input font-mono text-lg font-bold"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Harcama Açıklaması
+          </label>
+          <input
+            type="text"
+            [value]="spendDescription()"
+            (input)="spendDescription.set($any($event.target).value)"
+            class="odv-input"
+            placeholder="Hizmet / Ürün satışı"
+          />
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3">
+          <button
+            type="button"
+            (click)="showSpendModal.set(false)"
+            class="odv-btn-ghost text-xs"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            [disabled]="saving()"
+            (click)="confirmSpend()"
+            class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1 border-0 cursor-pointer"
+          >
+            <span class="material-symbols-outlined icon-size-4">check</span>
+            <span>{{ saving() ? 'İşleniyor…' : 'Cüzdandan Düş' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- SUB-MODAL 3: Taksit Tahsil Et Dialog -->
+  @if (showCollectInstallmentModal() && selectedInstallment(); as target) {
+    <div
+      class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-500 icon-size-5">payments</span>
+            <span>Taksit Tahsilatı Yap</span>
+          </h3>
+          <button
+            type="button"
+            (click)="showCollectInstallmentModal.set(false)"
+            class="text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900 text-xs text-indigo-900 dark:text-indigo-200 space-y-1">
+          <div class="flex justify-between font-bold">
+            <span>Taksit:</span>
+            <span>{{ target.item.installmentNo }}. Taksit</span>
+          </div>
+          <div class="flex justify-between font-bold">
+            <span>Vade Tarihi:</span>
+            <span>{{ target.item.dueDate | date: 'dd.MM.yyyy' }}</span>
+          </div>
+          <div class="flex justify-between font-bold text-sm pt-1 border-t border-indigo-200 dark:border-indigo-800">
+            <span>Tahsil Edilecek Tutar:</span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-mono">₺{{ target.item.amount | number: '1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Tahsilat Ödeme Yöntemi *
+          </label>
+          <select
+            [value]="collectionMethod()"
+            (change)="collectionMethod.set($any($event.target).value)"
+            class="odv-input"
+          >
+            <option value="Kredi Kartı">Kredi Kartı (POS)</option>
+            <option value="Nakit">Nakit</option>
+            <option value="Havale / EFT">Havale / EFT</option>
+            <option value="Cüzdan Bakiyesi">
+              Müşteri Cüzdanından Düş (Mevcut: ₺{{ (cust.walletBalance || 0) | number: '1.2-2' }})
+            </option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3">
+          <button
+            type="button"
+            (click)="showCollectInstallmentModal.set(false)"
+            class="odv-btn-ghost text-xs"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            [disabled]="saving()"
+            (click)="confirmCollection()"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 border-0 cursor-pointer"
+          >
+            <span class="material-symbols-outlined icon-size-4">check</span>
+            <span>{{ saving() ? 'Kaydediliyor…' : 'Tahsilatı Tamamla' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- SUB-MODAL 4: Yeni Taksit Planı Dialog -->
+  @if (showNewInstallmentPlanModal()) {
+    <div
+      class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-indigo-500 icon-size-5">post_add</span>
+            <span>Yeni Taksit Planı Tanımla</span>
+          </h3>
+          <button
+            type="button"
+            (click)="showNewInstallmentPlanModal.set(false)"
+            class="text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Plan Başlığı / Paket Adı *
+          </label>
+          <input
+            type="text"
+            [value]="newPlanTitle()"
+            (input)="newPlanTitle.set($any($event.target).value)"
+            class="odv-input"
+            placeholder="Örn: Buz Lazer Tüm Vücut Paketi"
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Toplam Tutar (₺) *
+            </label>
+            <input
+              type="number"
+              min="1"
+              [value]="newPlanAmount()"
+              (input)="newPlanAmount.set(+$any($event.target).value)"
+              class="odv-input font-mono font-bold"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Taksit Sayısı *
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="24"
+              [value]="newPlanCount()"
+              (input)="newPlanCount.set(+$any($event.target).value)"
+              class="odv-input font-mono font-bold"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            İlk Taksit Vade Tarihi *
+          </label>
+          <input
+            type="date"
+            [value]="newPlanFirstDate()"
+            (input)="newPlanFirstDate.set($any($event.target).value)"
+            class="odv-input"
+          />
+        </div>
+
+        <!-- Önizleme -->
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-300">
+          Aylık Taksit Tutarı:
+          <strong class="text-indigo-600 font-mono text-sm ml-1">
+            ₺{{ (newPlanAmount() / (newPlanCount() || 1)) | number: '1.2-2' }}
+          </strong>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3">
+          <button
+            type="button"
+            (click)="showNewInstallmentPlanModal.set(false)"
+            class="odv-btn-ghost text-xs"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            [disabled]="saving()"
+            (click)="confirmNewInstallmentPlan()"
+            class="odv-btn-primary text-xs"
+          >
+            <span>{{ saving() ? 'Oluşturuluyor…' : 'Planı Oluştur' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- SUB-MODAL 5: Seans Düş / Uygulama Kaydet Dialog -->
+  @if (showNewSessionModal() && selectedPackage(); as pkg) {
+    <div
+      class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-purple-600 icon-size-5">check_circle</span>
+            <span>Seans Uygulama Kaydı</span>
+          </h3>
+          <button
+            type="button"
+            (click)="showNewSessionModal.set(false)"
+            class="text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs text-purple-900 dark:text-purple-200">
+          <strong>{{ pkg.packageName }}</strong>
+          <div class="mt-0.5 text-purple-700 dark:text-purple-300">
+            Düşülecek Seans: <strong>{{ (pkg.completedSessions || 0) + 1 }}. Seans</strong> (Kalan: {{ pkg.remainingSessions }})
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Uygulanan Bölge *
+          </label>
+          <input
+            type="text"
+            [value]="sessionZone()"
+            (input)="sessionZone.set($any($event.target).value)"
+            class="odv-input"
+            placeholder="Tüm Bacak, Kolaltı, Yüz vb."
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Uygulayan Uzman / Estetisyen
+          </label>
+          <input
+            type="text"
+            [value]="sessionStaff()"
+            (input)="sessionStaff.set($any($event.target).value)"
+            class="odv-input"
+            placeholder="Estetisyen adı"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Klinik & Seans Notları
+          </label>
+          <textarea
+            rows="2"
+            [value]="sessionNotes()"
+            (input)="sessionNotes.set($any($event.target).value)"
+            class="odv-input"
+            placeholder="Cihaz dozu, joule değeri, cilt tepkisi vb."
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3">
+          <button
+            type="button"
+            (click)="showNewSessionModal.set(false)"
+            class="odv-btn-ghost text-xs"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            [disabled]="saving()"
+            (click)="confirmAddSession()"
+            class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1 border-0 cursor-pointer shadow-md shadow-purple-500/20"
+          >
+            <span class="material-symbols-outlined icon-size-4">check</span>
+            <span>{{ saving() ? 'Kaydediliyor…' : 'Seansı Düş ve Kaydet' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- SUB-MODAL 5: Yeni Ön Görüşme / Seans Bilgi Talebi Dialog -->
+  @if (showNewConsultationModal()) {
+    <div
+      class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-500 icon-size-5">support_agent</span>
+            <span>Yeni Ön Görüşme & Seans Bilgi Kaydı</span>
+          </h3>
+          <button
+            type="button"
+            (click)="closeNewConsultationModal()"
+            class="text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Kategori -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Hizmet Kategorisi *
+            </label>
+            <select
+              [value]="newConsultationCategory()"
+              (change)="newConsultationCategory.set($any($event.target).value)"
+              class="odv-input"
+            >
+              <option value="Lazer Epilasyon">Lazer Epilasyon</option>
+              <option value="Medikal Cilt Bakımı">Medikal Cilt Bakımı</option>
+              <option value="Bölgesel İncelme">Bölgesel İncelme</option>
+              <option value="Tırnak & El-Ayak">Tırnak & El-Ayak</option>
+              <option value="Spa & Masaj">Spa & Masaj</option>
+              <option value="Kalıcı Makyaj">Kalıcı Makyaj</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+
+          <!-- İletişim Kanalı -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Görüşme Kanalı
+            </label>
+            <select
+              [value]="newConsultationChannel()"
+              (change)="newConsultationChannel.set($any($event.target).value)"
+              class="odv-input"
+            >
+              <option value="Yüz Yüze">Yüz Yüze (Merkeze Geldi)</option>
+              <option value="Telefon">Telefon</option>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Instagram">Instagram DM</option>
+              <option value="Web">Web Formu</option>
+            </select>
+          </div>
+
+          <!-- İlgilenilen Seans / Paket -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              İlgilenilen Seans / Paket Detayı *
+            </label>
+            <input
+              type="text"
+              [value]="newConsultationSession()"
+              (input)="newConsultationSession.set($any($event.target).value)"
+              class="odv-input"
+              placeholder="Örn: Buz Lazer Tüm Vücut (8 Seans), Hydrafacial Cilt Bakımı"
+            />
+          </div>
+
+          <!-- Önerilen Seans Sayısı -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Önerilen Seans Sayısı
+            </label>
+            <input
+              type="number"
+              min="1"
+              [value]="newConsultationCount()"
+              (input)="newConsultationCount.set(+$any($event.target).value)"
+              class="odv-input font-bold"
+            />
+          </div>
+
+          <!-- Teklif Edilen Fiyat -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Verilen Teklif Tutarı (₺)
+            </label>
+            <input
+              type="number"
+              min="0"
+              [value]="newConsultationPrice()"
+              (input)="newConsultationPrice.set(+$any($event.target).value)"
+              class="odv-input font-mono font-bold text-emerald-600"
+            />
+          </div>
+
+          <!-- Görüşen Uzman -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Görüşmeyi Yapan Uzman
+            </label>
+            <input
+              type="text"
+              [value]="newConsultationStaff()"
+              (input)="newConsultationStaff.set($any($event.target).value)"
+              class="odv-input"
+              placeholder="Estetisyen / Uzman Adı"
+            />
+          </div>
+
+          <!-- İlgi Düzeyi -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Adayın İlgi Düzeyi
+            </label>
+            <select
+              [value]="newConsultationInterest()"
+              (change)="newConsultationInterest.set($any($event.target).value)"
+              class="odv-input"
+            >
+              <option value="high">🔥 Yüksek / Sıcak Aday</option>
+              <option value="medium">⚡ Orta / Düşünüyor</option>
+              <option value="low">❄️ Düşük / Sadece Bilgi Aldı</option>
+            </select>
+          </div>
+
+          <!-- Sonraki Takip Tarihi -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Sonraki Takip / Geri Arama Tarihi
+            </label>
+            <input
+              type="date"
+              [value]="newConsultationFollowUp()"
+              (input)="newConsultationFollowUp.set($any($event.target).value)"
+              class="odv-input"
+            />
+          </div>
+
+          <!-- Notlar -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Görüşme ve Talep Notları
+            </label>
+            <textarea
+              rows="3"
+              [value]="newConsultationNotes()"
+              (input)="newConsultationNotes.set($any($event.target).value)"
+              class="odv-input"
+              placeholder="Müşterinin sorduğu sorular, cilt hassasiyeti, indirim talebi veya seans aralıkları..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button
+            type="button"
+            (click)="closeNewConsultationModal()"
+            class="odv-btn-ghost text-xs"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            [disabled]="saving()"
+            (click)="saveNewConsultation()"
+            class="odv-btn-primary text-xs"
+          >
+            <span class="material-symbols-outlined icon-size-4">
+              {{ saving() ? 'sync' : 'save' }}
+            </span>
+            <span>{{ saving() ? 'Kaydediliyor…' : 'Ön Görüşmeyi Kaydet' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+}

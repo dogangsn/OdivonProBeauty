@@ -1,0 +1,961 @@
+<div class="space-y-6 pb-12 print:p-0 print:space-y-4">
+  <!-- 1. Header & Actions -->
+  <app-page-header
+    icon="monitoring"
+    eyebrow="YÖNETİCİ ANALİTİK & DENETİM"
+    title="Rapor Merkezi & Detaylı Analitik"
+    description="Salon ve klinik operasyonlarının finansal ciro, seans verimliliği, personel performansı, aday müşteri dönüşüm hunisi ve kasa hareketlerini anlık takip edin."
+  >
+    <div actions class="flex items-center gap-2 flex-wrap print:hidden">
+      <button
+        type="button"
+        (click)="refreshData()"
+        [disabled]="refreshing()"
+        class="odv-btn-ghost text-xs"
+        title="Canlı Verileri Yenile"
+      >
+        <span class="material-symbols-outlined icon-size-4" [class.animate-spin]="refreshing()">refresh</span>
+        <span>{{ refreshing() ? 'Yenileniyor…' : 'Yenile' }}</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="exportToCsv()"
+        class="odv-btn-ghost text-xs border border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+        title="Aktif Rapor Verilerini Excel/CSV Olarak İndir"
+      >
+        <span class="material-symbols-outlined icon-size-4">download</span>
+        <span>Excel / CSV İndir</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="printReport()"
+        class="odv-btn-primary text-xs"
+        title="Yazdır veya PDF Olarak Kaydet"
+      >
+        <span class="material-symbols-outlined icon-size-4">print</span>
+        <span>Yazdır / PDF</span>
+      </button>
+    </div>
+  </app-page-header>
+
+  <!-- Export Notification Toast -->
+  @if (exportNotification()) {
+    <aside
+      role="status"
+      class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-800 dark:text-emerald-200 text-xs flex items-center justify-between animate-fade-in"
+    >
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">check_circle</span>
+        <span>{{ exportNotification() }}</span>
+      </div>
+      <button type="button" (click)="exportNotification.set('')" class="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-100">
+        <span class="material-symbols-outlined icon-size-4">close</span>
+      </button>
+    </aside>
+  }
+
+  <!-- 2. Interactive Period & Filter Bar -->
+  <section class="odv-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
+    <!-- Period Presets -->
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">Dönem:</span>
+      <button
+        type="button"
+        (click)="setPeriod('today')"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+        [class]="selectedPeriod() === 'today' ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
+      >
+        Bugün
+      </button>
+      <button
+        type="button"
+        (click)="setPeriod('week')"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+        [class]="selectedPeriod() === 'week' ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
+      >
+        Bu Hafta
+      </button>
+      <button
+        type="button"
+        (click)="setPeriod('month')"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+        [class]="selectedPeriod() === 'month' ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
+      >
+        Bu Ay
+      </button>
+      <button
+        type="button"
+        (click)="setPeriod('quarter')"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+        [class]="selectedPeriod() === 'quarter' ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
+      >
+        Son 3 Ay
+      </button>
+      <button
+        type="button"
+        (click)="setPeriod('year')"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+        [class]="selectedPeriod() === 'year' ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
+      >
+        Bu Yıl
+      </button>
+      <button
+        type="button"
+        (click)="setPeriod('custom')"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+        [class]="selectedPeriod() === 'custom' ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'"
+      >
+        Özel Tarih
+      </button>
+    </div>
+
+    <!-- Branch Selector & Custom Date Inputs -->
+    <div class="flex items-center gap-3 flex-wrap">
+      @if (selectedPeriod() === 'custom') {
+        <div class="flex items-center gap-1.5 text-xs">
+          <input
+            type="date"
+            [value]="customStartDate()"
+            (input)="customStartDate.set($any($event.target).value)"
+            class="odv-input py-1 px-2 text-xs"
+          />
+          <span class="text-slate-400">-</span>
+          <input
+            type="date"
+            [value]="customEndDate()"
+            (input)="customEndDate.set($any($event.target).value)"
+            class="odv-input py-1 px-2 text-xs"
+          />
+        </div>
+      }
+
+      <div class="flex items-center gap-2">
+        <label for="rep-branch-sel" class="text-xs font-semibold text-slate-600 dark:text-slate-400">Şube:</label>
+        <select
+          id="rep-branch-sel"
+          [value]="selectedBranchId()"
+          (change)="setBranch($any($event.target).value)"
+          class="odv-input py-1.5 px-3 text-xs w-44"
+        >
+          <option value="">Tüm Şubeler</option>
+          @for (b of branches(); track b.id) {
+            <option [value]="b.id">{{ b.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Top Executive KPI Summary Strip (5 Cards) -->
+  <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5" aria-label="Yönetici Finansal ve Operasyonel Özet">
+    <div class="odv-card p-4 relative overflow-hidden flex flex-col justify-between">
+      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+        <span class="text-[11px] font-bold uppercase tracking-wider">Toplam Net Ciro</span>
+        <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">payments</span>
+      </div>
+      <div class="mt-2">
+        <strong class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          ₺{{ financialSummary().totalRevenue | number: '1.0-0' }}
+        </strong>
+        <div class="flex items-center gap-1 mt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+          <span class="material-symbols-outlined icon-size-3">trending_up</span>
+          <span>+{{ financialSummary().growthPercent }}% geçen döneme göre</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 relative overflow-hidden flex flex-col justify-between">
+      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+        <span class="text-[11px] font-bold uppercase tracking-wider">Seans & Doluluk</span>
+        <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">event_available</span>
+      </div>
+      <div class="mt-2">
+        <strong class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          {{ financialSummary().totalAppointments }} Seans
+        </strong>
+        <div class="flex items-center gap-1 mt-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+          <span class="material-symbols-outlined icon-size-3">speed</span>
+          <span>%{{ financialSummary().occupancyRatePercent }} Salon Doluluk Oranı</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 relative overflow-hidden flex flex-col justify-between">
+      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+        <span class="text-[11px] font-bold uppercase tracking-wider">Müşteri & Adaylar</span>
+        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">group</span>
+      </div>
+      <div class="mt-2">
+        <strong class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          {{ financialSummary().newCustomersCount }} Kişi
+        </strong>
+        <div class="flex items-center gap-1 mt-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+          <span class="material-symbols-outlined icon-size-3">person_search</span>
+          <span>{{ financialSummary().leadCustomersCount }} Bilgi Alan Aday</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 relative overflow-hidden flex flex-col justify-between">
+      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+        <span class="text-[11px] font-bold uppercase tracking-wider">Taksit Tahsilatı</span>
+        <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">receipt_long</span>
+      </div>
+      <div class="mt-2">
+        <strong class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          ₺{{ financialSummary().installmentPaid | number: '1.0-0' }}
+        </strong>
+        <div class="flex items-center gap-1 mt-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+          <span class="material-symbols-outlined icon-size-3">schedule</span>
+          <span>₺{{ financialSummary().remainingInstallment | number: '1.0-0' }} Bekleyen Alacak</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 relative overflow-hidden flex flex-col justify-between">
+      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+        <span class="text-[11px] font-bold uppercase tracking-wider">Cüzdan Avans Hacmi</span>
+        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">account_balance_wallet</span>
+      </div>
+      <div class="mt-2">
+        <strong class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          ₺{{ financialSummary().walletDeposits | number: '1.0-0' }}
+        </strong>
+        <div class="flex items-center gap-1 mt-1 text-[11px] font-semibold text-purple-600 dark:text-purple-400">
+          <span class="material-symbols-outlined icon-size-3">savings</span>
+          <span>₺{{ financialSummary().walletNetFloat | number: '1.0-0' }} Net Kalan Float</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Tab Navigation (5 Deep Analytics Areas) -->
+  <nav class="flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto print:hidden" aria-label="Rapor Sekmeleri">
+    <button
+      type="button"
+      (click)="setTab('financial')"
+      class="flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-bold transition whitespace-nowrap"
+      [class]="activeTab() === 'financial' ? 'border-primary-600 text-primary-600 dark:text-primary-400' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+    >
+      <span class="material-symbols-outlined icon-size-4">account_balance</span>
+      <span>1. Finans & Ciro Raporu</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('services')"
+      class="flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-bold transition whitespace-nowrap"
+      [class]="activeTab() === 'services' ? 'border-primary-600 text-primary-600 dark:text-primary-400' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+    >
+      <span class="material-symbols-outlined icon-size-4">spa</span>
+      <span>2. Seans & Hizmet Analizi</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('staff')"
+      class="flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-bold transition whitespace-nowrap"
+      [class]="activeTab() === 'staff' ? 'border-primary-600 text-primary-600 dark:text-primary-400' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+    >
+      <span class="material-symbols-outlined icon-size-4">badge</span>
+      <span>3. Uzman & Personel Performansı</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('consultations')"
+      class="flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-bold transition whitespace-nowrap"
+      [class]="activeTab() === 'consultations' ? 'border-primary-600 text-primary-600 dark:text-primary-400' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+    >
+      <span class="material-symbols-outlined icon-size-4">support_agent</span>
+      <span>4. Ön Görüşme & Dönüşüm Hunisi</span>
+    </button>
+
+    <button
+      type="button"
+      (click)="setTab('cashier')"
+      class="flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-bold transition whitespace-nowrap"
+      [class]="activeTab() === 'cashier' ? 'border-primary-600 text-primary-600 dark:text-primary-400' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+    >
+      <span class="material-symbols-outlined icon-size-4">point_of_sale</span>
+      <span>5. Kasa & Gün Sonu Kapanış</span>
+    </button>
+  </nav>
+
+  <!-- ================= TAB 1: FINANCIAL & REVENUE ================= -->
+  @if (activeTab() === 'financial') {
+    <section class="space-y-6">
+      <!-- Payment Methods & Category Breakdown Strip -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Ödeme Yöntemi Dağılımı -->
+        <div class="odv-card p-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Ödeme Yöntemi Dağılımı</h3>
+              <p class="text-xs text-slate-500">Kredi kartı, nakit, havale ve taksit tahsilat hacmi</p>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              ₺{{ financialSummary().totalRevenue | number: '1.0-0' }}
+            </span>
+          </div>
+
+          <div class="mt-4 space-y-3.5">
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>
+                  Kredi Kartı (POS)
+                </span>
+                <span class="text-slate-900 dark:text-white">₺{{ financialSummary().cardRevenue | number: '1.0-0' }} (%46)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 46%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
+                  Nakit Kasa Tahsilatı
+                </span>
+                <span class="text-slate-900 dark:text-white">₺{{ financialSummary().cashRevenue | number: '1.0-0' }} (%24)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-emerald-600 h-2.5 rounded-full" style="width: 24%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
+                  Havale / EFT
+                </span>
+                <span class="text-slate-900 dark:text-white">₺{{ financialSummary().transferRevenue | number: '1.0-0' }} (%15)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 15%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block"></span>
+                  Taksitli Sözleşme Tahsilatı
+                </span>
+                <span class="text-slate-900 dark:text-white">₺{{ financialSummary().installmentPaid | number: '1.0-0' }} (%15)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-amber-600 h-2.5 rounded-full" style="width: 15%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hizmet Kategori Gelir Dağılımı -->
+        <div class="odv-card p-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm">Hizmet Gruplarına Göre Gelir</h3>
+              <p class="text-xs text-slate-500">Lazer epilasyon, medikal cilt bakımı ve vücut şekillendirme</p>
+            </div>
+            <span class="text-xs font-semibold text-slate-400">{{ periodLabel() }}</span>
+          </div>
+
+          <div class="mt-4 space-y-3.5">
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="text-slate-700 dark:text-slate-300">Lazer Epilasyon Grubu</span>
+                <span class="text-slate-900 dark:text-white font-bold">₺148.500 (%42.6)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-primary-600 h-2.5 rounded-full" style="width: 42.6%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="text-slate-700 dark:text-slate-300">Medikal Cilt Bakımı & Leke</span>
+                <span class="text-slate-900 dark:text-white font-bold">₺119.200 (%34.2)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-cyan-500 h-2.5 rounded-full" style="width: 34.2%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="text-slate-700 dark:text-slate-300">Bölgesel İncelme & G5 Masajı</span>
+                <span class="text-slate-900 dark:text-white font-bold">₺70.000 (%20.1)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-amber-500 h-2.5 rounded-full" style="width: 20.1%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                <span class="text-slate-700 dark:text-slate-300">Kalıcı Makyaj & Kaş Laminasyonu</span>
+                <span class="text-slate-900 dark:text-white font-bold">₺18.200 (%5.2)</span>
+              </div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-rose-500 h-2.5 rounded-full" style="width: 5.2%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Günlük Ciro Dökümü Tablosu -->
+      <div class="odv-card overflow-hidden">
+        <header class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Günlük Ciro Akışı ve Kasa Tahsilatları</h3>
+            <p class="text-xs text-slate-500">Gün bazında nakit, kart, havale ve taksit dökümü</p>
+          </div>
+          <span class="text-xs font-semibold text-slate-400">Son 7 Gün</span>
+        </header>
+
+        <div class="overflow-x-auto">
+          <table class="odv-table w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 uppercase font-semibold text-[11px]">
+                <th class="p-3">Tarih & Gün</th>
+                <th class="p-3">İşlem Adedi</th>
+                <th class="p-3">Nakit Tahsilat</th>
+                <th class="p-3">Kredi Kartı (POS)</th>
+                <th class="p-3">Havale / EFT</th>
+                <th class="p-3">Taksit Tahsilatı</th>
+                <th class="p-3 text-right">Toplam Günlük Gelir</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+              @for (day of dailyRevenues(); track day.date) {
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                  <td class="p-3 font-semibold text-slate-900 dark:text-white">
+                    {{ day.date }}
+                    <span class="text-slate-400 font-normal ml-1">({{ day.dayName }})</span>
+                  </td>
+                  <td class="p-3 text-slate-600 dark:text-slate-300 font-mono">
+                    {{ day.transactionsCount }} işlem
+                  </td>
+                  <td class="p-3 text-emerald-600 dark:text-emerald-400 font-medium">
+                    ₺{{ day.cashAmount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3 text-indigo-600 dark:text-indigo-400 font-medium">
+                    ₺{{ day.cardAmount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3 text-blue-600 dark:text-blue-400 font-medium">
+                    ₺{{ day.transferAmount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3 text-amber-600 dark:text-amber-400 font-medium">
+                    ₺{{ day.installmentAmount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3 text-right font-black text-slate-900 dark:text-white">
+                    ₺{{ day.totalAmount | number: '1.2-2' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Taksit Alacak Yaşlandırma & Risk Tablosu -->
+      <div class="odv-card overflow-hidden">
+        <header class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Taksitli Satışlar & Alacak Yaşlandırma Tablosu</h3>
+            <p class="text-xs text-slate-500">Müşterilerin vadeli paket sözleşmeleri, ödenen tutarlar ve gecikmedeki alacaklar</p>
+          </div>
+          <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+            Toplam Alacak: ₺{{ financialSummary().remainingInstallment | number: '1.0-0' }}
+          </span>
+        </header>
+
+        <div class="overflow-x-auto">
+          <table class="odv-table w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 uppercase font-semibold text-[11px]">
+                <th class="p-3">Müşteri</th>
+                <th class="p-3">Paket / Sözleşme</th>
+                <th class="p-3">Toplam Tutar</th>
+                <th class="p-3">Tahsil Edilen</th>
+                <th class="p-3">Kalan Borç</th>
+                <th class="p-3">Taksit İlerleme</th>
+                <th class="p-3">Vade / Sonraki Taksit</th>
+                <th class="p-3">Durum</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+              @for (inst of installmentAging(); track inst.id) {
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                  <td class="p-3 font-bold text-slate-900 dark:text-white">
+                    {{ inst.customerName }}
+                    <span class="block text-[11px] font-normal text-slate-400">{{ inst.phone }}</span>
+                  </td>
+                  <td class="p-3 text-slate-700 dark:text-slate-300">
+                    {{ inst.packageName }}
+                  </td>
+                  <td class="p-3 font-semibold text-slate-900 dark:text-white">
+                    ₺{{ inst.totalAmount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3 font-semibold text-emerald-600 dark:text-emerald-400">
+                    ₺{{ inst.paidAmount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3 font-bold text-rose-600 dark:text-rose-400">
+                    ₺{{ inst.remainingAmount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3">
+                    <div class="flex items-center gap-2">
+                      <div class="w-16 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-indigo-600 h-1.5 rounded-full" [style.width.%]="(inst.paidCount / inst.totalCount) * 100"></div>
+                      </div>
+                      <span class="text-[11px] font-medium text-slate-500">{{ inst.paidCount }}/{{ inst.totalCount }}</span>
+                    </div>
+                  </td>
+                  <td class="p-3 text-slate-600 dark:text-slate-400">
+                    {{ inst.dueDate }}
+                  </td>
+                  <td class="p-3">
+                    @if (inst.status === 'overdue') {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                        {{ inst.statusLabel }}
+                      </span>
+                    } @else if (inst.status === 'paid') {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        {{ inst.statusLabel }}
+                      </span>
+                    } @else {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                        {{ inst.statusLabel }}
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ================= TAB 2: SERVICES & TREATMENTS ================= -->
+  @if (activeTab() === 'services') {
+    <section class="space-y-6">
+      <!-- Seans Performans Tablosu -->
+      <div class="odv-card overflow-hidden">
+        <header class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Hizmet ve Seans Performans Analizi</h3>
+            <p class="text-xs text-slate-500">Tamamlanan seans adedi, üretilen ciro, seans başı ortalama süre ve müşteri memnuniyet puanı</p>
+          </div>
+          <span class="text-xs font-semibold text-slate-400">{{ servicePerformances().length }} Hizmet İncelendi</span>
+        </header>
+
+        <div class="overflow-x-auto">
+          <table class="odv-table w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 uppercase font-semibold text-[11px]">
+                <th class="p-3">Hizmet & Protokol Adı</th>
+                <th class="p-3">Hizmet Grubu</th>
+                <th class="p-3">Tamamlanan Seans</th>
+                <th class="p-3">Toplam Üretilen Ciro</th>
+                <th class="p-3">Ort. Seans Başı Gelir</th>
+                <th class="p-3">Ort. Süre</th>
+                <th class="p-3">No-Show / İptal</th>
+                <th class="p-3">Müşteri Puanı</th>
+                <th class="p-3">Trend</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+              @for (svc of servicePerformances(); track svc.name) {
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                  <td class="p-3 font-bold text-slate-900 dark:text-white">
+                    {{ svc.name }}
+                  </td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      {{ svc.category }}
+                    </span>
+                  </td>
+                  <td class="p-3 font-semibold text-slate-900 dark:text-white font-mono">
+                    {{ svc.completedSessions }} Seans
+                  </td>
+                  <td class="p-3 font-bold text-emerald-600 dark:text-emerald-400">
+                    ₺{{ svc.totalRevenue | number: '1.0-0' }}
+                  </td>
+                  <td class="p-3 text-slate-700 dark:text-slate-300">
+                    ₺{{ svc.totalRevenue / svc.completedSessions | number: '1.0-0' }}
+                  </td>
+                  <td class="p-3 text-slate-600 dark:text-slate-400">
+                    {{ svc.avgDurationMinutes }} dk
+                  </td>
+                  <td class="p-3">
+                    <span class="text-rose-600 dark:text-rose-400 font-medium">%{{ svc.noShowRatePercent }}</span>
+                  </td>
+                  <td class="p-3">
+                    <div class="flex items-center gap-1 text-amber-500 font-bold">
+                      <span class="material-symbols-outlined icon-size-3">star</span>
+                      <span>{{ svc.customerRating }}</span>
+                    </div>
+                  </td>
+                  <td class="p-3">
+                    @if (svc.trend === 'up') {
+                      <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 text-[11px] font-bold">
+                        <span class="material-symbols-outlined icon-size-3">trending_up</span> Artışta
+                      </span>
+                    } @else if (svc.trend === 'down') {
+                      <span class="text-rose-600 dark:text-rose-400 flex items-center gap-0.5 text-[11px] font-bold">
+                        <span class="material-symbols-outlined icon-size-3">trending_down</span> Düşüşte
+                      </span>
+                    } @else {
+                      <span class="text-slate-400 flex items-center gap-0.5 text-[11px] font-medium">
+                        <span class="material-symbols-outlined icon-size-3">trending_flat</span> Sabit
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Oda & Cihaz Kullanım Verimliliği -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="odv-card p-4">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider">Buz Lazer Odası 1</span>
+            <span class="text-emerald-600 font-bold">%91 Doluluk</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-2">
+            <div class="bg-emerald-600 h-2 rounded-full" style="width: 91%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400">Günde ort. 7.4 saat aktif kullanım</p>
+        </div>
+
+        <div class="odv-card p-4">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider">Hydrafacial Cilt Bakımı</span>
+            <span class="text-indigo-600 font-bold">%82 Doluluk</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-2">
+            <div class="bg-indigo-600 h-2 rounded-full" style="width: 82%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400">Günde ort. 6.6 saat aktif kullanım</p>
+        </div>
+
+        <div class="odv-card p-4">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider">G5 & İncelme Odası</span>
+            <span class="text-amber-600 font-bold">%76 Doluluk</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-2">
+            <div class="bg-amber-600 h-2 rounded-full" style="width: 76%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400">Günde ort. 6.1 saat aktif kullanım</p>
+        </div>
+
+        <div class="odv-card p-4">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <span class="font-bold uppercase tracking-wider">Kalıcı Makyaj & VIP</span>
+            <span class="text-purple-600 font-bold">%68 Doluluk</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden mb-2">
+            <div class="bg-purple-600 h-2 rounded-full" style="width: 68%"></div>
+          </div>
+          <p class="text-[11px] text-slate-400">Günde ort. 5.4 saat aktif kullanım</p>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ================= TAB 3: STAFF & SPECIALISTS ================= -->
+  @if (activeTab() === 'staff') {
+    <section class="space-y-6">
+      <div class="odv-card overflow-hidden">
+        <header class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Uzman & Estetisyen Performans ve Prim Tablosu</h3>
+            <p class="text-xs text-slate-500">Uygulanan seans sayıları, üretilen ciro, ön görüşmeleri satışa dönüştürme oranı ve prim hak edişleri</p>
+          </div>
+          <span class="text-xs font-bold text-primary-600 dark:text-primary-400">
+            Toplam Prim Hak Edişi: ₺34.850
+          </span>
+        </header>
+
+        <div class="overflow-x-auto">
+          <table class="odv-table w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 uppercase font-semibold text-[11px]">
+                <th class="p-3">Uzman Adı & Ünvan</th>
+                <th class="p-3">Seans Sayısı</th>
+                <th class="p-3">Üretilen Ciro</th>
+                <th class="p-3">Seans Başı Ortalama</th>
+                <th class="p-3">Ön Görüşme Satış Dönüşümü</th>
+                <th class="p-3">Müşteri Sadakati</th>
+                <th class="p-3">Tahmini Prim (%10)</th>
+                <th class="p-3">Değerlendirme</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+              @for (st of staffPerformances(); track st.name) {
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                  <td class="p-3">
+                    <strong class="font-bold text-slate-900 dark:text-white block">{{ st.name }}</strong>
+                    <span class="text-[11px] text-slate-400">{{ st.role }}</span>
+                  </td>
+                  <td class="p-3 font-semibold text-slate-900 dark:text-white font-mono">
+                    {{ st.sessionsCount }} seans
+                  </td>
+                  <td class="p-3 font-bold text-emerald-600 dark:text-emerald-400">
+                    ₺{{ st.totalRevenue | number: '1.0-0' }}
+                  </td>
+                  <td class="p-3 text-slate-700 dark:text-slate-300">
+                    ₺{{ st.avgRevenuePerSession | number: '1.0-0' }} / seans
+                  </td>
+                  <td class="p-3">
+                    <div class="flex items-center gap-1.5">
+                      <div class="w-12 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-primary-600 h-1.5 rounded-full" [style.width.%]="st.conversionRatePercent"></div>
+                      </div>
+                      <span class="font-bold text-primary-600 dark:text-primary-400">%{{ st.conversionRatePercent }}</span>
+                    </div>
+                  </td>
+                  <td class="p-3 text-slate-700 dark:text-slate-300">
+                    %{{ st.retentionRatePercent }}
+                  </td>
+                  <td class="p-3 font-bold text-indigo-600 dark:text-indigo-400">
+                    ₺{{ st.commissionEstimate | number: '1.0-0' }}
+                  </td>
+                  <td class="p-3">
+                    <div class="flex items-center gap-1 text-amber-500 font-bold">
+                      <span class="material-symbols-outlined icon-size-3">star</span>
+                      <span>{{ st.ratingScore }}</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ================= TAB 4: LEADS & CONVERSION FUNNEL ================= -->
+  @if (activeTab() === 'consultations') {
+    <section class="space-y-6">
+      <!-- 3 Aşamalı Dönüşüm Hunisi -->
+      <div class="odv-card p-5">
+        <header class="pb-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Aday Müşteri & Ön Görüşme Satış Dönüşüm Hunisi</h3>
+            <p class="text-xs text-slate-500">Bilgi almaya gelen adayların randevuya ve kalıcı paket satışına dönüşüm aşamaları</p>
+          </div>
+          <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Ortalama Dönüşüm: %47.1</span>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+          <div class="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">1. AŞAMA: BİLGİ & ÖN GÖRÜŞME</span>
+            <div class="mt-2 flex items-baseline justify-between">
+              <strong class="text-3xl font-black text-slate-900 dark:text-white">68 Aday</strong>
+              <span class="text-xs font-semibold text-slate-500">%100 Başlangıç</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+              Verilen toplam teklif: ₺295.000. Instagram, WhatsApp ve yüz yüze bilgi talebi.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">2. AŞAMA: İLK RANDEVU / DENEME</span>
+            <div class="mt-2 flex items-baseline justify-between">
+              <strong class="text-3xl font-black text-slate-900 dark:text-white">51 Randevu</strong>
+              <span class="text-xs font-bold text-blue-600 dark:text-blue-400">%75.0 Dönüşüm</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+              Ön görüşme sonrası randevu oluşturan ve kliniğimize gelen sıcak adaylar.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">3. AŞAMA: PAKET SATIŞI (KAPANIŞ)</span>
+            <div class="mt-2 flex items-baseline justify-between">
+              <strong class="text-3xl font-black text-slate-900 dark:text-white">32 Satış</strong>
+              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">%47.1 Net Satış</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+              Kalıcı müşteri profiline dönüşen ve paket sözleşmesi imzalayan satışlar (₺138.000).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanal ROI & Verimlilik Tablosu -->
+      <div class="odv-card overflow-hidden">
+        <header class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Aday Edinme Kanallarına Göre Satış & ROI Analizi</h3>
+            <p class="text-xs text-slate-500">Hangi iletişim kanalı kaç aday getirdi ve ne kadarlık ciroya dönüştü?</p>
+          </div>
+          <span class="text-xs font-semibold text-slate-400">{{ leadChannels().length }} Kanal</span>
+        </header>
+
+        <div class="overflow-x-auto">
+          <table class="odv-table w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 uppercase font-semibold text-[11px]">
+                <th class="p-3">İletişim & Edinme Kanalı</th>
+                <th class="p-3">Gelen Aday</th>
+                <th class="p-3">Satışa Dönüşen</th>
+                <th class="p-3">Dönüşüm Başarısı</th>
+                <th class="p-3">Verilen Teklif Hacmi</th>
+                <th class="p-3">Gerçekleşen Satış Cirosu</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+              @for (ch of leadChannels(); track ch.channel) {
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                  <td class="p-3 font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-400 icon-size-4">{{ ch.icon }}</span>
+                    <span>{{ ch.channel }}</span>
+                  </td>
+                  <td class="p-3 font-semibold text-slate-900 dark:text-white font-mono">
+                    {{ ch.leadsCount }} Aday
+                  </td>
+                  <td class="p-3 font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                    {{ ch.convertedCount }} Müşteri
+                  </td>
+                  <td class="p-3">
+                    <div class="flex items-center gap-1.5">
+                      <div class="w-14 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-600 h-1.5 rounded-full" [style.width.%]="ch.conversionRatePercent"></div>
+                      </div>
+                      <span class="font-bold text-emerald-600 dark:text-emerald-400">%{{ ch.conversionRatePercent }}</span>
+                    </div>
+                  </td>
+                  <td class="p-3 text-slate-600 dark:text-slate-400">
+                    ₺{{ ch.totalQuotes | number: '1.0-0' }}
+                  </td>
+                  <td class="p-3 font-black text-slate-900 dark:text-white">
+                    ₺{{ ch.totalRevenue | number: '1.0-0' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ================= TAB 5: CASHIER & END OF DAY ================= -->
+  @if (activeTab() === 'cashier') {
+    <section class="space-y-6">
+      <!-- Kasa Kapanış Özet Strip -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="odv-card p-4">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Kasa Nakit Açılış Devri</span>
+          <strong class="text-xl font-bold text-slate-900 dark:text-white block mt-1">₺4,500.00</strong>
+          <span class="text-[11px] text-slate-400">Sabah saat 09:00</span>
+        </div>
+
+        <div class="odv-card p-4">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600">Günlük Toplam Giriş</span>
+          <strong class="text-xl font-bold text-emerald-600 dark:text-emerald-400 block mt-1">+₺13,816.00</strong>
+          <span class="text-[11px] text-slate-400">Nakit, POS ve Havale</span>
+        </div>
+
+        <div class="odv-card p-4">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Kasadan Yapılan Harcama</span>
+          <strong class="text-xl font-bold text-rose-600 dark:text-rose-400 block mt-1">-₺450.00</strong>
+          <span class="text-[11px] text-slate-400">Medikal solüsyon ve sarf</span>
+        </div>
+
+        <div class="odv-card p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Gün Sonu Net Kasa Devri</span>
+          <strong class="text-2xl font-black text-emerald-700 dark:text-emerald-300 block mt-1">₺17,866.00</strong>
+          <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">✓ Kasa Mutabakatı Tam</span>
+        </div>
+      </div>
+
+      <!-- Günlük Kasa Hareketleri Tablosu -->
+      <div class="odv-card overflow-hidden">
+        <header class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Gün İçi Kasa & POS Hareket Günlüğü</h3>
+            <p class="text-xs text-slate-500">Tüm nakit akışı, POS slip tahsilatları, havaleler ve kasa giderleri</p>
+          </div>
+          <span class="text-xs font-semibold text-slate-400">Bugün (21 Ekim 2026)</span>
+        </header>
+
+        <div class="overflow-x-auto">
+          <table class="odv-table w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400 uppercase font-semibold text-[11px]">
+                <th class="p-3">Saat & İşlem Kodu</th>
+                <th class="p-3">Tür & Yöntem</th>
+                <th class="p-3">Kategori</th>
+                <th class="p-3">Açıklama / Müşteri</th>
+                <th class="p-3">Tutar</th>
+                <th class="p-3">İşlemi Yapan</th>
+                <th class="p-3 text-right">Anlık Bakiye</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+              @for (tx of cashierTransactions(); track tx.id) {
+                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                  <td class="p-3">
+                    <strong class="text-slate-900 dark:text-white block">{{ tx.time }}</strong>
+                    <span class="text-[10px] text-slate-400 font-mono">{{ tx.id }}</span>
+                  </td>
+                  <td class="p-3">
+                    @if (tx.type === 'expense_out') {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                        {{ tx.typeLabel }}
+                      </span>
+                    } @else if (tx.type === 'wallet_topup') {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                        {{ tx.typeLabel }}
+                      </span>
+                    } @else if (tx.type === 'card_in') {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+                        {{ tx.typeLabel }}
+                      </span>
+                    } @else {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        {{ tx.typeLabel }}
+                      </span>
+                    }
+                  </td>
+                  <td class="p-3 text-slate-600 dark:text-slate-300">
+                    {{ tx.category }}
+                  </td>
+                  <td class="p-3 text-slate-900 dark:text-white font-medium">
+                    {{ tx.description }}
+                  </td>
+                  <td class="p-3 font-bold" [class]="tx.amount < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'">
+                    {{ tx.amount > 0 ? '+' : '' }}₺{{ tx.amount | number: '1.2-2' }}
+                  </td>
+                  <td class="p-3 text-slate-500 text-[11px]">
+                    {{ tx.staffName }}
+                  </td>
+                  <td class="p-3 text-right font-black text-slate-900 dark:text-white font-mono">
+                    ₺{{ tx.balanceAfter | number: '1.2-2' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+</div>

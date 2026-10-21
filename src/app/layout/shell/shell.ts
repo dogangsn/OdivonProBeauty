@@ -65,10 +65,17 @@ export class Shell {
       key: 'nav.section.customerCare',
       items: [
         { key: 'nav.customers', icon: 'group', route: '/customers' },
+        { key: 'nav.consultations', icon: 'support_agent', route: '/consultations' },
         { key: 'nav.customerHealth', icon: 'health_and_safety', route: '/customer-health' },
         { key: 'nav.consents', icon: 'verified_user', route: '/consents' },
         { key: 'nav.packages', icon: 'card_membership', route: '/packages' },
         { key: 'nav.sessions', icon: 'spa', route: '/sessions' },
+      ],
+    },
+    {
+      key: 'nav.section.nailStudio',
+      items: [
+        { key: 'nav.nailStudio', icon: 'palette', route: '/nail-studio' },
       ],
     },
     {

@@ -16,6 +16,7 @@ const workspace = (path: string, definition: WorkspaceDefinition): Routes[number
 });
 const workspaceRoutes = [
   ['customers', 'customers'],
+  ['consultations', 'consultations'],
   ['customer-health', 'health'],
   ['consents', 'consents'],
   ['services', 'services'],
@@ -37,7 +38,6 @@ const workspaceRoutes = [
   ['commissions', 'commissions'],
   ['campaigns', 'campaigns'],
   ['waitlist', 'waitlist'],
-  ['reports', 'reports'],
   ['audit-logs', 'audit'],
   ['settings', 'settings'],
 ] as const;
@@ -85,11 +85,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/appointments/calendar/calendar').then((m) => m.Calendar),
       },
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./features/reports/reports').then((m) => m.Reports),
+      },
       ...workspaceRoutes.map(([path, key]) => workspace(path, WORKSPACES[key])),
       {
         path: 'definitions',
         loadComponent: () =>
           import('./features/definitions/definitions/definitions').then((m) => m.Definitions),
+      },
+      {
+        path: 'nail-studio',
+        loadComponent: () =>
+          import('./features/nail-studio/nail-studio').then((m) => m.NailStudio),
       },
       {
         path: 'ai-recommendations',

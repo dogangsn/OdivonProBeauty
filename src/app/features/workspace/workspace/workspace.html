@@ -13,89 +13,181 @@
           <span>Hazır Hizmet Sihirbazı</span>
         </button>
       }
-      <button type="button" (click)="openCreate()" class="odv-btn-primary">
-        <span class="material-symbols-outlined icon-size-4">add</span>
-        <span class="capitalize">{{ definition.primaryAction }}</span>
-      </button>
+      @if (isCustomerWorkspace()) {
+        <button
+          type="button"
+          (click)="seedDemoCustomers()"
+          [disabled]="seedingDemoCustomers()"
+          class="odv-btn-ghost text-xs"
+          title="10 Gerçekçi Test Müşterisi Yükle (Sağlık, Cüzdan, Taksit, Seans Detaylarıyla)"
+        >
+          <span class="material-symbols-outlined icon-size-4 text-purple-600 dark:text-purple-400">group_add</span>
+          <span>{{ seedingDemoCustomers() ? 'Yükleniyor…' : '10 Örnek Müşteri Yükle' }}</span>
+        </button>
+        <button type="button" (click)="openCustomerCreateModal()" class="odv-btn-primary">
+          <span class="material-symbols-outlined icon-size-4">person_add</span>
+          <span>Yeni Müşteri</span>
+        </button>
+      } @else if (isConsultationWorkspace()) {
+        <button
+          type="button"
+          (click)="seedDemoConsultations()"
+          [disabled]="seedingDemoConsultations()"
+          class="odv-btn-ghost text-xs"
+          title="10 Gerçekçi Ön Görüşme ve Seans Bilgi Talebi Yükle"
+        >
+          <span class="material-symbols-outlined icon-size-4 text-amber-600 dark:text-amber-400">support_agent</span>
+          <span>{{ seedingDemoConsultations() ? 'Yükleniyor…' : '10 Örnek Ön Görüşme Yükle' }}</span>
+        </button>
+        <button type="button" (click)="openCustomerCreateModal()" class="odv-btn-primary">
+          <span class="material-symbols-outlined icon-size-4">person_add</span>
+          <span>Yeni Ön Görüşme / Aday Müşteri</span>
+        </button>
+      } @else {
+        <button type="button" (click)="openCreate()" class="odv-btn-primary">
+          <span class="material-symbols-outlined icon-size-4">add</span>
+          <span class="capitalize">{{ definition.primaryAction }}</span>
+        </button>
+      }
     </div>
   }
 </app-page-header>
 
 <!-- 2. Operational Summary Strip -->
-<section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5" aria-label="Kayıt Özeti">
-  <div class="odv-card p-4 flex items-center justify-between">
-    <div>
-      <span
-        class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-      >
-        Toplam Kayıt
-      </span>
-      <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
-        {{ rows().length }}
-      </strong>
+@if (isConsultationWorkspace()) {
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5" aria-label="Ön Görüşme Özeti">
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Toplam Ön Görüşme
+        </span>
+        <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+          {{ rows().length }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">support_agent</span>
+      </div>
     </div>
-    <div
-      class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
-    >
-      <span class="material-symbols-outlined icon-size-5">format_list_bulleted</span>
-    </div>
-  </div>
 
-  <div class="odv-card p-4 flex items-center justify-between">
-    <div>
-      <span
-        class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-      >
-        Şube Kapsamı
-      </span>
-      <strong
-        class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-1 block truncate max-w-[200px]"
-      >
-        {{ branchFilter() ? 'Seçili Şube' : 'Tüm Şubeler' }}
-      </strong>
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Sıcak Adaylar (Yüksek İlgi)
+        </span>
+        <strong class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5 block">
+          🔥 {{ hotLeadsCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">local_fire_department</span>
+      </div>
     </div>
-    <div
-      class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center"
-    >
-      <span class="material-symbols-outlined icon-size-5">storefront</span>
-    </div>
-  </div>
 
-  <div class="odv-card p-4 flex items-center justify-between">
-    <div>
-      <span
-        class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-      >
-        Veri Kaynağı
-      </span>
-      <span
-        class="inline-flex items-center gap-1.5 font-bold text-xs mt-1"
-        [class.text-emerald-600]="!remote.error()"
-        [class.dark:text-emerald-400]="!remote.error()"
-        [class.text-rose-600]="remote.error()"
-      >
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Toplam Teklif Tutarı
+        </span>
+        <strong class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block font-mono">
+          ₺{{ totalQuotedPrice() | number: '1.0-0' }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">request_quote</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Satışa Dönüşen
+        </span>
+        <strong class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5 block">
+          ✓ {{ convertedConsultationCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">verified</span>
+      </div>
+    </div>
+  </section>
+} @else {
+  <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5" aria-label="Kayıt Özeti">
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
         <span
-          class="w-2 h-2 rounded-full"
-          [class.bg-emerald-500]="!remote.error()"
-          [class.bg-rose-500]="remote.error()"
-          [class.animate-pulse]="!remote.error()"
-        ></span>
-        {{
-          remote.error()
-            ? 'Bağlantı Hatası'
-            : remote.isLoading()
-              ? 'Yükleniyor…'
-              : 'MainApi Çevrimiçi'
-        }}
-      </span>
+          class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+        >
+          Toplam Kayıt
+        </span>
+        <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+          {{ rows().length }}
+        </strong>
+      </div>
+      <div
+        class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
+      >
+        <span class="material-symbols-outlined icon-size-5">format_list_bulleted</span>
+      </div>
     </div>
-    <div
-      class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
-    >
-      <span class="material-symbols-outlined icon-size-5">cloud_done</span>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span
+          class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+        >
+          Şube Kapsamı
+        </span>
+        <strong
+          class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-1 block truncate max-w-[200px]"
+        >
+          {{ branchFilter() ? 'Seçili Şube' : 'Tüm Şubeler' }}
+        </strong>
+      </div>
+      <div
+        class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center"
+      >
+        <span class="material-symbols-outlined icon-size-5">storefront</span>
+      </div>
     </div>
-  </div>
-</section>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span
+          class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+        >
+          Veri Kaynağı
+        </span>
+        <span
+          class="inline-flex items-center gap-1.5 font-bold text-xs mt-1"
+          [class.text-emerald-600]="!remote.error()"
+          [class.dark:text-emerald-400]="!remote.error()"
+          [class.text-rose-600]="remote.error()"
+        >
+          <span
+            class="w-2 h-2 rounded-full"
+            [class.bg-emerald-500]="!remote.error()"
+            [class.bg-rose-500]="remote.error()"
+            [class.animate-pulse]="!remote.error()"
+          ></span>
+          {{
+            remote.error()
+              ? 'Bağlantı Hatası'
+              : remote.isLoading()
+                ? 'Yükleniyor…'
+                : 'MainApi Çevrimiçi'
+          }}
+        </span>
+      </div>
+      <div
+        class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+      >
+        <span class="material-symbols-outlined icon-size-5">cloud_done</span>
+      </div>
+    </div>
+  </section>
+}
 
 <!-- 3. Live Search & Filter Bar -->
 <section
@@ -190,55 +282,136 @@
   } @else {
     <div class="overflow-x-auto custom-scroll">
       <table class="w-full text-left border-collapse">
-        <thead>
-          <tr
-            class="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 odv-th"
-          >
-            @for (column of definition.columns; track column.key) {
-              <th class="py-3.5 px-6">{{ column.label }}</th>
-            }
-            @if (!definition.readonly) {
+        @if (isCustomerWorkspace()) {
+          <thead>
+            <tr
+              class="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 odv-th"
+            >
+              <th class="py-3.5 px-6">Müşteri / Kimlik</th>
+              <th class="py-3.5 px-6">İletişim</th>
+              <th class="py-3.5 px-6">Cilt & Medikal</th>
+              <th class="py-3.5 px-6">Cüzdan Bakiye</th>
+              <th class="py-3.5 px-6">Paket & Seans</th>
+              <th class="py-3.5 px-6">Durum</th>
               <th class="py-3.5 px-6 text-right">İşlemler</th>
-            }
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
-          @for (row of rows(); track row.id) {
-            <tr class="hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 transition-colors group">
-              @for (column of definition.columns; track column.key) {
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
+            @for (row of rows(); track row.id) {
+              @let cust = asCustomer(row);
+              <tr
+                (click)="openCustomerDetail(row)"
+                class="hover:bg-indigo-50/50 dark:hover:bg-slate-800/80 transition-colors group cursor-pointer"
+                title="Detayları incelemek için tıklayın"
+              >
+                <!-- Müşteri & Kimlik -->
                 <td class="odv-td">
-                  @if (column.format === 'status') {
-                    <app-status-badge [status]="statusValue(row, column)" />
-                  } @else if ($index === 0) {
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[11px] font-bold flex-shrink-0 group-hover:scale-105 transition-transform shadow-2xs border border-indigo-100 dark:border-indigo-900/40"
-                      >
-                        {{ initials(cellValue(row, column)) }}
-                      </span>
-                      <div class="min-w-0">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs"
+                    >
+                      {{ initials(cust.fullName) }}
+                    </span>
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-1.5 flex-wrap">
                         <strong
-                          class="block font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
+                          class="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
                         >
-                          {{ cellValue(row, column) }}
+                          {{ cust.fullName }}
                         </strong>
-                        <span
-                          class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 font-semibold border border-slate-200 dark:border-slate-700"
-                        >
-                          #{{ row.id.slice(0, 8) }}
-                        </span>
+                        @if (cust.segment) {
+                          <span
+                            class="text-[10px] px-1.5 py-0.2 rounded font-extrabold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300"
+                          >
+                            {{ cust.segment }}
+                          </span>
+                        }
+                      </div>
+                      <div class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
+                        @if (cust.identityNumber) {
+                          <span class="font-mono font-semibold">TC: {{ cust.identityNumber }}</span>
+                        }
+                        @if (computeCustomerAge(cust.birthDate); as age) {
+                          <span class="font-bold text-indigo-600 dark:text-indigo-400">• {{ age }} Yaş</span>
+                        }
                       </div>
                     </div>
-                  } @else {
-                    <span class="text-slate-600 dark:text-slate-300">
-                      {{ cellValue(row, column) }}
-                    </span>
-                  }
+                  </div>
                 </td>
-              }
-              @if (!definition.readonly) {
-                <td class="odv-td text-right">
+
+                <!-- İletişim -->
+                <td class="odv-td">
+                  <div class="text-xs">
+                    <span class="font-semibold text-slate-800 dark:text-slate-200 block">{{ cust.phone }}</span>
+                    <span class="text-slate-400 text-[11px] block">
+                      {{ cust.district ? cust.district + ' / ' : '' }}{{ cust.city || '' }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Cilt & Medikal -->
+                <td class="odv-td">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    @if (cust.health?.skinType) {
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 capitalize">
+                        {{ cust.health?.skinType }}
+                      </span>
+                    }
+                    @if (cust.health?.fitzpatrick) {
+                      <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 uppercase">
+                        {{ cust.health?.fitzpatrick }}
+                      </span>
+                    }
+                    @if (cust.health?.isPregnant || cust.health?.hasImplant || (cust.health?.medications && cust.health.medications.includes('Roaccutane'))) {
+                      <span
+                        class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                        title="Kritik Kontrendikasyon Uyarısı"
+                      >
+                        ⚠️ Medikal Uyarı
+                      </span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Cüzdan Bakiye -->
+                <td class="odv-td">
+                  <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                    ₺{{ (cust.walletBalance || 0) | number: '1.2-2' }}
+                  </span>
+                </td>
+
+                <!-- Paket & Seans -->
+                <td class="odv-td">
+                  <div class="text-xs">
+                    @if ((cust.packages?.length || 0) > 0) {
+                      <span class="font-bold text-purple-600 dark:text-purple-400 block">
+                        {{ cust.packages?.length }} Paket
+                      </span>
+                      <span class="text-slate-400 text-[10px] block">
+                        {{ cust.packages?.[0]?.completedSessions }}/{{ cust.packages?.[0]?.totalSessions }} Seans
+                      </span>
+                    } @else {
+                      <span class="text-slate-400 block">Paket yok</span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Durum -->
+                <td class="odv-td">
+                  <app-status-badge [status]="cust.status || 'active'" />
+                </td>
+
+                <!-- İşlemler -->
+                <td class="odv-td text-right" (click)="$event.stopPropagation()">
                   <div class="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      class="odv-icon-btn text-indigo-600 dark:text-indigo-400"
+                      title="Detaylı Müşteri Kartı"
+                      (click)="openCustomerDetail(row)"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">visibility</span>
+                    </button>
                     <button
                       type="button"
                       class="odv-icon-btn"
@@ -258,62 +431,373 @@
                     </button>
                   </div>
                 </td>
-              }
-            </tr>
-          } @empty {
-            <tr>
-              <td
-                [attr.colspan]="definition.columns.length + (definition.readonly ? 0 : 1)"
-                class="py-12 text-center"
-              >
-                @if (isServiceWorkspace()) {
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="py-12 text-center">
                   <div class="flex flex-col items-center justify-center max-w-md mx-auto p-4">
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/10 mb-3">
-                      <span class="material-symbols-outlined icon-size-7">auto_fix_high</span>
+                    <div
+                      class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3"
+                    >
+                      <span class="material-symbols-outlined icon-size-7">groups</span>
                     </div>
                     <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mt-1 mb-0">
-                      {{ definition.emptyTitle || 'Henüz Hizmet / Kategori Tanımlanmadı' }}
+                      Henüz Kayıtlı Müşteri Yok
                     </h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-5 leading-relaxed">
-                      Lazer Epilasyon, Cilt Bakımı, Spa, Tırnak ve Bölgesel İncelme gibi hazır sektör şablonlarını sihirbaz ile tek tıkla yükleyebilirsiniz.
+                      Gerçekçi kimlik, yaş, sağlık kartı, cüzdan ve seans verilerine sahip 10 test müşterisini tek tıkla yükleyebilir veya yeni müşteri kartı açabilirsiniz.
                     </p>
                     <div class="flex items-center gap-2.5 flex-wrap justify-center">
-                      <button type="button" (click)="openWizard()" class="odv-btn-primary">
-                        <span class="material-symbols-outlined icon-size-4">auto_fix_high</span>
-                        <span>Hazır Hizmet Sihirbazını Başlat</span>
+                      <button
+                        type="button"
+                        (click)="seedDemoCustomers()"
+                        [disabled]="seedingDemoCustomers()"
+                        class="odv-btn-primary"
+                      >
+                        <span class="material-symbols-outlined icon-size-4">group_add</span>
+                        <span>{{ seedingDemoCustomers() ? 'Yükleniyor…' : '10 Örnek Müşteri Yükle' }}</span>
                       </button>
+                      <button type="button" (click)="openCustomerCreateModal()" class="odv-btn-ghost">
+                        <span class="material-symbols-outlined icon-size-4">person_add</span>
+                        <span>Yeni Müşteri Ekle</span>
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        } @else if (isConsultationWorkspace()) {
+          <thead>
+            <tr
+              class="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 odv-th"
+            >
+              <th class="py-3.5 px-6">Aday / Müşteri</th>
+              <th class="py-3.5 px-6">İletişim & Kanal</th>
+              <th class="py-3.5 px-6">İlgilenilen Seans / Paket</th>
+              <th class="py-3.5 px-6">Teklif Tutarı</th>
+              <th class="py-3.5 px-6">Görüşen Uzman & Tarih</th>
+              <th class="py-3.5 px-6">İlgi & Durum</th>
+              <th class="py-3.5 px-6 text-right">İşlemler</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
+            @for (row of rows(); track row.id) {
+              <tr
+                (click)="openCustomerDetailFromConsultation(row)"
+                class="hover:bg-amber-50/40 dark:hover:bg-slate-800/80 transition-colors group cursor-pointer"
+                title="Müşteri kartı ve seans ön görüşme detaylarını açmak için tıklayın"
+              >
+                <!-- Aday Müşteri -->
+                <td class="odv-td">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs"
+                    >
+                      {{ initials(asString(row['customerName'])) }}
+                    </span>
+                    <div class="min-w-0">
+                      <strong
+                        class="font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors block truncate"
+                      >
+                        {{ row['customerName'] }}
+                      </strong>
+                      <span class="text-[10px] text-slate-400 block font-mono">
+                        ID: #{{ row.id.slice(0, 8) }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- İletişim & Kanal -->
+                <td class="odv-td">
+                  <div class="text-xs">
+                    <span class="font-semibold text-slate-800 dark:text-slate-200 block">{{ row['phone'] }}</span>
+                    <span
+                      class="inline-flex items-center gap-1 text-[10px] font-bold mt-0.5 px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    >
+                      {{ row['channel'] || 'Yüz Yüze' }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- İlgilenilen Seans / Paket -->
+                <td class="odv-td">
+                  <div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                        {{ row['serviceCategory'] || 'Hizmet' }}
+                      </span>
+                      @if (row['targetSessionsCount']) {
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+                          {{ row['targetSessionsCount'] }} Seans
+                        </span>
+                      }
+                    </div>
+                    <strong class="font-bold text-slate-900 dark:text-white block mt-1 text-xs">
+                      {{ row['inquiredSession'] }}
+                    </strong>
+                    @if (row['notes']) {
+                      <span class="text-[11px] text-slate-400 block truncate max-w-xs mt-0.5" [title]="asString(row['notes'])">
+                        {{ row['notes'] }}
+                      </span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Teklif Tutarı -->
+                <td class="odv-td">
+                  <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                    ₺{{ asNumber(row['quotedPrice']) | number: '1.2-2' }}
+                  </span>
+                </td>
+
+                <!-- Görüşen Uzman & Tarih -->
+                <td class="odv-td">
+                  <div class="text-xs">
+                    <span class="font-semibold text-slate-800 dark:text-slate-200 block">
+                      {{ row['consultantStaffName'] || '—' }}
+                    </span>
+                    <span class="text-slate-400 text-[11px] block">
+                      Görüşme: {{ formatDate(row['consultationDate']) }}
+                    </span>
+                    @if (row['nextFollowUpDate']) {
+                      <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-[10px] block">
+                        Takip: {{ formatDate(row['nextFollowUpDate']) }}
+                      </span>
+                    }
+                  </div>
+                </td>
+
+                <!-- İlgi & Durum -->
+                <td class="odv-td">
+                  <div class="flex flex-col gap-1 items-start">
+                    @if (row['interestLevel'] === 'high') {
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+                        🔥 Yüksek / Sıcak
+                      </span>
+                    } @else if (row['interestLevel'] === 'medium') {
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                        ⚡ Orta / Düşünüyor
+                      </span>
+                    } @else {
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                        ❄️ Düşük / Bilgi Aldı
+                      </span>
+                    }
+
+                    @if (row.status === 'inquiry') {
+                      <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                        ● Bilgi Aldı
+                      </span>
+                    } @else if (row.status === 'scheduled') {
+                      <span class="text-[10px] font-bold text-blue-700 dark:text-blue-300">
+                        ● Randevu Verildi
+                      </span>
+                    } @else if (row.status === 'converted') {
+                      <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+                        ● Satışa Dönüştü
+                      </span>
+                    } @else {
+                      <span class="text-[10px] font-bold text-slate-500">
+                        ● Vazgeçti
+                      </span>
+                    }
+                  </div>
+                </td>
+
+                <!-- İşlemler -->
+                <td class="odv-td text-right" (click)="$event.stopPropagation()">
+                  <div class="inline-flex items-center gap-1">
+                    <button
+                      type="button"
+                      class="odv-icon-btn text-indigo-600 dark:text-indigo-400"
+                      title="Müşteri Detay Kartını Aç"
+                      (click)="openCustomerDetailFromConsultation(row)"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">visibility</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="odv-icon-btn"
+                      title="Ön Görüşmeyi Düzenle"
+                      (click)="openEdit(row)"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="odv-icon-btn odv-icon-btn-danger"
+                      title="Sil"
+                      [disabled]="deletingId() === row.id"
+                      (click)="remove(row)"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="py-12 text-center">
+                  <div class="flex flex-col items-center justify-center max-w-md mx-auto p-4">
+                    <div
+                      class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-lg shadow-amber-500/20 mb-3"
+                    >
+                      <span class="material-symbols-outlined icon-size-7">support_agent</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mt-1 mb-0">
+                      Henüz Ön Görüşme Kaydı Yok
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-5 leading-relaxed">
+                      Merkeze seans ve paketler hakkında bilgi almaya gelen aday müşterilerin taleplerini, ilgilendikleri seansları ve verilen fiyat tekliflerini buradan takip edin.
+                    </p>
+                    <div class="flex items-center gap-2.5 flex-wrap justify-center">
+                      <button
+                        type="button"
+                        (click)="seedDemoConsultations()"
+                        [disabled]="seedingDemoConsultations()"
+                        class="odv-btn-primary"
+                      >
+                        <span class="material-symbols-outlined icon-size-4">support_agent</span>
+                        <span>{{ seedingDemoConsultations() ? 'Yükleniyor…' : '10 Örnek Ön Görüşme Yükle' }}</span>
+                      </button>
+                      <button type="button" (click)="openCreate()" class="odv-btn-ghost">
+                        <span class="material-symbols-outlined icon-size-4">add_comment</span>
+                        <span>Yeni Ön Görüşme Ekle</span>
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        } @else {
+          <thead>
+            <tr
+              class="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 odv-th"
+            >
+              @for (column of definition.columns; track column.key) {
+                <th class="py-3.5 px-6">{{ column.label }}</th>
+              }
+              @if (!definition.readonly) {
+                <th class="py-3.5 px-6 text-right">İşlemler</th>
+              }
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
+            @for (row of rows(); track row.id) {
+              <tr class="hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 transition-colors group">
+                @for (column of definition.columns; track column.key) {
+                  <td class="odv-td">
+                    @if (column.format === 'status') {
+                      <app-status-badge [status]="statusValue(row, column)" />
+                    } @else if ($index === 0) {
+                      <div class="flex items-center gap-3">
+                        <span
+                          class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-[11px] font-bold flex-shrink-0 group-hover:scale-105 transition-transform shadow-2xs border border-indigo-100 dark:border-indigo-900/40"
+                        >
+                          {{ initials(cellValue(row, column)) }}
+                        </span>
+                        <div class="min-w-0">
+                          <strong
+                            class="block font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
+                          >
+                            {{ cellValue(row, column) }}
+                          </strong>
+                          <span
+                            class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 font-semibold border border-slate-200 dark:border-slate-700"
+                          >
+                            #{{ row.id.slice(0, 8) }}
+                          </span>
+                        </div>
+                      </div>
+                    } @else {
+                      <span class="text-slate-600 dark:text-slate-300">
+                        {{ cellValue(row, column) }}
+                      </span>
+                    }
+                  </td>
+                }
+                @if (!definition.readonly) {
+                  <td class="odv-td text-right">
+                    <div class="inline-flex items-center gap-1">
+                      <button
+                        type="button"
+                        class="odv-icon-btn"
+                        title="Düzenle"
+                        (click)="openEdit(row)"
+                      >
+                        <span class="material-symbols-outlined icon-size-4">edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="odv-icon-btn odv-icon-btn-danger"
+                        title="Sil"
+                        [disabled]="deletingId() === row.id"
+                        (click)="remove(row)"
+                      >
+                        <span class="material-symbols-outlined icon-size-4">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td
+                  [attr.colspan]="definition.columns.length + (definition.readonly ? 0 : 1)"
+                  class="py-12 text-center"
+                >
+                  @if (isServiceWorkspace()) {
+                    <div class="flex flex-col items-center justify-center max-w-md mx-auto p-4">
+                      <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/10 mb-3">
+                        <span class="material-symbols-outlined icon-size-7">auto_fix_high</span>
+                      </div>
+                      <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mt-1 mb-0">
+                        {{ definition.emptyTitle || 'Henüz Hizmet / Kategori Tanımlanmadı' }}
+                      </h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-5 leading-relaxed">
+                        Lazer Epilasyon, Cilt Bakımı, Spa, Tırnak ve Bölgesel İncelme gibi hazır sektör şablonlarını sihirbaz ile tek tıkla yükleyebilirsiniz.
+                      </p>
+                      <div class="flex items-center gap-2.5 flex-wrap justify-center">
+                        <button type="button" (click)="openWizard()" class="odv-btn-primary">
+                          <span class="material-symbols-outlined icon-size-4">auto_fix_high</span>
+                          <span>Hazır Hizmet Sihirbazını Başlat</span>
+                        </button>
+                        @if (!definition.readonly) {
+                          <button type="button" (click)="openCreate()" class="odv-btn-ghost">
+                            <span class="material-symbols-outlined icon-size-4">add</span>
+                            <span>Manuel Ekle</span>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="flex flex-col items-center justify-center">
+                      <span
+                        class="material-symbols-outlined text-slate-300 dark:text-slate-600 icon-size-8"
+                        >folder_open</span
+                      >
+                      <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2 mb-0">
+                        {{ definition.emptyTitle || 'Henüz Kayıt Yok' }}
+                      </h3>
+                      <p class="text-xs text-slate-400 max-w-sm mt-1 mb-4">
+                        {{ definition.emptyDescription || 'Filtrelerinize uygun kayıt bulunamadı.' }}
+                      </p>
                       @if (!definition.readonly) {
-                        <button type="button" (click)="openCreate()" class="odv-btn-ghost">
+                        <button type="button" (click)="openCreate()" class="odv-btn-primary">
                           <span class="material-symbols-outlined icon-size-4">add</span>
-                          <span>Manuel Ekle</span>
+                          <span>İlk Kaydı Oluştur</span>
                         </button>
                       }
                     </div>
-                  </div>
-                } @else {
-                  <div class="flex flex-col items-center justify-center">
-                    <span
-                      class="material-symbols-outlined text-slate-300 dark:text-slate-600 icon-size-8"
-                      >folder_open</span
-                    >
-                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2 mb-0">
-                      {{ definition.emptyTitle || 'Henüz Kayıt Yok' }}
-                    </h3>
-                    <p class="text-xs text-slate-400 max-w-sm mt-1 mb-4">
-                      {{ definition.emptyDescription || 'Filtrelerinize uygun kayıt bulunamadı.' }}
-                    </p>
-                    @if (!definition.readonly) {
-                      <button type="button" (click)="openCreate()" class="odv-btn-primary">
-                        <span class="material-symbols-outlined icon-size-4">add</span>
-                        <span>İlk Kaydı Oluştur</span>
-                      </button>
-                    }
-                  </div>
-                }
-              </td>
-            </tr>
-          }
-        </tbody>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        }
       </table>
     </div>
 
@@ -452,5 +936,23 @@
     [open]="wizardOpen()"
     (close)="closeWizard()"
     (completed)="onWizardCompleted($event)"
+  />
+}
+
+@if ((isCustomerWorkspace() || isConsultationWorkspace()) && customerDetailOpen() && selectedCustomer(); as cust) {
+  <app-customer-detail-modal
+    [customer]="cust"
+    [open]="customerDetailOpen()"
+    [initialTab]="customerDetailInitialTab()"
+    (close)="closeCustomerDetail()"
+    (updated)="onCustomerUpdated($event)"
+  />
+}
+
+@if ((isCustomerWorkspace() || isConsultationWorkspace()) && customerFormOpen()) {
+  <app-customer-form-modal
+    [open]="customerFormOpen()"
+    (close)="closeCustomerCreateModal()"
+    (saved)="onCustomerCreated()"
   />
 }

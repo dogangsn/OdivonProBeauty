@@ -1,6 +1,7 @@
 import { Component, computed, inject, resource, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, catchError, of } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import { BranchService } from '../../../core/branch.service';
 import { DefinitionsService } from '../../../core/definitions/definitions.service';
@@ -17,12 +18,25 @@ import { PageHeader } from '../../../shared/page-header/page-header';
 import { SlideOver } from '../../../shared/slide-over/slide-over';
 import { StatusBadge } from '../../../shared/status-badge/status-badge';
 import { ServiceWizard, WizardCompletionResult } from '../../../shared/components/service-wizard/service-wizard';
+import { CustomerDetailModal, DetailTab } from '../../../shared/components/customer-detail-modal/customer-detail-modal';
+import { CustomerFormModal } from '../../../shared/components/customer-form-modal/customer-form-modal';
+import { CustomerConsultation, CustomerProfile, calculateAge } from '../../../core/customer/customer.model';
+import { DEMO_CUSTOMERS } from '../../../core/customer/customer-demo-data';
+import { DEMO_CONSULTATIONS } from '../../../core/customer/consultation-demo-data';
 
 type DraftValue = string | number | boolean;
 type Draft = Record<string, DraftValue>;
 
 @Component({
-  imports: [PageHeader, SlideOver, StatusBadge, ServiceWizard],
+  imports: [
+    PageHeader,
+    SlideOver,
+    StatusBadge,
+    ServiceWizard,
+    CustomerDetailModal,
+    CustomerFormModal,
+    DecimalPipe,
+  ],
   selector: 'app-workspace',
   styleUrl: './workspace.css',
   templateUrl: './workspace.html',
@@ -49,6 +63,18 @@ export class Workspace {
   protected readonly isServiceWorkspace = computed(
     () => this.definition.resource === 'services' || this.definition.resource === 'service-categories',
   );
+  protected readonly isCustomerWorkspace = computed(
+    () => this.definition.resource === 'customers',
+  );
+  protected readonly isConsultationWorkspace = computed(
+    () => this.definition.resource === 'consultations',
+  );
+  protected readonly selectedCustomer = signal<CustomerProfile | null>(null);
+  protected readonly customerDetailOpen = signal<boolean>(false);
+  protected readonly customerDetailInitialTab = signal<DetailTab>('overview');
+  protected readonly customerFormOpen = signal<boolean>(false);
+  protected readonly seedingDemoCustomers = signal<boolean>(false);
+  protected readonly seedingDemoConsultations = signal<boolean>(false);
 
   protected readonly branches = resource({
     loader: async () => this.branchService.ensureBranches(),
@@ -67,6 +93,79 @@ export class Workspace {
           status: 'ready',
         }));
       }
+
+      if (params.resource === 'consultations') {
+        const [cnsRes, custRes] = await Promise.all([
+          firstValueFrom(
+            this.api.list<BeautyRecord>('consultations', {
+              branchId: params.branchId || undefined,
+              limit: 100,
+            }),
+          ).catch(() => ({ data: [] })),
+          firstValueFrom(
+            this.api.list<CustomerProfile>('customers', {
+              branchId: params.branchId || undefined,
+              limit: 100,
+            }),
+          ).catch(() => ({ data: [] })),
+        ]);
+
+        const records: BeautyRecord[] = [...cnsRes.data];
+        const existingIds = new Set(records.map((r) => r.id));
+
+        for (const cust of custRes.data) {
+          if (Array.isArray(cust.consultations) && cust.consultations.length > 0) {
+            for (const c of cust.consultations) {
+              if (!existingIds.has(c.id)) {
+                records.push({
+                  id: c.id,
+                  customerId: cust.id,
+                  customerName: c.customerName || cust.fullName,
+                  phone: c.phone || cust.phone,
+                  email: c.email || cust.email || '',
+                  serviceCategory: c.serviceCategory,
+                  inquiredSession: c.inquiredSession,
+                  targetSessionsCount: c.targetSessionsCount,
+                  quotedPrice: c.quotedPrice,
+                  consultantStaffName: c.consultantStaffName || '',
+                  consultationDate: c.consultationDate,
+                  nextFollowUpDate: c.nextFollowUpDate || '',
+                  interestLevel: c.interestLevel || 'high',
+                  channel: c.channel || 'Yüz Yüze',
+                  status: c.status || 'inquiry',
+                  notes: c.notes || '',
+                  branchId: cust.branchId,
+                  createdAt: c.consultationDate || cust.createdAt,
+                });
+                existingIds.add(c.id);
+              }
+            }
+          } else if ((cust.segment === 'lead' || cust.segment === 'aday') && !existingIds.has(cust.id)) {
+            records.push({
+              id: cust.id,
+              customerId: cust.id,
+              customerName: cust.fullName,
+              phone: cust.phone,
+              email: cust.email || '',
+              serviceCategory: 'Genel Danışmanlık',
+              inquiredSession: cust.notes || 'Hizmet Bilgisi Talebi',
+              targetSessionsCount: 1,
+              quotedPrice: 0,
+              consultantStaffName: cust.preferredStaffName || '',
+              consultationDate: cust.createdAt ? cust.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
+              nextFollowUpDate: '',
+              interestLevel: 'high',
+              channel: cust.referralSource || 'Yüz Yüze',
+              status: cust.status === 'active' ? 'inquiry' : cust.status,
+              notes: cust.notes || '',
+              branchId: cust.branchId,
+            });
+            existingIds.add(cust.id);
+          }
+        }
+        return records;
+      }
+
       return (
         await firstValueFrom(
           this.api.list<BeautyRecord>(params.resource, {
@@ -85,6 +184,16 @@ export class Workspace {
       const matchesStatus = !status || row.status === status;
       return matchesQuery && matchesStatus;
     });
+  });
+
+  protected readonly hotLeadsCount = computed(() => {
+    return this.rows().filter((r) => r['interestLevel'] === 'high').length;
+  });
+  protected readonly totalQuotedPrice = computed(() => {
+    return this.rows().reduce((sum, r) => sum + (Number(r['quotedPrice']) || 0), 0);
+  });
+  protected readonly convertedConsultationCount = computed(() => {
+    return this.rows().filter((r) => r.status === 'converted').length;
   });
   protected readonly complete = computed(() =>
     (this.definition.fields ?? [])
@@ -161,7 +270,86 @@ export class Workspace {
     target === 'branch' ? this.branchFilter.set(value) : this.statusFilter.set(value);
   }
 
+  protected openCustomerDetail(row: BeautyRecord): void {
+    if (!this.isCustomerWorkspace()) return;
+    this.selectedCustomer.set(row as unknown as CustomerProfile);
+    this.customerDetailInitialTab.set('overview');
+    this.customerDetailOpen.set(true);
+  }
+
+  protected closeCustomerDetail(): void {
+    this.customerDetailOpen.set(false);
+    this.selectedCustomer.set(null);
+  }
+
+  protected onCustomerUpdated(_updated: CustomerProfile): void {
+    this.remote.reload();
+  }
+
+  protected openCustomerCreateModal(): void {
+    this.customerFormOpen.set(true);
+  }
+
+  protected closeCustomerCreateModal(): void {
+    this.customerFormOpen.set(false);
+  }
+
+  protected onCustomerCreated(): void {
+    this.customerFormOpen.set(false);
+    this.feedback.set('Yeni müşteri başarıyla eklendi.');
+    this.remote.reload();
+  }
+
+  protected async seedDemoCustomers(): Promise<void> {
+    if (this.seedingDemoCustomers()) return;
+    this.seedingDemoCustomers.set(true);
+    this.feedback.set('10 örnek müşteri yükleniyor…');
+    try {
+      const availableBranches = this.branches.value() ?? this.branchService.branches();
+      const branchId = this.branchService.activeBranchId() || availableBranches[0]?.id;
+
+      for (const demoCust of DEMO_CUSTOMERS) {
+        const { id, ...data } = demoCust;
+        await firstValueFrom(
+          this.api.create<CustomerProfile>('customers', {
+            branchId,
+            data,
+          }),
+        );
+      }
+      this.feedback.set(
+        '10 Örnek Müşteri başarıyla yüklendi! Kimlik, sağlık, cüzdan ve seans detaylarıyla test edebilirsiniz.',
+      );
+      this.remote.reload();
+    } catch (err) {
+      console.error('Failed to seed demo customers:', err);
+      this.feedback.set('Örnek müşteriler yüklenirken bir hata oluştu.');
+    } finally {
+      this.seedingDemoCustomers.set(false);
+    }
+  }
+
+  protected asCustomer(row: BeautyRecord): CustomerProfile {
+    return row as unknown as CustomerProfile;
+  }
+
+  protected computeCustomerAge(birthDate?: string): number | null {
+    return calculateAge(birthDate);
+  }
+
+  protected asNumber(value: unknown): number {
+    return typeof value === 'number' ? value : Number(value) || 0;
+  }
+
+  protected asString(value: unknown): string {
+    return typeof value === 'string' ? value : String(value ?? '');
+  }
+
   protected openCreate(): void {
+    if (this.isCustomerWorkspace()) {
+      this.openCustomerCreateModal();
+      return;
+    }
     this.editingId.set(null);
     this.draft.set(this.emptyDraft());
     this.feedback.set('');
@@ -223,6 +411,123 @@ export class Workspace {
     this.feedback.set('');
     try {
       const data = this.normalizedData(values);
+
+      if (this.definition.resource === 'consultations') {
+        const custRes = await firstValueFrom(
+          this.api.list<CustomerProfile>('customers', { limit: 100 }),
+        );
+        const existingCustomers = custRes.data;
+
+        if (this.editingId()) {
+          const editId = this.editingId()!;
+          const cust = existingCustomers.find(
+            (c) => c.id === editId || (c.consultations && c.consultations.some((item) => item.id === editId)),
+          );
+          if (cust) {
+            const updatedConsultations = (cust.consultations || []).map((item) => {
+              if (item.id === editId) {
+                return {
+                  ...item,
+                  serviceCategory: String(data['serviceCategory'] || item.serviceCategory),
+                  inquiredSession: String(data['inquiredSession'] || item.inquiredSession),
+                  targetSessionsCount: Number(data['targetSessionsCount'] || item.targetSessionsCount),
+                  quotedPrice: Number(data['quotedPrice'] || item.quotedPrice),
+                  consultantStaffName: String(data['consultantStaffName'] || item.consultantStaffName),
+                  consultationDate: String(data['consultationDate'] || item.consultationDate),
+                  nextFollowUpDate: data['nextFollowUpDate'] ? String(data['nextFollowUpDate']) : item.nextFollowUpDate,
+                  interestLevel: (data['interestLevel'] as any) || item.interestLevel,
+                  channel: (data['channel'] as any) || item.channel,
+                  status: (data['status'] as any) || item.status,
+                  notes: data['notes'] ? String(data['notes']) : item.notes,
+                };
+              }
+              return item;
+            });
+            const { id: custId, createdAt, updatedAt, createdBy, updatedBy, deletedAt, ...cleanData } = cust;
+            await firstValueFrom(
+              this.api.update<CustomerProfile>('customers', cust.id, {
+                data: {
+                  ...cleanData,
+                  consultations: updatedConsultations,
+                },
+              }),
+            );
+            await firstValueFrom(
+              this.api.update<BeautyRecord>('consultations', editId, { data }).pipe(
+                catchError(() => of(null)),
+              ),
+            );
+          } else {
+            await firstValueFrom(
+              this.api.update<BeautyRecord>('consultations', editId, { data }).pipe(
+                catchError(() => of(null)),
+              ),
+            );
+          }
+        } else {
+          const phone = String(data['phone'] || '').trim();
+          const name = String(data['customerName'] || '').trim();
+          const existingCust = existingCustomers.find(
+            (c) => (phone && c.phone === phone) || (name && c.fullName.toLowerCase() === name.toLowerCase()),
+          );
+
+          const newCns: CustomerConsultation = {
+            id: 'cns_' + Date.now().toString(36),
+            customerId: existingCust?.id || '',
+            customerName: name,
+            phone,
+            email: String(data['email'] || ''),
+            serviceCategory: String(data['serviceCategory'] || 'Lazer Epilasyon'),
+            inquiredSession: String(data['inquiredSession'] || ''),
+            targetSessionsCount: Number(data['targetSessionsCount'] || 1),
+            quotedPrice: Number(data['quotedPrice'] || 0),
+            consultantStaffName: String(data['consultantStaffName'] || ''),
+            consultationDate: String(data['consultationDate'] || new Date().toISOString().split('T')[0]),
+            nextFollowUpDate: data['nextFollowUpDate'] ? String(data['nextFollowUpDate']) : undefined,
+            interestLevel: (data['interestLevel'] as any) || 'high',
+            channel: (data['channel'] as any) || 'Yüz Yüze',
+            status: (data['status'] as any) || 'inquiry',
+            notes: data['notes'] ? String(data['notes']) : undefined,
+          };
+
+          if (existingCust) {
+            const { id: custId, createdAt, updatedAt, createdBy, updatedBy, deletedAt, ...cleanData } = existingCust;
+            await firstValueFrom(
+              this.api.update<CustomerProfile>('customers', existingCust.id, {
+                data: {
+                  ...cleanData,
+                  consultations: [newCns, ...(existingCust.consultations || [])],
+                },
+              }),
+            );
+          } else {
+            await firstValueFrom(
+              this.api.create<CustomerProfile>('customers', {
+                branchId: branchId || undefined,
+                data: {
+                  fullName: name,
+                  phone,
+                  email: String(data['email'] || ''),
+                  segment: 'lead',
+                  status: 'active',
+                  consultations: [newCns],
+                  notes: `Ön görüşme kaydı: ${newCns.inquiredSession}`,
+                },
+              }),
+            );
+          }
+          await firstValueFrom(
+            this.api.create<BeautyRecord>('consultations', {
+              branchId: branchId || undefined,
+              data: newCns,
+            }).pipe(catchError(() => of(null))),
+          );
+        }
+        this.closeDrawer();
+        this.remote.reload();
+        return;
+      }
+
       const id = this.editingId();
       if (id) {
         await firstValueFrom(this.api.update<BeautyRecord>(this.definition.resource, id, { data }));
@@ -258,6 +563,29 @@ export class Workspace {
     if (!confirm(`“${this.recordName(row)}” kaydi silinsin mi?`)) return;
     this.deletingId.set(row.id);
     try {
+      if (this.definition.resource === 'consultations') {
+        const custRes = await firstValueFrom(
+          this.api.list<CustomerProfile>('customers', { limit: 100 }),
+        );
+        const cust = custRes.data.find(
+          (c) => c.id === row.id || (c.consultations && c.consultations.some((item) => item.id === row.id)),
+        );
+        if (cust) {
+          const updatedConsultations = (cust.consultations || []).filter((item) => item.id !== row.id);
+          const { id: custId, createdAt, updatedAt, createdBy, updatedBy, deletedAt, ...cleanData } = cust;
+          await firstValueFrom(
+            this.api.update<CustomerProfile>('customers', cust.id, {
+              data: {
+                ...cleanData,
+                consultations: updatedConsultations,
+              },
+            }),
+          );
+        }
+        this.remote.reload();
+        return;
+      }
+
       await firstValueFrom(this.api.remove(this.definition.resource, row.id));
       if (this.entityLookup.isEntityResource(this.definition.resource)) {
         void this.entityLookup.refresh(this.definition.resource);
@@ -267,6 +595,96 @@ export class Workspace {
       this.feedback.set(error instanceof Error ? error.message : 'Kayit silinemedi.');
     } finally {
       this.deletingId.set(null);
+    }
+  }
+
+  protected async openCustomerDetailFromConsultation(row: BeautyRecord): Promise<void> {
+    const custId = String(row['customerId'] || row.id);
+    try {
+      let customer: CustomerProfile | undefined;
+      try {
+        const directRes = await firstValueFrom(this.api.get<CustomerProfile>('customers', custId));
+        if (directRes && directRes.data) {
+          customer = directRes.data;
+        }
+      } catch {
+        // Fallback
+      }
+
+      if (!customer) {
+        const custRes = await firstValueFrom(
+          this.api.list<CustomerProfile>('customers', { limit: 100 }),
+        );
+        customer = custRes.data.find((c) => c.id === custId || c.phone === row['phone']);
+      }
+
+      if (customer) {
+        this.selectedCustomer.set(customer);
+        this.customerDetailInitialTab.set('consultations');
+        this.customerDetailOpen.set(true);
+      } else {
+        this.feedback.set('Müşteri kaydı bulunamadı.');
+      }
+    } catch {
+      this.feedback.set('Müşteri detayı yüklenemedi.');
+    }
+  }
+
+  protected async seedDemoConsultations(): Promise<void> {
+    if (this.seedingDemoConsultations()) return;
+    this.seedingDemoConsultations.set(true);
+    this.feedback.set('Örnek ön görüşme ve seans bilgi talebi kayıtları yükleniyor…');
+    try {
+      const availableBranches = this.branches.value() ?? this.branchService.branches();
+      const branchId = this.branchService.activeBranchId() || availableBranches[0]?.id;
+
+      const custRes = await firstValueFrom(
+        this.api.list<CustomerProfile>('customers', { limit: 100 }),
+      );
+      const existingCustomers = custRes.data;
+
+      for (const cns of DEMO_CONSULTATIONS) {
+        const existing = existingCustomers.find(
+          (c) => c.fullName.toLowerCase() === cns.customerName.toLowerCase() || c.phone === cns.phone,
+        );
+        if (existing) {
+          const hasIt = (existing.consultations || []).some((item) => item.id === cns.id);
+          if (!hasIt) {
+            const { id: custId, createdAt, updatedAt, createdBy, updatedBy, deletedAt, ...cleanData } = existing;
+            await firstValueFrom(
+              this.api.update<CustomerProfile>('customers', existing.id, {
+                data: {
+                  ...cleanData,
+                  consultations: [cns, ...(existing.consultations || [])],
+                },
+              }),
+            );
+          }
+        } else {
+          await firstValueFrom(
+            this.api.create<CustomerProfile>('customers', {
+              branchId,
+              data: {
+                fullName: cns.customerName,
+                phone: cns.phone,
+                email: cns.email,
+                segment: 'lead',
+                status: 'active',
+                consultations: [cns],
+                notes: `Ön görüşme: ${cns.inquiredSession}. Not: ${cns.notes || ''}`,
+              },
+            }),
+          );
+        }
+      }
+
+      this.feedback.set('10 Gerçekçi Ön Görüşme ve Seans Bilgi Talebi başarıyla yüklendi!');
+      this.remote.reload();
+    } catch (err) {
+      console.error('Failed to seed demo consultations:', err);
+      this.feedback.set('Örnek ön görüşmeler yüklenirken bir hata oluştu.');
+    } finally {
+      this.seedingDemoConsultations.set(false);
     }
   }
 
@@ -411,6 +829,14 @@ export class Workspace {
       if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
       return (value as Record<string, unknown>)[key];
     }, row);
+  }
+
+  protected formatDate(value: unknown): string {
+    if (typeof value !== 'string' || !value) return '—';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? value
+      : new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium' }).format(date);
   }
 
   private date(value: unknown): string {

@@ -93,6 +93,13 @@ export class CustomerDetailModal {
   protected readonly newConsultationChannel = signal<string>('Yüz Yüze');
   protected readonly newConsultationNotes = signal<string>('');
 
+  // Customer Online Payment Link Modal State
+  protected readonly showPaymentLinkModal = signal<boolean>(false);
+  protected readonly linkPaymentType = signal<string>('deposit');
+  protected readonly linkAmount = signal<number>(500);
+  protected readonly linkTitle = signal<string>('Randevu Ön Ödemesi');
+  protected readonly generatedPaymentLinkUrl = signal<string>('');
+
   // Edit Tab Draft
   protected readonly editDraft = linkedSignal<Partial<CustomerProfile>>(() => {
     const c = this.currentCustomer();
@@ -734,6 +741,46 @@ export class CustomerDetailModal {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  // --- ONLINE PAYMENT LINK ACTIONS ---
+  protected openPaymentLinkModal(): void {
+    const cust = this.currentCustomer();
+    this.linkPaymentType.set('deposit');
+    this.linkAmount.set(500);
+    this.linkTitle.set(`${cust?.fullName || 'Müşteri'} - Randevu Ön Ödemesi`);
+    this.generatedPaymentLinkUrl.set('');
+    this.showPaymentLinkModal.set(true);
+  }
+
+  protected closePaymentLinkModal(): void {
+    this.showPaymentLinkModal.set(false);
+    this.generatedPaymentLinkUrl.set('');
+  }
+
+  protected generatePaymentLink(): void {
+    const code = `LNK-${Math.floor(8930 + Math.random() * 900)}`;
+    const fullUrl = `${window.location.origin}/pay/${code}`;
+    this.generatedPaymentLinkUrl.set(fullUrl);
+    this.feedback.set(`${code} kodlu online ödeme bağlantısı hazırlandı.`);
+  }
+
+  protected sendPaymentLinkViaWhatsApp(): void {
+    const cust = this.currentCustomer();
+    if (!cust) return;
+    const cleanPhone = (cust.phone || '').replace(/\D/g, '');
+    const url = this.generatedPaymentLinkUrl();
+    const msg = encodeURIComponent(
+      `Sayın ${cust.fullName},\nOdivonPro Güzellik Merkezi bünyesindeki "${this.linkTitle()}" işleminiz için ${this.linkAmount().toLocaleString('tr-TR')} ₺ tutarındaki güvenli 3D Secure ödeme bağlantınız:\n\n${url}\n\nİyi günler dileriz.`
+    );
+    window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+  }
+
+  protected copyPaymentLink(): void {
+    const url = this.generatedPaymentLinkUrl();
+    navigator.clipboard.writeText(url).then(() => {
+      this.feedback.set('Ödeme linki panoya kopyalandı.');
+    });
   }
 
   // Helpers

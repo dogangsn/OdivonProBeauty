@@ -71,6 +71,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/customer-portal/portal/portal').then((m) => m.Portal),
   },
   {
+    path: 'pay/:linkId',
+    loadComponent: () =>
+      import('./features/payment-links/public-checkout/public-checkout').then(
+        (m) => m.PublicCheckout
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell/shell').then((m) => m.Shell),
@@ -105,6 +112,11 @@ export const routes: Routes = [
         path: 'purchasing',
         loadComponent: () =>
           import('./features/purchasing/purchasing').then((m) => m.Purchasing),
+      },
+      {
+        path: 'payment-links',
+        loadComponent: () =>
+          import('./features/payment-links/payment-links').then((m) => m.PaymentLinks),
       },
       {
         path: 'ai-recommendations',

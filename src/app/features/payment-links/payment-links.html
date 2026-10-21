@@ -1,0 +1,496 @@
+<div class="payment-links-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-badge">
+        <span class="badge-icon">💳</span>
+        <span class="badge-text">ONLINE TAHSİLAT & PAY-BY-LINK</span>
+      </div>
+      <h1 class="main-title">Müşteri Online Ödeme & Bağlantı Yönetimi</h1>
+      <p class="subtitle">
+        Randevu kaporaları, seans taksitleri ve temassız tahsilatlar için müşterilerinize 3D Secure güvenceli ödeme linkleri üretin; WhatsApp ve SMS ile anında iletin.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+        <span class="material-icons">add_link</span>
+        <span>Yeni Ödeme Linki Oluştur</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KPI Overview Grid -->
+  <section class="kpi-grid">
+    <div class="kpi-card highlight-emerald">
+      <div class="kpi-icon-wrap emerald">
+        <span class="material-icons">payments</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Toplam Online Tahsilat</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">{{ stats().totalPaidAmount | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+        </div>
+        <span class="kpi-caption">3D Secure ve Apple Pay ile tamamlanan</span>
+      </div>
+    </div>
+
+    <div class="kpi-card highlight-amber">
+      <div class="kpi-icon-wrap amber">
+        <span class="material-icons">hourglass_top</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Bekleyen / Açık Linkler</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">{{ stats().pendingAmount | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+          <span class="kpi-subtext">({{ pendingLinksCount() }} Adet)</span>
+        </div>
+        <span class="kpi-caption">Müşteriye iletilen aktif bağlantılar</span>
+      </div>
+    </div>
+
+    <div class="kpi-card highlight-indigo">
+      <div class="kpi-icon-wrap indigo">
+        <span class="material-icons">event_available</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">No-Show Koruması</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">%{{ stats().noShowPreventionPercent }}</span>
+        </div>
+        <span class="kpi-caption">Kapora ile randevuya gelmeme engeli</span>
+      </div>
+    </div>
+
+    <div class="kpi-card highlight-violet">
+      <div class="kpi-icon-wrap violet">
+        <span class="material-icons">bolt</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Ortalama Ödeme Hızı</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">{{ stats().averageCheckoutSeconds }} Sn</span>
+        </div>
+        <span class="kpi-caption">Link tıklanmasından 3D onaya kadar</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toolbar & Filters -->
+  <section class="toolbar">
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input
+        type="text"
+        placeholder="Müşteri adı, link kodu (Örn: LNK-8921) veya telefon ara..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+    </div>
+
+    <div class="filter-pills">
+      <button
+        type="button"
+        class="pill-btn"
+        [class.active]="statusFilter() === 'all'"
+        (click)="statusFilter.set('all')"
+      >
+        Tümü ({{ paymentLinks().length }})
+      </button>
+      <button
+        type="button"
+        class="pill-btn amber"
+        [class.active]="statusFilter() === 'pending'"
+        (click)="statusFilter.set('pending')"
+      >
+        ⏳ Bekleyenler
+      </button>
+      <button
+        type="button"
+        class="pill-btn indigo"
+        [class.active]="statusFilter() === 'viewed'"
+        (click)="statusFilter.set('viewed')"
+      >
+        👁️ Görüntülenenler
+      </button>
+      <button
+        type="button"
+        class="pill-btn emerald"
+        [class.active]="statusFilter() === 'paid'"
+        (click)="statusFilter.set('paid')"
+      >
+        ✅ Ödenenler
+      </button>
+      <button
+        type="button"
+        class="pill-btn rose"
+        [class.active]="statusFilter() === 'expired'"
+        (click)="statusFilter.set('expired')"
+      >
+        ⌛ Süresi Dolanlar
+      </button>
+    </div>
+  </section>
+
+  <!-- Payment Links Table -->
+  <section class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Link Kodu</th>
+          <th>Müşteri</th>
+          <th>Ödeme Türü</th>
+          <th>Hizmet / Açıklama</th>
+          <th>Tutar</th>
+          <th>Son Geçerlilik</th>
+          <th>Durum & Telemetri</th>
+          <th>Hızlı Paylaşım & İşlemler</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (link of filteredLinks(); track link.id) {
+          <tr>
+            <td>
+              <div class="code-col">
+                <span class="code-badge">{{ link.linkCode }}</span>
+                <span class="text-xs text-slate-400 font-mono">{{ link.branchName }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="customer-col">
+                <span class="font-bold text-slate-800">{{ link.customerName }}</span>
+                <span class="text-xs text-slate-500 font-mono">{{ link.customerPhone }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="type-badge" [class]="link.paymentType">
+                @switch (link.paymentType) {
+                  @case ('deposit') { 🛡️ Kapora }
+                  @case ('package_installment') { 📦 Paket Taksiti }
+                  @case ('service_checkout') { 💅 Hizmet Tahsilatı }
+                  @case ('wallet_topup') { 👛 Cüzdan Yükleme }
+                  @default { 💳 Özel Ödeme }
+                }
+              </span>
+            </td>
+            <td>
+              <div class="title-col">
+                <span class="font-medium text-slate-800">{{ link.title }}</span>
+                @if (link.description) {
+                  <p class="text-xs text-slate-400 truncate-text">{{ link.description }}</p>
+                }
+              </div>
+            </td>
+            <td>
+              <span class="price-text">{{ link.amount | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+            </td>
+            <td>
+              <span class="text-xs font-semibold text-slate-600">{{ link.expiresAt | date:'dd.MM.yyyy HH:mm' }}</span>
+            </td>
+            <td>
+              <div class="status-col">
+                <span class="status-pill" [class]="link.status">
+                  @switch (link.status) {
+                    @case ('paid') { ✅ Ödendi }
+                    @case ('viewed') { 👁️ Müşteri Linki Açtı! }
+                    @case ('pending') { ⏳ Ödeme Bekliyor }
+                    @case ('expired') { ⌛ Süresi Doldu }
+                    @default { 🚫 İptal }
+                  }
+                </span>
+
+                @if (link.status === 'paid') {
+                  <span class="text-xs text-emerald-600 font-medium">
+                    {{ link.paidAt | date:'dd.MM HH:mm' }} • {{ link.cardBrand || 'Kart' }} *{{ link.cardLast4 || '••' }}
+                  </span>
+                } @else if (link.status === 'viewed') {
+                  <span class="text-xs text-indigo-600 font-medium animate-pulse">
+                    Son görüntüleme: {{ link.viewedAt | date:'dd.MM HH:mm' }}
+                  </span>
+                }
+              </div>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <!-- WhatsApp Share -->
+                <button
+                  type="button"
+                  class="btn-icon emerald"
+                  title="WhatsApp ile Müşteriye Gönder"
+                  (click)="sendViaWhatsApp(link)"
+                >
+                  <span class="material-icons text-base">chat</span>
+                </button>
+
+                <!-- SMS Send -->
+                <button
+                  type="button"
+                  class="btn-icon indigo"
+                  title="SMS ile İlet"
+                  (click)="sendViaSms(link)"
+                >
+                  <span class="material-icons text-base">sms</span>
+                </button>
+
+                <!-- QR Code Modal -->
+                <button
+                  type="button"
+                  class="btn-icon"
+                  title="Bankoda QR Kod Göster"
+                  (click)="openQrModal(link)"
+                >
+                  <span class="material-icons text-base">qr_code_scanner</span>
+                </button>
+
+                <!-- Copy Link -->
+                <button
+                  type="button"
+                  class="btn-icon"
+                  title="Bağlantıyı Kopyala"
+                  (click)="copyLink(link)"
+                >
+                  <span class="material-icons text-base">content_copy</span>
+                </button>
+
+                <!-- Open Public Checkout Screen -->
+                <button
+                  type="button"
+                  class="btn-action primary"
+                  title="Müşteri Gözünden Ödeme Sayfasını Aç"
+                  (click)="openCustomerCheckoutView(link)"
+                >
+                  <span class="material-icons text-xs">launch</span>
+                  <span>Ödeme Sayfası</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8" class="empty-cell">
+              <span class="material-icons empty-icon">link_off</span>
+              <p>Arama kriterlerine uygun ödeme linki bulunamadı.</p>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- 1. CREATE PAYMENT LINK MODAL -->
+@if (isCreateModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCreateModal()">
+    <div class="modal-card modal-md" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-icon indigo">
+          <span class="material-icons">add_card</span>
+        </div>
+        <div>
+          <h2 class="modal-title">Yeni Müşteri Ödeme Linki Oluştur</h2>
+          <p class="modal-desc">Randevu kaporası, seans veya cüzdan için 3D Secure güvenli link üretin.</p>
+        </div>
+        <button type="button" class="close-btn" (click)="closeCreateModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Customer Info -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Müşteri Adı Soyadı *</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Örn: Merve Aydın"
+              [ngModel]="newCustomerName()"
+              (ngModelChange)="newCustomerName.set($event)"
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Telefon Numarası *</label>
+            <input
+              type="tel"
+              class="form-input font-mono"
+              placeholder="+90 5xx xxx xx xx"
+              [ngModel]="newCustomerPhone()"
+              (ngModelChange)="newCustomerPhone.set($event)"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Ödeme Türü</label>
+            <select
+              class="form-select"
+              [ngModel]="newPaymentType()"
+              (ngModelChange)="onPaymentTypeChange($event)"
+            >
+              <option value="deposit">🛡️ Randevu Kaporası (No-Show Koruması)</option>
+              <option value="service_checkout">💅 Seans Sonrası Temassız Tahsilat</option>
+              <option value="package_installment">📦 Paket & Taksit Ödemesi</option>
+              <option value="wallet_topup">👛 Cüzdan Yükleme (+Bonus Kampanyası)</option>
+              <option value="custom">💳 Özel Tutar / Diğer</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Ödeme Tutarı (₺) *</label>
+            <input
+              type="number"
+              min="1"
+              step="10"
+              class="form-input font-bold text-indigo-700"
+              [ngModel]="newAmount()"
+              (ngModelChange)="newAmount.set($event)"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Başlık / Hizmet Tanımı</label>
+          <input
+            type="text"
+            class="form-input"
+            [ngModel]="newTitle()"
+            (ngModelChange)="newTitle.set($event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Müşteriye Gösterilecek Açıklama</label>
+          <textarea
+            class="form-textarea"
+            rows="2"
+            [ngModel]="newDescription()"
+            (ngModelChange)="newDescription.set($event)"
+          ></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Bağlantı Geçerlilik Süresi</label>
+            <select
+              class="form-select"
+              [ngModel]="newExpiresInHours()"
+              (ngModelChange)="newExpiresInHours.set($event)"
+            >
+              <option [value]="2">2 Saat (Acil Randevu Kapora)</option>
+              <option [value]="12">12 Saat</option>
+              <option [value]="24">24 Saat (1 Gün - Standart)</option>
+              <option [value]="48">48 Saat (2 Gün)</option>
+              <option [value]="168">7 Gün (1 Hafta)</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Klinik Şubesi</label>
+            <input
+              type="text"
+              class="form-input"
+              [ngModel]="newBranchName()"
+              (ngModelChange)="newBranchName.set($event)"
+            />
+          </div>
+        </div>
+
+        <!-- WhatsApp Preview Box -->
+        <div class="whatsapp-preview-box">
+          <div class="preview-header">
+            <span class="material-icons text-emerald-600">chat</span>
+            <span class="text-xs font-bold text-slate-700">MÜŞTERİYE GİDECEK WHATSAPP / SMS MESAJI:</span>
+          </div>
+          <p class="preview-text">
+            Sayın {{ newCustomerName() || '[Müşteri Adı]' }},<br>
+            OdivonPro Güzellik Merkezi bünyesindeki "{{ newTitle() }}" işleminiz için {{ newAmount() | currency:'TRY':'symbol':'1.0-0':'tr' }} tutarındaki güvenli ödeme bağlantınız:<br>
+            <span class="text-indigo-600 font-mono font-semibold">https://odivon.beauty/pay/LNK-XXXX</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">İptal</button>
+        <button type="button" class="btn btn-primary" (click)="savePaymentLink()">
+          <span class="material-icons">check</span>
+          <span>Ödeme Linkini Oluştur</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- 2. QR CODE BANKO MODAL -->
+@if (isQrModalOpen() && selectedLinkForQr(); as link) {
+  <div class="modal-backdrop" (click)="closeQrModal()">
+    <div class="modal-card modal-sm text-center" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Karekod (QR) İle Ödeme</h2>
+          <span class="text-xs text-slate-500">{{ link.customerName }} | {{ link.linkCode }}</span>
+        </div>
+        <button type="button" class="close-btn" (click)="closeQrModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body items-center">
+        <p class="text-sm text-slate-600 mb-2">
+          Müşteri telefon kamerasını açarak aşağıdaki QR kodu tarayabilir ve 3D Secure ile ödemesini saniyeler içinde tamamlayabilir.
+        </p>
+
+        <!-- Simulated SVG QR Code -->
+        <div class="qr-canvas-box">
+          <svg viewBox="0 0 200 200" width="180" height="180" class="qr-svg">
+            <rect width="200" height="200" fill="#ffffff" rx="12"/>
+            <!-- Corner marker 1 -->
+            <rect x="20" y="20" width="45" height="45" fill="#1e1b4b" rx="6"/>
+            <rect x="28" y="28" width="29" height="29" fill="#ffffff" rx="4"/>
+            <rect x="34" y="34" width="17" height="17" fill="#4338ca" rx="2"/>
+            <!-- Corner marker 2 -->
+            <rect x="135" y="20" width="45" height="45" fill="#1e1b4b" rx="6"/>
+            <rect x="143" y="28" width="29" height="29" fill="#ffffff" rx="4"/>
+            <rect x="149" y="34" width="17" height="17" fill="#4338ca" rx="2"/>
+            <!-- Corner marker 3 -->
+            <rect x="20" y="135" width="45" height="45" fill="#1e1b4b" rx="6"/>
+            <rect x="28" y="143" width="29" height="29" fill="#ffffff" rx="4"/>
+            <rect x="34" y="149" width="17" height="17" fill="#4338ca" rx="2"/>
+            <!-- Data dots -->
+            <rect x="75" y="25" width="10" height="10" fill="#312e81"/>
+            <rect x="95" y="25" width="10" height="10" fill="#4f46e5"/>
+            <rect x="115" y="25" width="10" height="10" fill="#312e81"/>
+            <rect x="75" y="45" width="10" height="10" fill="#4338ca"/>
+            <rect x="95" y="55" width="15" height="15" fill="#1e1b4b" rx="3"/>
+            <rect x="80" y="80" width="40" height="40" fill="#4f46e5" rx="4"/>
+            <!-- Center icon -->
+            <circle cx="100" cy="100" r="14" fill="#ffffff"/>
+            <text x="100" y="104" text-anchor="middle" font-size="10" font-weight="bold" fill="#4f46e5">✨</text>
+            <rect x="135" y="75" width="10" height="10" fill="#312e81"/>
+            <rect x="155" y="85" width="10" height="10" fill="#4f46e5"/>
+            <rect x="145" y="105" width="15" height="15" fill="#1e1b4b"/>
+            <rect x="75" y="135" width="12" height="12" fill="#4338ca"/>
+            <rect x="95" y="145" width="12" height="12" fill="#312e81"/>
+            <rect x="115" y="135" width="12" height="12" fill="#4f46e5"/>
+            <rect x="140" y="140" width="35" height="35" fill="#312e81" rx="4"/>
+          </svg>
+        </div>
+
+        <div class="qr-amount-pill mt-2">
+          <span>Ödenecek Tutar:</span>
+          <span class="font-bold text-indigo-700 text-lg">{{ link.amount | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+        </div>
+      </div>
+
+      <div class="modal-footer justify-center">
+        <button type="button" class="btn btn-secondary" (click)="closeQrModal()">Kapat</button>
+        <button type="button" class="btn btn-primary" (click)="copyLink(link)">
+          <span class="material-icons">content_copy</span>
+          <span>Bağlantıyı Kopyala</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}

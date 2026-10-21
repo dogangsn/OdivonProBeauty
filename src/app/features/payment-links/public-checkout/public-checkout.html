@@ -1,0 +1,365 @@
+<div class="checkout-page-wrapper">
+  <!-- Top Trust Bar -->
+  <header class="checkout-header">
+    <div class="header-inner">
+      <div class="brand-box">
+        <span class="brand-icon">✨</span>
+        <div>
+          <span class="brand-title">ODIVONPRO BEAUTY</span>
+          <span class="brand-branch">{{ paymentLink().branchName }}</span>
+        </div>
+      </div>
+
+      <div class="security-badges">
+        <div class="sec-badge">
+          <span class="material-icons">lock</span>
+          <span>256-Bit SSL</span>
+        </div>
+        <div class="sec-badge">
+          <span class="material-icons">verified_user</span>
+          <span>3D Secure 2.0</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="checkout-main">
+    @if (!isPaidSuccess()) {
+      <div class="checkout-grid">
+        <!-- Left: Treatment & Order Summary -->
+        <section class="summary-card">
+          <div class="summary-top">
+            <span class="type-pill" [class]="paymentLink().paymentType">
+              @switch (paymentLink().paymentType) {
+                @case ('deposit') { 🛡️ Randevu Kaporası }
+                @case ('package_installment') { 📦 Paket Taksit Ödemesi }
+                @case ('service_checkout') { 💅 Hizmet Tahsilatı }
+                @case ('wallet_topup') { 👛 Cüzdan Yükleme }
+                @default { 💳 Güvenli Ödeme }
+              }
+            </span>
+            <span class="link-code-tag">{{ paymentLink().linkCode }}</span>
+          </div>
+
+          <h1 class="treatment-title">{{ paymentLink().title }}</h1>
+          @if (paymentLink().description) {
+            <p class="treatment-desc">{{ paymentLink().description }}</p>
+          }
+
+          <div class="customer-info-box">
+            <div class="info-row">
+              <span class="info-label">Müşteri:</span>
+              <span class="info-value font-bold">{{ paymentLink().customerName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Telefon:</span>
+              <span class="info-value">{{ paymentLink().customerPhone }}</span>
+            </div>
+            @if (paymentLink().appointmentDate) {
+              <div class="info-row">
+                <span class="info-label">Randevu Tarihi:</span>
+                <span class="info-value text-indigo-700 font-semibold">{{ paymentLink().appointmentDate | date:'dd MMMM yyyy, HH:mm':'':'tr' }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="price-breakdown">
+            <div class="breakdown-row">
+              <span>Hizmet / Tutar:</span>
+              <span>{{ paymentLink().amount | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+            </div>
+            @if (selectedInstallment() > 1) {
+              <div class="breakdown-row text-xs text-slate-500">
+                <span>Taksit Seçeneği:</span>
+                <span>{{ selectedInstallment() }} Taksit</span>
+              </div>
+            }
+            <div class="total-row">
+              <span>Ödenecek Toplam:</span>
+              <span class="total-number">{{ currentTotalAmount() | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+            </div>
+          </div>
+
+          <div class="guarantee-note">
+            <span class="material-icons text-emerald-600">security</span>
+            <p class="text-xs text-slate-600">
+              Ödemeniz BDDK lisanslı banka altyapısıyla 3D Secure korumalı olarak işlenir. Kart bilgileriniz kesinlikle kaydedilmez.
+            </p>
+          </div>
+        </section>
+
+        <!-- Right: Payment Methods & Card Form -->
+        <section class="payment-card">
+          <!-- Method Selector Tabs -->
+          <div class="method-tabs">
+            <button
+              type="button"
+              class="method-btn"
+              [class.active]="paymentMethod() === 'card'"
+              (click)="selectPaymentMethod('card')"
+            >
+              <span class="material-icons">credit_card</span>
+              <span>Kredi / Banka Kartı</span>
+            </button>
+            <button
+              type="button"
+              class="method-btn"
+              [class.active]="paymentMethod() === 'apple_pay'"
+              (click)="selectPaymentMethod('apple_pay')"
+            >
+              <span class="material-icons">phone_iphone</span>
+              <span>Apple Pay / Fast</span>
+            </button>
+            <button
+              type="button"
+              class="method-btn"
+              [class.active]="paymentMethod() === 'fast'"
+              (click)="selectPaymentMethod('fast')"
+            >
+              <span class="material-icons">account_balance</span>
+              <span>Havale / FAST</span>
+            </button>
+          </div>
+
+          @if (paymentMethod() === 'card') {
+            <!-- Interactive Visual Card -->
+            <div class="visual-card-container">
+              <div class="virtual-card">
+                <div class="card-chip-row">
+                  <div class="chip"></div>
+                  <span class="brand-network">{{ detectedCardBrand() }}</span>
+                </div>
+                <div class="card-number-display">
+                  {{ cardNumber() || '•••• •••• •••• ••••' }}
+                </div>
+                <div class="card-bottom-row">
+                  <div class="holder-meta">
+                    <span class="meta-label">KART SAHİBİ</span>
+                    <span class="meta-val">{{ cardHolderName() || 'AD SOYAD' }}</span>
+                  </div>
+                  <div class="expiry-meta">
+                    <span class="meta-label">SKT</span>
+                    <span class="meta-val">{{ cardExpiry() || 'AA/YY' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Inputs -->
+            <div class="card-form">
+              <div class="form-group">
+                <label class="form-label">Kart Üzerindeki İsim</label>
+                <input
+                  type="text"
+                  class="form-input text-uppercase"
+                  placeholder="AD SOYAD"
+                  [(ngModel)]="cardHolderName"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Kart Numarası</label>
+                <div class="input-with-icon">
+                  <input
+                    type="text"
+                    class="form-input font-mono"
+                    maxlength="19"
+                    placeholder="5428 1900 0000 0000"
+                    [(ngModel)]="cardNumber"
+                  />
+                  <span class="card-type-icon">{{ detectedCardBrand() }}</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label">Son Kullanma (AA/YY)</label>
+                  <input
+                    type="text"
+                    class="form-input font-mono text-center"
+                    maxlength="5"
+                    placeholder="12/28"
+                    [(ngModel)]="cardExpiry"
+                  />
+                </div>
+
+                <div class="form-group flex-1">
+                  <label class="form-label">Güvenlik Kodu (CVV)</label>
+                  <input
+                    type="password"
+                    class="form-input font-mono text-center"
+                    maxlength="4"
+                    placeholder="•••"
+                    [(ngModel)]="cardCvc"
+                  />
+                </div>
+              </div>
+
+              <!-- Installments Table -->
+              <div class="installments-section">
+                <label class="form-label">Taksit Seçenekleri</label>
+                <div class="installments-grid">
+                  @for (opt of installmentOptions(); track opt.count) {
+                    <div
+                      class="inst-item"
+                      [class.selected]="selectedInstallment() === opt.count"
+                      (click)="selectInstallment(opt.count)"
+                    >
+                      <div class="inst-top">
+                        <span class="inst-count">
+                          @if (opt.count === 1) {
+                            Peşin (Tek Çekim)
+                          } @else {
+                            {{ opt.count }} Taksit
+                          }
+                        </span>
+                        <span class="inst-monthly">{{ opt.monthlyAmount | currency:'TRY':'symbol':'1.0-0':'tr' }} / ay</span>
+                      </div>
+                      <span class="inst-total">{{ opt.bankName }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="agreement-box">
+                <input type="checkbox" id="agree" [(ngModel)]="cardSaveAgreement" />
+                <label for="agree" class="text-xs text-slate-600">
+                  <a href="javascript:void(0)" class="text-indigo-600 font-medium">Mesafeli Satış Sözleşmesi</a>'ni ve iptal/iade şartlarını okudum, kabul ediyorum.
+                </label>
+              </div>
+
+              <button
+                type="button"
+                class="pay-submit-btn"
+                [disabled]="isProcessing()"
+                (click)="triggerSubmitPayment()"
+              >
+                <span class="material-icons">lock</span>
+                <span>{{ currentTotalAmount() | currency:'TRY':'symbol':'1.0-0':'tr' }} Güvenli Öde</span>
+              </button>
+            </div>
+          } @else if (paymentMethod() === 'apple_pay') {
+            <div class="apple-pay-box">
+              <span class="material-icons apple-icon">phone_iphone</span>
+              <h3>Apple Pay & Google Wallet Hızlı Ödeme</h3>
+              <p>Kart bilgisi girmeden tek dokunuşla biyometrik doğrulama ile ödeme yapabilirsiniz.</p>
+              <button type="button" class="apple-pay-btn" (click)="triggerSubmitPayment()">
+                <span> Pay ile Hemen Öde</span>
+              </button>
+            </div>
+          } @else {
+            <div class="fast-payment-box">
+              <span class="material-icons fast-icon">account_balance</span>
+              <h3>FAST / 7/24 Anında Havale</h3>
+              <p>Aşağıdaki IBAN numarasına gönderim yapabilirsiniz. Açıklamaya lütfen link kodunuzu yazınız.</p>
+              <div class="iban-card">
+                <span class="text-xs text-slate-400">GÜZELLİK MERKEZİ IBAN:</span>
+                <span class="font-mono font-bold text-slate-800 text-sm">TR56 0006 2000 0001 2948 2100 92</span>
+                <span class="text-xs text-indigo-600 font-semibold mt-1">Açıklama: {{ paymentLink().linkCode }}</span>
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+    } @else {
+      <!-- Payment Successful Screen -->
+      <section class="success-screen">
+        <div class="success-card">
+          <div class="success-checkmark-circle">
+            <span class="material-icons">check_circle</span>
+          </div>
+          <h1 class="success-title">Ödemeniz Başarıyla Alındı!</h1>
+          <p class="success-sub">
+            Sayın <strong>{{ paymentLink().customerName }}</strong>, işleminiz başarıyla tamamlandı. Randevunuz / paketiniz onaylanmıştır.
+          </p>
+
+          <div class="receipt-box">
+            <div class="receipt-header">
+              <span>DİJİTAL TAHSİLAT MAKBUZU</span>
+              <span class="font-mono text-xs">{{ transactionReceiptId() }}</span>
+            </div>
+            <div class="receipt-rows">
+              <div class="rec-row">
+                <span>Hizmet / Açıklama:</span>
+                <span class="font-medium">{{ paymentLink().title }}</span>
+              </div>
+              <div class="rec-row">
+                <span>Şube:</span>
+                <span>{{ paymentLink().branchName }}</span>
+              </div>
+              <div class="rec-row">
+                <span>Ödeme Yöntemi:</span>
+                <span>{{ paymentLink().paymentMethod || '3D Secure Kredi Kartı' }}</span>
+              </div>
+              <div class="rec-row">
+                <span>Tarih / Saat:</span>
+                <span>{{ paymentLink().paidAt | date:'dd.MM.yyyy HH:mm' }}</span>
+              </div>
+              <div class="rec-row total">
+                <span>Tahsil Edilen Tutar:</span>
+                <span class="rec-total-amount">{{ currentTotalAmount() | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="success-actions">
+            <button type="button" class="btn btn-secondary" (click)="printReceipt()">
+              <span class="material-icons">print</span>
+              <span>Makbuzu Yazdır / PDF</span>
+            </button>
+            <a href="/" class="btn btn-primary">
+              <span class="material-icons">home</span>
+              <span>Klinik Ana Sayfasına Dön</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    }
+  </main>
+
+  <!-- 3D Secure OTP Modal Simulation -->
+  @if (isOtpModalOpen()) {
+    <div class="modal-backdrop">
+      <div class="modal-card modal-sm">
+        <div class="bank-otp-header">
+          <div class="bank-logo-row">
+            <span class="bank-title">BANK 3D SECURE DOĞRULAMA</span>
+            <span class="material-icons text-emerald-600">verified</span>
+          </div>
+          <span class="text-xs text-slate-500">Güvenli SMS Şifresi Onay Ekranı</span>
+        </div>
+
+        <div class="modal-body">
+          <p class="text-sm text-slate-600">
+            <strong>{{ paymentLink().customerPhone }}</strong> nolu telefonunuza gönderilen tek kullanımlık 3D Secure onay şifresini giriniz.
+          </p>
+          <div class="otp-input-wrap">
+            <input
+              type="text"
+              maxlength="6"
+              class="otp-input"
+              [(ngModel)]="otpInput"
+            />
+          </div>
+          <span class="text-xs text-slate-400 text-center block mt-1">Kalan Süre: 02:48 (Simülasyon kodu hazır dolduruldu)</span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="isOtpModalOpen.set(false)">İptal</button>
+          <button
+            type="button"
+            class="btn btn-success"
+            [disabled]="isProcessing()"
+            (click)="confirmOtp()"
+          >
+            @if (isProcessing()) {
+              <span>İşleniyor…</span>
+            } @else {
+              <span>Doğrula & {{ currentTotalAmount() | currency:'TRY':'symbol':'1.0-0':'tr' }} Öde</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

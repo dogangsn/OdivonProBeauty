@@ -151,6 +151,18 @@
 
             <button
               type="button"
+              (click)="openPaymentLinkModal()"
+              class="odv-btn-soft text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+              title="Müşteriye 3D Secure Online Ödeme Linki Gönder"
+            >
+              <span class="material-symbols-outlined icon-size-4 text-indigo-600 dark:text-indigo-400"
+                >link</span
+              >
+              <span>Ödeme Linki</span>
+            </button>
+
+            <button
+              type="button"
               (click)="close.emit()"
               class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 border-0 cursor-pointer transition-colors"
               aria-label="Kapat"
@@ -2392,6 +2404,130 @@
             </span>
             <span>{{ saving() ? 'Kaydediliyor…' : 'Ön Görüşmeyi Kaydet' }}</span>
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Online Payment Link Modal for this Customer -->
+  @if (showPaymentLinkModal()) {
+    <div
+      class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+      (click)="closePaymentLinkModal()"
+    >
+      <div
+        class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg p-5 sm:p-6 space-y-4"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <span class="material-symbols-outlined icon-size-5">link</span>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white m-0">Online Ödeme Linki Oluştur</h3>
+              <p class="text-xs text-slate-400 m-0">{{ cust.fullName }} için 3D Secure güvenli ödeme bağlantısı</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closePaymentLinkModal()"
+            class="w-7 h-7 rounded-lg flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 border-0 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="space-y-3.5">
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-slate-600 dark:text-slate-300">Ödeme Türü</label>
+            <select
+              [value]="linkPaymentType()"
+              (change)="linkPaymentType.set($any($event.target).value)"
+              class="odv-input"
+            >
+              <option value="deposit">🛡️ Randevu Kaporası</option>
+              <option value="package_installment">📦 Paket Taksit Tahsilatı</option>
+              <option value="service_checkout">💅 Seans Sonrası Ödeme</option>
+              <option value="wallet_topup">👛 Cüzdan Yükleme</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-slate-600 dark:text-slate-300">Ödeme Tutarı (₺)</label>
+            <input
+              type="number"
+              min="10"
+              step="10"
+              [value]="linkAmount()"
+              (input)="linkAmount.set(+$any($event.target).value)"
+              class="odv-input font-bold text-indigo-600"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-xs font-bold text-slate-600 dark:text-slate-300">Açıklama / Hizmet</label>
+            <input
+              type="text"
+              [value]="linkTitle()"
+              (input)="linkTitle.set($any($event.target).value)"
+              class="odv-input"
+            />
+          </div>
+
+          @if (generatedPaymentLinkUrl(); as url) {
+            <div class="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-2">
+              <span class="text-xs font-bold text-indigo-700 dark:text-indigo-300 block">HAZIRLANAN ÖDEME BAĞLANTISI:</span>
+              <div class="flex items-center gap-2">
+                <input
+                  type="text"
+                  readonly
+                  [value]="url"
+                  class="odv-input font-mono text-xs text-indigo-900 bg-white dark:bg-slate-900"
+                />
+                <button
+                  type="button"
+                  (click)="copyPaymentLink()"
+                  class="odv-btn-soft text-xs whitespace-nowrap"
+                  title="Kopyala"
+                >
+                  <span class="material-symbols-outlined icon-size-4">content_copy</span>
+                  <span>Kopyala</span>
+                </button>
+              </div>
+
+              <div class="pt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  (click)="sendPaymentLinkViaWhatsApp()"
+                  class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm border-0 cursor-pointer"
+                >
+                  <span class="material-symbols-outlined icon-size-4">chat</span>
+                  <span>WhatsApp ile Müşteriye Gönder</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button
+            type="button"
+            (click)="closePaymentLinkModal()"
+            class="odv-btn-ghost text-xs"
+          >
+            Kapat
+          </button>
+          @if (!generatedPaymentLinkUrl()) {
+            <button
+              type="button"
+              (click)="generatePaymentLink()"
+              class="odv-btn-primary text-xs"
+            >
+              <span class="material-symbols-outlined icon-size-4">link</span>
+              <span>Bağlantı Oluştur</span>
+            </button>
+          }
         </div>
       </div>
     </div>

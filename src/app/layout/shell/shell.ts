@@ -101,6 +101,7 @@ export class Shell {
     {
       key: 'nav.section.financeStock',
       items: [
+        { key: 'nav.purchasing', icon: 'shopping_cart_checkout', route: '/purchasing' },
         { key: 'nav.payments', icon: 'payments', route: '/payments' },
         { key: 'nav.invoices', icon: 'receipt_long', route: '/invoices' },
         { key: 'nav.expenses', icon: 'account_balance_wallet', route: '/expenses' },

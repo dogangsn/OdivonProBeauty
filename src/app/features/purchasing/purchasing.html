@@ -1,0 +1,1320 @@
+<div class="purchasing-container">
+  <!-- Header -->
+  <header class="purchasing-header">
+    <div class="header-left">
+      <div class="title-badge">
+        <span class="badge-icon">🛍️</span>
+        <span class="badge-text">KURUMSAL SATIN ALMA & MALZEME YÖNETİMİ</span>
+      </div>
+      <h1 class="main-title">Satın Alma, Talep & Sipariş Onay Merkezi</h1>
+      <p class="subtitle">
+        Şube malzeme taleplerini, çok kademeli onay akışlarını, tedarikçi siparişlerini ve mal kabul süreçlerini uçtan uca yönetin.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-secondary" (click)="setActiveTab('approvals')">
+        <span class="icon">notifications_active</span>
+        <span>Onay Kutusu ({{ totalPendingApprovalsCount() }})</span>
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openNewRequisitionModal()">
+        <span class="icon">add_circle</span>
+        <span>Yeni Satın Alma Talebi</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KPI Overview Grid -->
+  <section class="kpi-grid">
+    <div class="kpi-card highlight-amber">
+      <div class="kpi-icon-wrap amber">
+        <span class="material-icons">pending_actions</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Onay Bekleyen Talepler</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">{{ kpis().pendingRequisitionsCount }} Talep</span>
+          <span class="kpi-subtext">({{ kpis().pendingRequisitionsTotal | currency:'TRY':'symbol':'1.0-0':'tr' }})</span>
+        </div>
+        <span class="kpi-caption">Kademe 1 & 2 değerlendirmesinde</span>
+      </div>
+    </div>
+
+    <div class="kpi-card highlight-indigo">
+      <div class="kpi-icon-wrap indigo">
+        <span class="material-icons">local_shipping</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Aktif Sipariş & Sevkiyat</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">{{ kpis().activeOrdersCount }} Sipariş</span>
+          <span class="kpi-subtext">({{ kpis().activeOrdersTotal | currency:'TRY':'symbol':'1.0-0':'tr' }})</span>
+        </div>
+        <span class="kpi-caption">Tedarikçi teslimat aşamasında</span>
+      </div>
+    </div>
+
+    <div class="kpi-card highlight-emerald">
+      <div class="kpi-icon-wrap emerald">
+        <span class="material-icons">account_balance</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Aylık Bütçe Kullanımı</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">%{{ kpis().budgetUtilizationPercent }}</span>
+          <span class="kpi-subtext">{{ kpis().monthlySpend | currency:'TRY':'symbol':'1.0-0':'tr' }} / {{ kpis().budgetLimit | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" [style.width.%]="kpis().budgetUtilizationPercent"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card highlight-violet">
+      <div class="kpi-icon-wrap violet">
+        <span class="material-icons">speed</span>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Ortalama Onay Süresi</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number">{{ kpis().averageApprovalHours }} Saat</span>
+        </div>
+        <span class="kpi-caption">Dijital onay zinciri ile %80 hızlanma</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Tabs -->
+  <nav class="purchasing-tabs">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'requisitions'"
+      (click)="setActiveTab('requisitions')"
+    >
+      <span class="material-icons">assignment</span>
+      <span>Taleplerim & Departman Talepleri</span>
+      <span class="tab-counter">{{ requisitions().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'approvals'"
+      (click)="setActiveTab('approvals')"
+    >
+      <span class="material-icons">verified_user</span>
+      <span>Onay Merkezi (Workflow)</span>
+      @if (totalPendingApprovalsCount() > 0) {
+        <span class="tab-counter badge-alert">{{ totalPendingApprovalsCount() }}</span>
+      }
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'orders'"
+      (click)="setActiveTab('orders')"
+    >
+      <span class="material-icons">shopping_bag</span>
+      <span>Satın Alma Siparişleri (PO)</span>
+      <span class="tab-counter">{{ purchaseOrders().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'goods-receipts'"
+      (click)="setActiveTab('goods-receipts')"
+    >
+      <span class="material-icons">fact_check</span>
+      <span>Mal Kabul & Depo Girişi</span>
+      <span class="tab-counter">{{ goodsReceipts().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'suppliers'"
+      (click)="setActiveTab('suppliers')"
+    >
+      <span class="material-icons">store</span>
+      <span>Tedarikçi Karneleri</span>
+      <span class="tab-counter">{{ suppliers().length }}</span>
+    </button>
+  </nav>
+
+  <!-- TAB 1: REQUISITIONS -->
+  @if (activeTab() === 'requisitions') {
+    <section class="tab-content-area">
+      <!-- Filter Bar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="material-icons">search</span>
+          <input
+            type="text"
+            placeholder="Talep kodu, ürün adı veya talep eden ara..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+        </div>
+
+        <div class="filter-pills">
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="requisitionFilter() === 'all'"
+            (click)="requisitionFilter.set('all')"
+          >
+            Tümü ({{ requisitions().length }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn amber"
+            [class.active]="requisitionFilter() === 'pending'"
+            (click)="requisitionFilter.set('pending')"
+          >
+            Onay Bekleyenler ({{ pendingApprovalRequisitions().length }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn emerald"
+            [class.active]="requisitionFilter() === 'approved'"
+            (click)="requisitionFilter.set('approved')"
+          >
+            Onaylananlar
+          </button>
+          <button
+            type="button"
+            class="pill-btn indigo"
+            [class.active]="requisitionFilter() === 'ordered'"
+            (click)="requisitionFilter.set('ordered')"
+          >
+            Siparişe Dönüşenler
+          </button>
+        </div>
+      </div>
+
+      <!-- Requisition Table -->
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Talep Kodu</th>
+              <th>Öncelik</th>
+              <th>Kategori / Şube</th>
+              <th>Talep Eden & Gerekçe</th>
+              <th>Kalemler</th>
+              <th>Tahmini Tutar</th>
+              <th>Onay Durumu</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (req of filteredRequisitions(); track req.id) {
+              <tr class="clickable-row" (click)="viewRequisitionDetail(req)">
+                <td>
+                  <div class="code-col">
+                    <span class="font-bold text-slate-800">{{ req.code }}</span>
+                    <span class="text-xs text-slate-400">{{ req.requestedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="priority-badge" [class]="req.priority">
+                    @switch (req.priority) {
+                      @case ('urgent') { Acil / Kritik }
+                      @case ('high') { Yüksek }
+                      @case ('normal') { Normal }
+                      @default { Düşük }
+                    }
+                  </span>
+                </td>
+                <td>
+                  <div class="category-col">
+                    <span class="cat-tag">{{ req.category }}</span>
+                    <span class="text-xs text-slate-500">{{ req.branchName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="requester-col">
+                    <span class="font-medium text-slate-700">{{ req.requestedByStaffName }}</span>
+                    <p class="text-xs text-slate-500 truncate-text">{{ req.reason }}</p>
+                  </div>
+                </td>
+                <td>
+                  <span class="item-count-badge">{{ req.items.length }} Kalem</span>
+                </td>
+                <td>
+                  <span class="price-text">{{ req.estimatedTotal | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+                </td>
+                <td>
+                  <div class="approval-status-col">
+                    <span class="status-pill" [class]="req.status">
+                      @switch (req.status) {
+                        @case ('pending_approval') { Kademe {{ req.currentApprovalLevel }} Onayında }
+                        @case ('approved') { Onaylandı }
+                        @case ('ordered') { Siparişte ({{ req.poNumber }}) }
+                        @case ('rejected') { Reddedildi }
+                        @default { Taslak }
+                      }
+                    </span>
+                    <!-- Multi-step mini indicator -->
+                    <div class="mini-stepper">
+                      @for (step of req.approvalFlow; track step.level) {
+                        <span
+                          class="step-dot"
+                          [class.completed]="step.status === 'approved'"
+                          [class.rejected]="step.status === 'rejected'"
+                          [class.current]="step.status === 'pending'"
+                          [title]="step.roleName + ': ' + step.status"
+                        ></span>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="btn-icon"
+                      title="Detay Görüntüle"
+                      (click)="viewRequisitionDetail(req)"
+                    >
+                      <span class="material-icons">visibility</span>
+                    </button>
+
+                    @if (req.status === 'pending_approval') {
+                      <button
+                        type="button"
+                        class="btn-icon emerald"
+                        title="Hızlı Onayla"
+                        (click)="approveRequisition(req)"
+                      >
+                        <span class="material-icons">done</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-icon rose"
+                        title="Reddet"
+                        (click)="openRejectModal('req', req.id, req.code)"
+                      >
+                        <span class="material-icons">close</span>
+                      </button>
+                    }
+
+                    @if (req.status === 'approved') {
+                      <button
+                        type="button"
+                        class="btn-action indigo"
+                        (click)="startConvertToPurchaseOrder(req)"
+                      >
+                        <span class="material-icons">shopping_cart</span>
+                        <span>Sipariş Emri Aç</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty-cell">
+                  <span class="material-icons empty-icon">inventory_2</span>
+                  <p>Kriterlere uygun satın alma talebi bulunamadı.</p>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 2: APPROVAL WORKFLOW HUB -->
+  @if (activeTab() === 'approvals') {
+    <section class="tab-content-area">
+      <div class="approval-inbox-header">
+        <div class="inbox-banner">
+          <div class="banner-icon">
+            <span class="material-icons">verified</span>
+          </div>
+          <div class="banner-text">
+            <h2>Yetkili Onay Bekleme Havuzu</h2>
+            <p>
+              Tüzük gereği 10.000 ₺ altı talepler Şube Müdürü, 10.000 ₺ - 50.000 ₺ arası Satın Alma Müdürü, 50.000 ₺ üzeri yatırımlar ise Genel Müdür onayına tabidir.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="approval-cards-grid">
+        @for (req of pendingApprovalRequisitions(); track req.id) {
+          <div class="approval-card">
+            <div class="card-top">
+              <div class="code-and-prio">
+                <span class="code-badge">{{ req.code }}</span>
+                <span class="priority-badge" [class]="req.priority">{{ req.priority }}</span>
+              </div>
+              <span class="level-indicator">Kademe {{ req.currentApprovalLevel }} Onayı</span>
+            </div>
+
+            <div class="card-body">
+              <h3 class="card-title">{{ req.category | uppercase }} - {{ req.branchName }}</h3>
+              <p class="card-requester">
+                <span class="material-icons text-sm">person</span>
+                <span>Talep Eden: <strong>{{ req.requestedByStaffName }}</strong></span>
+              </p>
+              <div class="card-reason-box">
+                <span class="text-xs text-slate-400 font-semibold">GEREKÇE:</span>
+                <p class="text-sm text-slate-600">{{ req.reason }}</p>
+              </div>
+
+              <!-- Item Preview -->
+              <div class="card-items-preview">
+                <span class="text-xs font-semibold text-slate-500">TALEP EDİLEN KALEMLER:</span>
+                <ul class="preview-item-list">
+                  @for (item of req.items; track item.id) {
+                    <li>
+                      <span class="item-name">{{ item.productName }}</span>
+                      <span class="item-qty">{{ item.requestedQuantity }} {{ item.unit }}</span>
+                      <span class="item-cost">{{ item.estimatedTotalCost | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <!-- Approval Hierarchy Stepper -->
+              <div class="workflow-stepper">
+                @for (step of req.approvalFlow; track step.level) {
+                  <div
+                    class="step-item"
+                    [class.active]="step.level === req.currentApprovalLevel"
+                    [class.done]="step.status === 'approved'"
+                  >
+                    <div class="step-circle">
+                      @if (step.status === 'approved') {
+                        <span class="material-icons">check</span>
+                      } @else {
+                        <span>{{ step.level }}</span>
+                      }
+                    </div>
+                    <div class="step-meta">
+                      <span class="step-role">{{ step.roleName }}</span>
+                      <span class="step-status">{{ step.status }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="total-bar">
+                <span>Tahmini Toplam Bütçe:</span>
+                <span class="total-amount">{{ req.estimatedTotal | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <button
+                type="button"
+                class="btn btn-danger-outline"
+                (click)="openRejectModal('req', req.id, req.code)"
+              >
+                <span class="material-icons">close</span>
+                <span>Reddet</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-success"
+                (click)="approveRequisition(req)"
+              >
+                <span class="material-icons">done_all</span>
+                <span>Onayla (Kademe {{ req.currentApprovalLevel }})</span>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-inbox">
+            <span class="material-icons big-icon">task_alt</span>
+            <h3>Harika! Bekleyen Onayınız Yok</h3>
+            <p>Şu anda yetki kademenizde onay bekleyen herhangi bir satın alma talebi veya sipariş bulunmuyor.</p>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- TAB 3: PURCHASE ORDERS -->
+  @if (activeTab() === 'orders') {
+    <section class="tab-content-area">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="material-icons">search</span>
+          <input
+            type="text"
+            placeholder="Sipariş no, tedarikçi veya kargo takip no ara..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+        </div>
+
+        <div class="filter-pills">
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="orderFilter() === 'all'"
+            (click)="orderFilter.set('all')"
+          >
+            Tüm Siparişler ({{ purchaseOrders().length }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn indigo"
+            [class.active]="orderFilter() === 'in_transit'"
+            (click)="orderFilter.set('in_transit')"
+          >
+            Sevkiyatta / Yolda
+          </button>
+          <button
+            type="button"
+            class="pill-btn emerald"
+            [class.active]="orderFilter() === 'completed'"
+            (click)="orderFilter.set('completed')"
+          >
+            Teslim Alınanlar
+          </button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Sipariş No (PO)</th>
+              <th>Tedarikçi Firma</th>
+              <th>Şube</th>
+              <th>Sipariş Tarihi</th>
+              <th>Beklenen Teslim</th>
+              <th>Tutar</th>
+              <th>Kargo & Takip</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (po of filteredOrders(); track po.id) {
+              <tr class="clickable-row" (click)="viewOrderDetail(po)">
+                <td>
+                  <div class="code-col">
+                    <span class="font-bold text-slate-800">{{ po.poNumber }}</span>
+                    @if (po.requisitionCode) {
+                      <span class="text-xs text-indigo-600 font-semibold">{{ po.requisitionCode }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="supplier-cell">
+                    <span class="font-medium text-slate-800">{{ po.supplierName }}</span>
+                    <span class="text-xs text-slate-400">{{ po.supplierContact }} ({{ po.supplierPhone }})</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="text-sm text-slate-600">{{ po.branchName }}</span>
+                </td>
+                <td>
+                  <span class="text-sm text-slate-600">{{ po.orderDate | date:'dd.MM.yyyy' }}</span>
+                </td>
+                <td>
+                  <span class="text-sm font-semibold text-slate-700">{{ po.expectedDeliveryDate | date:'dd.MM.yyyy' }}</span>
+                </td>
+                <td>
+                  <div class="price-cell">
+                    <span class="font-bold text-slate-800">{{ po.grandTotal | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+                    <span class="text-xs text-slate-400 font-medium">{{ po.paymentTerms }}</span>
+                  </div>
+                </td>
+                <td>
+                  @if (po.trackingNumber) {
+                    <div class="tracking-pill">
+                      <span class="material-icons text-xs">local_shipping</span>
+                      <span class="text-xs font-semibold">{{ po.trackingNumber }}</span>
+                    </div>
+                  } @else {
+                    <span class="text-xs text-slate-400">-</span>
+                  }
+                </td>
+                <td>
+                  <span class="status-pill" [class]="po.deliveryStatus">
+                    @switch (po.deliveryStatus) {
+                      @case ('in_transit') { 🚚 Yolda / Sevkiyatta }
+                      @case ('delivered') { ✅ Depoya Teslim Edildi }
+                      @case ('partially_received') { 📦 Kısmi Teslimat }
+                      @default { ⏳ Hazırlanıyor }
+                    }
+                  </span>
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="btn-icon"
+                      title="Sipariş Detayı & PO Yazdır"
+                      (click)="viewOrderDetail(po)"
+                    >
+                      <span class="material-icons">receipt</span>
+                    </button>
+
+                    @if (po.deliveryStatus === 'in_transit' || po.deliveryStatus === 'waiting') {
+                      <button
+                        type="button"
+                        class="btn-action emerald"
+                        title="Mal Kabul Yap"
+                        (click)="openGoodsReceiptModal(po)"
+                      >
+                        <span class="material-icons">inventory</span>
+                        <span>Mal Kabul Yap</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 4: GOODS RECEIPTS (MAL KABUL) -->
+  @if (activeTab() === 'goods-receipts') {
+    <section class="tab-content-area">
+      <div class="receipts-banner">
+        <div class="banner-icon emerald">
+          <span class="material-icons">fact_check</span>
+        </div>
+        <div class="banner-text">
+          <h2>Mal Kabul & Kalite Kontrol Tutanağı</h2>
+          <p>
+            Teslim alınan ürünlerin irsaliye, fatura, parti/lot numarası ve son kullanma tarihlerini (SKT) denetleyerek klinik stoklarına kaydedin.
+          </p>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Makbuz No</th>
+              <th>Sipariş No</th>
+              <th>Tedarikçi Firma</th>
+              <th>İrsaliye No</th>
+              <th>Fatura No</th>
+              <th>Teslim Alan</th>
+              <th>Kabul Tarihi</th>
+              <th>Kalite Durumu</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (grn of goodsReceipts(); track grn.id) {
+              <tr>
+                <td>
+                  <span class="font-bold text-slate-800">{{ grn.receiptNumber }}</span>
+                </td>
+                <td>
+                  <span class="code-badge">{{ grn.poNumber }}</span>
+                </td>
+                <td>
+                  <span class="font-medium text-slate-800">{{ grn.supplierName }}</span>
+                </td>
+                <td>
+                  <span class="font-mono text-sm text-slate-700">{{ grn.waybillNumber }}</span>
+                </td>
+                <td>
+                  <span class="font-mono text-sm text-indigo-700">{{ grn.invoiceNumber || '-' }}</span>
+                </td>
+                <td>
+                  <span class="text-sm text-slate-600">{{ grn.receivedByStaffName }}</span>
+                </td>
+                <td>
+                  <span class="text-sm text-slate-600">{{ grn.receivedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+                </td>
+                <td>
+                  <span class="status-pill delivered">
+                    <span class="material-icons text-xs">verified</span>
+                    <span>Kusursuz / Doğrulandı</span>
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 5: SUPPLIERS -->
+  @if (activeTab() === 'suppliers') {
+    <section class="tab-content-area">
+      <div class="suppliers-grid">
+        @for (sup of suppliers(); track sup.id) {
+          <div class="supplier-card">
+            <div class="supplier-header">
+              <div class="sup-avatar">
+                <span class="material-icons">business</span>
+              </div>
+              <div class="sup-meta">
+                <h3 class="sup-name">{{ sup.supplierName }}</h3>
+                <span class="sup-cat">{{ sup.category }}</span>
+              </div>
+              <span class="sup-status" [class]="sup.status">{{ sup.status | uppercase }}</span>
+            </div>
+
+            <div class="supplier-scores">
+              <div class="score-item">
+                <span class="score-label">Değerlendirme</span>
+                <div class="rating-stars">
+                  <span class="material-icons text-amber-500">star</span>
+                  <span class="rating-val">{{ sup.rating }} / 5.0</span>
+                </div>
+              </div>
+              <div class="score-item">
+                <span class="score-label">Zamanında Teslim</span>
+                <span class="score-val text-emerald-600">%{{ sup.onTimeDeliveryRate }}</span>
+              </div>
+              <div class="score-item">
+                <span class="score-label">Kalite Uyumu</span>
+                <span class="score-val text-indigo-600">%{{ sup.qualityComplianceRate }}</span>
+              </div>
+              <div class="score-item">
+                <span class="score-label">Teslim Süresi</span>
+                <span class="score-val text-slate-700">{{ sup.leadTimeDays }} Gün</span>
+              </div>
+            </div>
+
+            <div class="supplier-contacts">
+              <div class="contact-line">
+                <span class="material-icons text-slate-400">person</span>
+                <span>{{ sup.contactPerson }}</span>
+              </div>
+              <div class="contact-line">
+                <span class="material-icons text-slate-400">call</span>
+                <span>{{ sup.phone }}</span>
+              </div>
+              <div class="contact-line">
+                <span class="material-icons text-slate-400">mail</span>
+                <span>{{ sup.email }}</span>
+              </div>
+            </div>
+
+            <div class="supplier-footer">
+              <div class="spend-info">
+                <span class="text-xs text-slate-400">Toplam İşlem Hacmi</span>
+                <span class="text-sm font-bold text-slate-800">{{ sup.totalSpend | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+              </div>
+              <button type="button" class="btn btn-secondary-sm" (click)="openNewRequisitionModal()">
+                <span class="material-icons text-sm">post_add</span>
+                <span>Talep Aç</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>
+
+<!-- ================= MODALS & DRAWERS ================= -->
+
+<!-- 1. NEW REQUISITION MODAL -->
+@if (isNewRequisitionModalOpen()) {
+  <div class="modal-backdrop" (click)="closeNewRequisitionModal()">
+    <div class="modal-card modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-icon">
+          <span class="material-icons">add_shopping_cart</span>
+        </div>
+        <div>
+          <h2 class="modal-title">Yeni Satın Alma Talebi Oluştur</h2>
+          <p class="modal-desc">Klinik veya departmanınız için malzeme veya ürün ikmal talebinde bulunun.</p>
+        </div>
+        <button type="button" class="close-btn" (click)="closeNewRequisitionModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Şube</label>
+            <input
+              type="text"
+              class="form-input"
+              [ngModel]="newReqBranchName()"
+              (ngModelChange)="newReqBranchName.set($event)"
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Kategori</label>
+            <select
+              class="form-select"
+              [ngModel]="newReqCategory()"
+              (ngModelChange)="newReqCategory.set($event)"
+            >
+              <option value="tirnak-sarf">💅 Tırnak & Protez Jel Sarfiyatı</option>
+              <option value="lazer-sarf">⚡ Lazer Cihaz Gaz & Sarf</option>
+              <option value="cilt-bakim">🧴 Medikal Cilt Bakım & Serum</option>
+              <option value="hijyen-sterilizasyon">🏥 Otoklav & Sterilizasyon</option>
+              <option value="ekipman-yedek-parca">🔧 Ekipman & Freze Uçları</option>
+              <option value="genel-sarf">📦 Genel Klinik Sarfı</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Öncelik Derecesi</label>
+            <select
+              class="form-select"
+              [ngModel]="newReqPriority()"
+              (ngModelChange)="newReqPriority.set($event)"
+            >
+              <option value="low">Düşük</option>
+              <option value="normal">Normal</option>
+              <option value="high">Yüksek</option>
+              <option value="urgent">🚨 Acil (Kritik Stok)</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">İhtiyaç Tarihi</label>
+            <input
+              type="date"
+              class="form-input"
+              [ngModel]="newReqRequiredDate()"
+              (ngModelChange)="newReqRequiredDate.set($event)"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Gerekçe / Talep Nedeni</label>
+          <textarea
+            class="form-textarea"
+            rows="2"
+            placeholder="Neden bu malzemeye ihtiyaç duyulduğunu ve kullanım amacını belirtiniz..."
+            [ngModel]="newReqReason()"
+            (ngModelChange)="newReqReason.set($event)"
+          ></textarea>
+        </div>
+
+        <!-- Dynamic Items Table -->
+        <div class="items-editor-section">
+          <div class="section-title-row">
+            <span class="font-bold text-slate-800">Talep Edilen Malzeme Kalemleri</span>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="addRequisitionItemRow()">
+              <span class="material-icons text-sm">add</span>
+              <span>Kalem Ekle</span>
+            </button>
+          </div>
+
+          <div class="items-table-wrap">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Ürün / Malzeme Adı</th>
+                  <th>Marka</th>
+                  <th style="width: 90px;">Miktar</th>
+                  <th style="width: 100px;">Birim</th>
+                  <th style="width: 120px;">Birim Fiyat (₺)</th>
+                  <th style="width: 120px;">Toplam (₺)</th>
+                  <th style="width: 50px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of newReqItems(); track $index) {
+                  <tr>
+                    <td>
+                      <input
+                        type="text"
+                        class="table-input"
+                        placeholder="Örn: Kodi Rubber Base 50ml"
+                        [(ngModel)]="item.productName"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        class="table-input"
+                        placeholder="Örn: Kodi"
+                        [(ngModel)]="item.brand"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        min="1"
+                        class="table-input"
+                        [(ngModel)]="item.requestedQuantity"
+                      />
+                    </td>
+                    <td>
+                      <select class="table-select" [(ngModel)]="item.unit">
+                        <option value="Adet">Adet</option>
+                        <option value="Kutu">Kutu</option>
+                        <option value="Rulo">Rulo</option>
+                        <option value="Set">Set</option>
+                        <option value="Tüp">Tüp</option>
+                        <option value="Bidon">Bidon</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        class="table-input text-right"
+                        [(ngModel)]="item.estimatedUnitCost"
+                      />
+                    </td>
+                    <td class="text-right font-bold text-slate-800">
+                      {{ (item.requestedQuantity * item.estimatedUnitCost) | currency:'TRY':'symbol':'1.0-0':'tr' }}
+                    </td>
+                    <td>
+                      @if (newReqItems().length > 1) {
+                        <button
+                          type="button"
+                          class="btn-icon rose text-xs"
+                          (click)="removeRequisitionItemRow($index)"
+                        >
+                          <span class="material-icons text-sm">delete</span>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="summary-and-threshold">
+            <div class="threshold-notice">
+              <span class="material-icons text-indigo-500">info</span>
+              <span>
+                @if (newReqCalculatedTotal() >= 50000) {
+                  50.000 ₺ üzeri tutarlar <strong>3 Kademeli Onay</strong> (Şube Md. + Satın Alma Md. + Genel Müdür) gerektirir.
+                } @else if (newReqCalculatedTotal() >= 10000) {
+                  10.000 ₺ üzeri tutarlar <strong>2 Kademeli Onay</strong> (Şube Md. + Satın Alma Md.) gerektirir.
+                } @else {
+                  10.000 ₺ altı tutarlar <strong>Tek Kademeli Onay</strong> (Şube Müdürü) ile sonuçlanır.
+                }
+              </span>
+            </div>
+            <div class="total-calc-box">
+              <span class="label">Hesaplanan Toplam:</span>
+              <span class="value">{{ newReqCalculatedTotal() | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeNewRequisitionModal()">İptal</button>
+        <button type="button" class="btn btn-primary" (click)="saveNewRequisition()">
+          <span class="material-icons">send</span>
+          <span>Talebi Onaya Gönder</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- 2. REQUISITION DETAIL DRAWER / MODAL -->
+@if (isRequisitionDetailOpen() && selectedRequisition(); as req) {
+  <div class="modal-backdrop" (click)="closeRequisitionDetail()">
+    <div class="modal-card modal-md" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="code-badge">{{ req.code }}</span>
+          <h2 class="modal-title mt-1">{{ req.category | uppercase }} Satın Alma Talebi</h2>
+          <span class="text-xs text-slate-500">{{ req.branchName }} | {{ req.requestedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+        </div>
+        <button type="button" class="close-btn" (click)="closeRequisitionDetail()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Requester & Reason -->
+        <div class="detail-section">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <span class="text-xs text-slate-400 font-semibold">TALEP EDEN:</span>
+              <p class="text-sm font-medium text-slate-800">{{ req.requestedByStaffName }}</p>
+            </div>
+            <div>
+              <span class="text-xs text-slate-400 font-semibold">ÖNCELİK & TARİH:</span>
+              <p class="text-sm font-medium text-slate-800">{{ req.priority | uppercase }} (İhtiyaç: {{ req.requiredDate | date:'dd.MM.yyyy' }})</p>
+            </div>
+          </div>
+          <div class="mt-3">
+            <span class="text-xs text-slate-400 font-semibold">GEREKÇE:</span>
+            <p class="text-sm text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 mt-1">{{ req.reason }}</p>
+          </div>
+        </div>
+
+        <!-- Approval Stepper Tracker -->
+        <div class="detail-section">
+          <h4 class="font-bold text-slate-800 text-sm mb-3">Çok Kademeli Onay Akışı Takibi</h4>
+          <div class="workflow-stepper">
+            @for (step of req.approvalFlow; track step.level) {
+              <div
+                class="step-item"
+                [class.active]="step.level === req.currentApprovalLevel && req.status === 'pending_approval'"
+                [class.done]="step.status === 'approved'"
+                [class.rejected]="step.status === 'rejected'"
+              >
+                <div class="step-circle">
+                  @if (step.status === 'approved') {
+                    <span class="material-icons">check</span>
+                  } @else if (step.status === 'rejected') {
+                    <span class="material-icons">close</span>
+                  } @else {
+                    <span>{{ step.level }}</span>
+                  }
+                </div>
+                <div class="step-meta">
+                  <span class="step-role">{{ step.roleName }}</span>
+                  <span class="step-status">
+                    @if (step.status === 'approved') {
+                      ✅ {{ step.approverStaffName }} ({{ step.actionAt | date:'dd.MM HH:mm' }})
+                    } @else if (step.status === 'rejected') {
+                      ❌ Reddedildi
+                    } @else {
+                      ⏳ Onay Bekliyor
+                    }
+                  </span>
+                  @if (step.comment) {
+                    <span class="text-xs text-slate-500 italic">"{{ step.comment }}"</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Items List -->
+        <div class="detail-section">
+          <h4 class="font-bold text-slate-800 text-sm mb-2">Talep Kalemleri ({{ req.items.length }})</h4>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Ürün</th>
+                <th>Miktar</th>
+                <th class="text-right">Birim</th>
+                <th class="text-right">Toplam</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of req.items; track item.id) {
+                <tr>
+                  <td>
+                    <span class="font-medium text-slate-800">{{ item.productName }}</span>
+                    @if (item.brand) {
+                      <span class="text-xs text-slate-400 block">{{ item.brand }}</span>
+                    }
+                  </td>
+                  <td>{{ item.requestedQuantity }} {{ item.unit }}</td>
+                  <td class="text-right">{{ item.estimatedUnitCost | currency:'TRY':'symbol':'1.0-0':'tr' }}</td>
+                  <td class="text-right font-bold text-slate-800">{{ item.estimatedTotalCost | currency:'TRY':'symbol':'1.0-0':'tr' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-right font-bold">Toplam Tutar:</td>
+                <td class="text-right font-bold text-indigo-700">{{ req.estimatedTotal | currency:'TRY':'symbol':'1.0-0':'tr' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        @if (req.status === 'pending_approval') {
+          <button
+            type="button"
+            class="btn btn-danger-outline"
+            (click)="openRejectModal('req', req.id, req.code)"
+          >
+            <span class="material-icons">close</span>
+            <span>Reddet</span>
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            (click)="approveRequisition(req)"
+          >
+            <span class="material-icons">done</span>
+            <span>Kademe {{ req.currentApprovalLevel }} Onayını Ver</span>
+          </button>
+        }
+
+        @if (req.status === 'approved') {
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="startConvertToPurchaseOrder(req)"
+          >
+            <span class="material-icons">shopping_cart</span>
+            <span>Tedarikçiye Sipariş Emri (PO) Aç</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- 3. CONVERT TO PURCHASE ORDER MODAL -->
+@if (isNewOrderModalOpen()) {
+  <div class="modal-backdrop" (click)="closeNewOrderModal()">
+    <div class="modal-card modal-md" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-icon indigo">
+          <span class="material-icons">local_shipping</span>
+        </div>
+        <div>
+          <h2 class="modal-title">Satın Alma Sipariş Emri (PO) Oluştur</h2>
+          <p class="modal-desc">Onaylanan talebi tedarikçiye resmi siparişe dönüştürün.</p>
+        </div>
+        <button type="button" class="close-btn" (click)="closeNewOrderModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tedarikçi Firma Seçimi</label>
+          <select
+            class="form-select"
+            [ngModel]="newOrderSupplierId()"
+            (ngModelChange)="newOrderSupplierId.set($event)"
+          >
+            @for (sup of suppliers(); track sup.id) {
+              <option [value]="sup.id">
+                {{ sup.supplierName }} ({{ sup.category }}) - ⭐ {{ sup.rating }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Beklenen Teslim Tarihi</label>
+            <input
+              type="date"
+              class="form-input"
+              [ngModel]="newOrderExpectedDate()"
+              (ngModelChange)="newOrderExpectedDate.set($event)"
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Ödeme Vadesi / Koşulu</label>
+            <select
+              class="form-select"
+              [ngModel]="newOrderPaymentTerms()"
+              (ngModelChange)="newOrderPaymentTerms.set($event)"
+            >
+              <option value="pesin">Peşin / Havale</option>
+              <option value="vade_30">30 Gün Vade</option>
+              <option value="vade_60">60 Gün Vade</option>
+              <option value="vade_90">90 Gün Vade</option>
+              <option value="kredi_karti">Kurumsal Kredi Kartı</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sipariş / Sevkiyat Notu</label>
+          <textarea
+            class="form-textarea"
+            rows="3"
+            placeholder="Tedarikçiye ve lojistik firmasına iletilecek özel talimatlar..."
+            [ngModel]="newOrderNotes()"
+            (ngModelChange)="newOrderNotes.set($event)"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeNewOrderModal()">İptal</button>
+        <button type="button" class="btn btn-primary" (click)="savePurchaseOrder()">
+          <span class="material-icons">send</span>
+          <span>Siparişi Tedarikçiye İlet & Kaydet</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- 4. GOODS RECEIPT MODAL (MAL KABUL) -->
+@if (isGoodsReceiptModalOpen() && targetOrderForReceipt(); as order) {
+  <div class="modal-backdrop" (click)="closeGoodsReceiptModal()">
+    <div class="modal-card modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-icon emerald">
+          <span class="material-icons">inventory</span>
+        </div>
+        <div>
+          <h2 class="modal-title">Mal Kabul & Depo Girişi: {{ order.poNumber }}</h2>
+          <p class="modal-desc">{{ order.supplierName }} firmasından gelen sevkiyatı doğrulayın.</p>
+        </div>
+        <button type="button" class="close-btn" (click)="closeGoodsReceiptModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">İrsaliye Numarası *</label>
+            <input
+              type="text"
+              class="form-input font-mono"
+              placeholder="Örn: IRS-2026-99214"
+              [ngModel]="grnWaybillNumber()"
+              (ngModelChange)="grnWaybillNumber.set($event)"
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">E-Fatura No (Opsiyonel)</label>
+            <input
+              type="text"
+              class="form-input font-mono"
+              placeholder="Örn: GIB-202600019482"
+              [ngModel]="grnInvoiceNumber()"
+              (ngModelChange)="grnInvoiceNumber.set($event)"
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Parti / Lot Numarası</label>
+            <input
+              type="text"
+              class="form-input font-mono"
+              placeholder="Örn: LOT-2026-M48"
+              [ngModel]="grnLotNumber()"
+              (ngModelChange)="grnLotNumber.set($event)"
+            />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Son Kullanma Tarihi (SKT)</label>
+            <input
+              type="date"
+              class="form-input"
+              [ngModel]="grnExpiryDate()"
+              (ngModelChange)="grnExpiryDate.set($event)"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Teslim Alan Depo / Klinik Görevlisi</label>
+          <input
+            type="text"
+            class="form-input"
+            [ngModel]="grnReceivedBy()"
+            (ngModelChange)="grnReceivedBy.set($event)"
+          />
+        </div>
+
+        <div class="items-editor-section mt-4">
+          <h4 class="font-bold text-slate-800 text-sm mb-2">Teslim Alınan Kalemlerin Fiziksel Kontrolü</h4>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Ürün</th>
+                <th>Sipariş Miktarı</th>
+                <th>Teslim Alınan</th>
+                <th>Birim</th>
+                <th>Kalite Durumu</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of order.items; track item.id) {
+                <tr>
+                  <td class="font-medium text-slate-800">{{ item.productName }}</td>
+                  <td>{{ item.orderedQuantity }}</td>
+                  <td class="font-bold text-emerald-700">{{ item.orderedQuantity }}</td>
+                  <td>{{ item.unit }}</td>
+                  <td>
+                    <span class="status-pill delivered">
+                      <span class="material-icons text-xs">check</span>
+                      <span>Ambalaj Sağlam / CE Sertifikalı</span>
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="form-group mt-3">
+          <label class="form-label">Kalite Kontrol / Kabul Notu</label>
+          <textarea
+            class="form-textarea"
+            rows="2"
+            [ngModel]="grnNotes()"
+            (ngModelChange)="grnNotes.set($event)"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeGoodsReceiptModal()">İptal</button>
+        <button type="button" class="btn btn-success" (click)="confirmGoodsReceipt()">
+          <span class="material-icons">save_alt</span>
+          <span>Mal Kabul Tutanağını İmzala & Depoya Aktar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- 5. REJECT REASON MODAL -->
+@if (isRejectModalOpen() && rejectTarget(); as target) {
+  <div class="modal-backdrop" (click)="closeRejectModal()">
+    <div class="modal-card modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-icon rose">
+          <span class="material-icons">warning</span>
+        </div>
+        <div>
+          <h2 class="modal-title">Gerekçeli Ret Bildirimi</h2>
+          <p class="modal-desc">{{ target.code }} kaydını reddetmek üzeresiniz.</p>
+        </div>
+        <button type="button" class="close-btn" (click)="closeRejectModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Ret Gerekçesi (Zorunludur) *</label>
+          <textarea
+            class="form-textarea"
+            rows="4"
+            placeholder="Talebin veya siparişin neden reddedildiğini açıklayan ayrıntılı bir not yazınız..."
+            [ngModel]="rejectReasonInput()"
+            (ngModelChange)="rejectReasonInput.set($event)"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">Vazgeç</button>
+        <button type="button" class="btn btn-danger" (click)="confirmReject()">
+          <span class="material-icons">block</span>
+          <span>Reddi Onayla</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}

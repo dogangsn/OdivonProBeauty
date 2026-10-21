@@ -102,6 +102,11 @@ export const routes: Routes = [
           import('./features/nail-studio/nail-studio').then((m) => m.NailStudio),
       },
       {
+        path: 'purchasing',
+        loadComponent: () =>
+          import('./features/purchasing/purchasing').then((m) => m.Purchasing),
+      },
+      {
         path: 'ai-recommendations',
         loadComponent: () =>
           import('./features/ai/recommendations/recommendations').then((m) => m.Recommendations),

@@ -1,33 +1,28 @@
 <div class="purchasing-container">
-  <!-- Header -->
-  <header class="purchasing-header">
-    <div class="header-left">
-      <div class="title-badge">
-        <span class="badge-icon">🛍️</span>
-        <span class="badge-text">KURUMSAL SATIN ALMA & MALZEME YÖNETİMİ</span>
-      </div>
-      <h1 class="main-title">Satın Alma, Talep & Sipariş Onay Merkezi</h1>
-      <p class="subtitle">
-        Şube malzeme taleplerini, çok kademeli onay akışlarını, tedarikçi siparişlerini ve mal kabul süreçlerini uçtan uca yönetin.
-      </p>
-    </div>
-    <div class="header-actions">
-      <button type="button" class="btn btn-secondary" (click)="setActiveTab('approvals')">
-        <span class="icon">notifications_active</span>
+  <!-- 1. Executive Page Header -->
+  <app-page-header
+    icon="shopping_bag"
+    eyebrow="KURUMSAL SATIN ALMA & MALZEME YÖNETİMİ"
+    title="Satın Alma, Talep & Sipariş Onay Merkezi"
+    description="Şube malzeme taleplerini, çok kademeli onay akışlarını, tedarikçi siparişlerini ve mal kabul süreçlerini uçtan uca yönetin."
+  >
+    <div actions class="flex items-center gap-2">
+      <button type="button" class="odv-btn-ghost text-xs" (click)="setActiveTab('approvals')">
+        <span class="material-symbols-outlined icon-size-4">notifications_active</span>
         <span>Onay Kutusu ({{ totalPendingApprovalsCount() }})</span>
       </button>
-      <button type="button" class="btn btn-primary" (click)="openNewRequisitionModal()">
-        <span class="icon">add_circle</span>
+      <button type="button" class="odv-btn-primary text-xs" (click)="openNewRequisitionModal()">
+        <span class="material-symbols-outlined icon-size-4">add_circle</span>
         <span>Yeni Satın Alma Talebi</span>
       </button>
     </div>
-  </header>
+  </app-page-header>
 
   <!-- KPI Overview Grid -->
   <section class="kpi-grid">
     <div class="kpi-card highlight-amber">
       <div class="kpi-icon-wrap amber">
-        <span class="material-icons">pending_actions</span>
+        <span class="material-symbols-outlined">pending_actions</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">Onay Bekleyen Talepler</span>
@@ -41,7 +36,7 @@
 
     <div class="kpi-card highlight-indigo">
       <div class="kpi-icon-wrap indigo">
-        <span class="material-icons">local_shipping</span>
+        <span class="material-symbols-outlined">local_shipping</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">Aktif Sipariş & Sevkiyat</span>
@@ -55,7 +50,7 @@
 
     <div class="kpi-card highlight-emerald">
       <div class="kpi-icon-wrap emerald">
-        <span class="material-icons">account_balance</span>
+        <span class="material-symbols-outlined">account_balance</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">Aylık Bütçe Kullanımı</span>
@@ -71,7 +66,7 @@
 
     <div class="kpi-card highlight-violet">
       <div class="kpi-icon-wrap violet">
-        <span class="material-icons">speed</span>
+        <span class="material-symbols-outlined">speed</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">Ortalama Onay Süresi</span>
@@ -91,7 +86,7 @@
       [class.active]="activeTab() === 'requisitions'"
       (click)="setActiveTab('requisitions')"
     >
-      <span class="material-icons">assignment</span>
+      <span class="material-symbols-outlined">assignment</span>
       <span>Taleplerim & Departman Talepleri</span>
       <span class="tab-counter">{{ requisitions().length }}</span>
     </button>
@@ -102,7 +97,7 @@
       [class.active]="activeTab() === 'approvals'"
       (click)="setActiveTab('approvals')"
     >
-      <span class="material-icons">verified_user</span>
+      <span class="material-symbols-outlined">verified_user</span>
       <span>Onay Merkezi (Workflow)</span>
       @if (totalPendingApprovalsCount() > 0) {
         <span class="tab-counter badge-alert">{{ totalPendingApprovalsCount() }}</span>
@@ -115,7 +110,7 @@
       [class.active]="activeTab() === 'orders'"
       (click)="setActiveTab('orders')"
     >
-      <span class="material-icons">shopping_bag</span>
+      <span class="material-symbols-outlined">shopping_bag</span>
       <span>Satın Alma Siparişleri (PO)</span>
       <span class="tab-counter">{{ purchaseOrders().length }}</span>
     </button>
@@ -126,7 +121,7 @@
       [class.active]="activeTab() === 'goods-receipts'"
       (click)="setActiveTab('goods-receipts')"
     >
-      <span class="material-icons">fact_check</span>
+      <span class="material-symbols-outlined">fact_check</span>
       <span>Mal Kabul & Depo Girişi</span>
       <span class="tab-counter">{{ goodsReceipts().length }}</span>
     </button>
@@ -137,7 +132,7 @@
       [class.active]="activeTab() === 'suppliers'"
       (click)="setActiveTab('suppliers')"
     >
-      <span class="material-icons">store</span>
+      <span class="material-symbols-outlined">store</span>
       <span>Tedarikçi Karneleri</span>
       <span class="tab-counter">{{ suppliers().length }}</span>
     </button>
@@ -149,7 +144,7 @@
       <!-- Filter Bar -->
       <div class="toolbar">
         <div class="search-box">
-          <span class="material-icons">search</span>
+          <span class="material-symbols-outlined">search</span>
           <input
             type="text"
             placeholder="Talep kodu, ürün adı veya talep eden ara..."
@@ -279,7 +274,7 @@
                       title="Detay Görüntüle"
                       (click)="viewRequisitionDetail(req)"
                     >
-                      <span class="material-icons">visibility</span>
+                      <span class="material-symbols-outlined">visibility</span>
                     </button>
 
                     @if (req.status === 'pending_approval') {
@@ -289,7 +284,7 @@
                         title="Hızlı Onayla"
                         (click)="approveRequisition(req)"
                       >
-                        <span class="material-icons">done</span>
+                        <span class="material-symbols-outlined">done</span>
                       </button>
                       <button
                         type="button"
@@ -297,7 +292,7 @@
                         title="Reddet"
                         (click)="openRejectModal('req', req.id, req.code)"
                       >
-                        <span class="material-icons">close</span>
+                        <span class="material-symbols-outlined">close</span>
                       </button>
                     }
 
@@ -307,7 +302,7 @@
                         class="btn-action indigo"
                         (click)="startConvertToPurchaseOrder(req)"
                       >
-                        <span class="material-icons">shopping_cart</span>
+                        <span class="material-symbols-outlined">shopping_cart</span>
                         <span>Sipariş Emri Aç</span>
                       </button>
                     }
@@ -317,7 +312,7 @@
             } @empty {
               <tr>
                 <td colspan="8" class="empty-cell">
-                  <span class="material-icons empty-icon">inventory_2</span>
+                  <span class="material-symbols-outlined empty-icon">inventory_2</span>
                   <p>Kriterlere uygun satın alma talebi bulunamadı.</p>
                 </td>
               </tr>
@@ -334,7 +329,7 @@
       <div class="approval-inbox-header">
         <div class="inbox-banner">
           <div class="banner-icon">
-            <span class="material-icons">verified</span>
+            <span class="material-symbols-outlined">verified</span>
           </div>
           <div class="banner-text">
             <h2>Yetkili Onay Bekleme Havuzu</h2>
@@ -359,7 +354,7 @@
             <div class="card-body">
               <h3 class="card-title">{{ req.category | uppercase }} - {{ req.branchName }}</h3>
               <p class="card-requester">
-                <span class="material-icons text-sm">person</span>
+                <span class="material-symbols-outlined text-sm">person</span>
                 <span>Talep Eden: <strong>{{ req.requestedByStaffName }}</strong></span>
               </p>
               <div class="card-reason-box">
@@ -391,7 +386,7 @@
                   >
                     <div class="step-circle">
                       @if (step.status === 'approved') {
-                        <span class="material-icons">check</span>
+                        <span class="material-symbols-outlined">check</span>
                       } @else {
                         <span>{{ step.level }}</span>
                       }
@@ -416,7 +411,7 @@
                 class="btn btn-danger-outline"
                 (click)="openRejectModal('req', req.id, req.code)"
               >
-                <span class="material-icons">close</span>
+                <span class="material-symbols-outlined">close</span>
                 <span>Reddet</span>
               </button>
               <button
@@ -424,14 +419,14 @@
                 class="btn btn-success"
                 (click)="approveRequisition(req)"
               >
-                <span class="material-icons">done_all</span>
+                <span class="material-symbols-outlined">done_all</span>
                 <span>Onayla (Kademe {{ req.currentApprovalLevel }})</span>
               </button>
             </div>
           </div>
         } @empty {
           <div class="empty-inbox">
-            <span class="material-icons big-icon">task_alt</span>
+            <span class="material-symbols-outlined big-icon">task_alt</span>
             <h3>Harika! Bekleyen Onayınız Yok</h3>
             <p>Şu anda yetki kademenizde onay bekleyen herhangi bir satın alma talebi veya sipariş bulunmuyor.</p>
           </div>
@@ -445,7 +440,7 @@
     <section class="tab-content-area">
       <div class="toolbar">
         <div class="search-box">
-          <span class="material-icons">search</span>
+          <span class="material-symbols-outlined">search</span>
           <input
             type="text"
             placeholder="Sipariş no, tedarikçi veya kargo takip no ara..."
@@ -532,7 +527,7 @@
                 <td>
                   @if (po.trackingNumber) {
                     <div class="tracking-pill">
-                      <span class="material-icons text-xs">local_shipping</span>
+                      <span class="material-symbols-outlined text-xs">local_shipping</span>
                       <span class="text-xs font-semibold">{{ po.trackingNumber }}</span>
                     </div>
                   } @else {
@@ -557,7 +552,7 @@
                       title="Sipariş Detayı & PO Yazdır"
                       (click)="viewOrderDetail(po)"
                     >
-                      <span class="material-icons">receipt</span>
+                      <span class="material-symbols-outlined">receipt</span>
                     </button>
 
                     @if (po.deliveryStatus === 'in_transit' || po.deliveryStatus === 'waiting') {
@@ -567,7 +562,7 @@
                         title="Mal Kabul Yap"
                         (click)="openGoodsReceiptModal(po)"
                       >
-                        <span class="material-icons">inventory</span>
+                        <span class="material-symbols-outlined">inventory</span>
                         <span>Mal Kabul Yap</span>
                       </button>
                     }
@@ -586,7 +581,7 @@
     <section class="tab-content-area">
       <div class="receipts-banner">
         <div class="banner-icon emerald">
-          <span class="material-icons">fact_check</span>
+          <span class="material-symbols-outlined">fact_check</span>
         </div>
         <div class="banner-text">
           <h2>Mal Kabul & Kalite Kontrol Tutanağı</h2>
@@ -636,7 +631,7 @@
                 </td>
                 <td>
                   <span class="status-pill delivered">
-                    <span class="material-icons text-xs">verified</span>
+                    <span class="material-symbols-outlined text-xs">verified</span>
                     <span>Kusursuz / Doğrulandı</span>
                   </span>
                 </td>
@@ -656,7 +651,7 @@
           <div class="supplier-card">
             <div class="supplier-header">
               <div class="sup-avatar">
-                <span class="material-icons">business</span>
+                <span class="material-symbols-outlined">business</span>
               </div>
               <div class="sup-meta">
                 <h3 class="sup-name">{{ sup.supplierName }}</h3>
@@ -669,7 +664,7 @@
               <div class="score-item">
                 <span class="score-label">Değerlendirme</span>
                 <div class="rating-stars">
-                  <span class="material-icons text-amber-500">star</span>
+                  <span class="material-symbols-outlined text-amber-500">star</span>
                   <span class="rating-val">{{ sup.rating }} / 5.0</span>
                 </div>
               </div>
@@ -689,15 +684,15 @@
 
             <div class="supplier-contacts">
               <div class="contact-line">
-                <span class="material-icons text-slate-400">person</span>
+                <span class="material-symbols-outlined text-slate-400">person</span>
                 <span>{{ sup.contactPerson }}</span>
               </div>
               <div class="contact-line">
-                <span class="material-icons text-slate-400">call</span>
+                <span class="material-symbols-outlined text-slate-400">call</span>
                 <span>{{ sup.phone }}</span>
               </div>
               <div class="contact-line">
-                <span class="material-icons text-slate-400">mail</span>
+                <span class="material-symbols-outlined text-slate-400">mail</span>
                 <span>{{ sup.email }}</span>
               </div>
             </div>
@@ -708,7 +703,7 @@
                 <span class="text-sm font-bold text-slate-800">{{ sup.totalSpend | currency:'TRY':'symbol':'1.0-0':'tr' }}</span>
               </div>
               <button type="button" class="btn btn-secondary-sm" (click)="openNewRequisitionModal()">
-                <span class="material-icons text-sm">post_add</span>
+                <span class="material-symbols-outlined text-sm">post_add</span>
                 <span>Talep Aç</span>
               </button>
             </div>
@@ -727,14 +722,14 @@
     <div class="modal-card modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-header-icon">
-          <span class="material-icons">add_shopping_cart</span>
+          <span class="material-symbols-outlined">add_shopping_cart</span>
         </div>
         <div>
           <h2 class="modal-title">Yeni Satın Alma Talebi Oluştur</h2>
           <p class="modal-desc">Klinik veya departmanınız için malzeme veya ürün ikmal talebinde bulunun.</p>
         </div>
         <button type="button" class="close-btn" (click)="closeNewRequisitionModal()">
-          <span class="material-icons">close</span>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
@@ -807,7 +802,7 @@
           <div class="section-title-row">
             <span class="font-bold text-slate-800">Talep Edilen Malzeme Kalemleri</span>
             <button type="button" class="btn btn-sm btn-secondary" (click)="addRequisitionItemRow()">
-              <span class="material-icons text-sm">add</span>
+              <span class="material-symbols-outlined text-sm">add</span>
               <span>Kalem Ekle</span>
             </button>
           </div>
@@ -881,7 +876,7 @@
                           class="btn-icon rose text-xs"
                           (click)="removeRequisitionItemRow($index)"
                         >
-                          <span class="material-icons text-sm">delete</span>
+                          <span class="material-symbols-outlined text-sm">delete</span>
                         </button>
                       }
                     </td>
@@ -893,7 +888,7 @@
 
           <div class="summary-and-threshold">
             <div class="threshold-notice">
-              <span class="material-icons text-indigo-500">info</span>
+              <span class="material-symbols-outlined text-indigo-500">info</span>
               <span>
                 @if (newReqCalculatedTotal() >= 50000) {
                   50.000 ₺ üzeri tutarlar <strong>3 Kademeli Onay</strong> (Şube Md. + Satın Alma Md. + Genel Müdür) gerektirir.
@@ -915,7 +910,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeNewRequisitionModal()">İptal</button>
         <button type="button" class="btn btn-primary" (click)="saveNewRequisition()">
-          <span class="material-icons">send</span>
+          <span class="material-symbols-outlined">send</span>
           <span>Talebi Onaya Gönder</span>
         </button>
       </div>
@@ -934,7 +929,7 @@
           <span class="text-xs text-slate-500">{{ req.branchName }} | {{ req.requestedAt | date:'dd.MM.yyyy HH:mm' }}</span>
         </div>
         <button type="button" class="close-btn" (click)="closeRequisitionDetail()">
-          <span class="material-icons">close</span>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
@@ -970,9 +965,9 @@
               >
                 <div class="step-circle">
                   @if (step.status === 'approved') {
-                    <span class="material-icons">check</span>
+                    <span class="material-symbols-outlined">check</span>
                   } @else if (step.status === 'rejected') {
-                    <span class="material-icons">close</span>
+                    <span class="material-symbols-outlined">close</span>
                   } @else {
                     <span>{{ step.level }}</span>
                   }
@@ -1041,7 +1036,7 @@
             class="btn btn-danger-outline"
             (click)="openRejectModal('req', req.id, req.code)"
           >
-            <span class="material-icons">close</span>
+            <span class="material-symbols-outlined">close</span>
             <span>Reddet</span>
           </button>
           <button
@@ -1049,7 +1044,7 @@
             class="btn btn-success"
             (click)="approveRequisition(req)"
           >
-            <span class="material-icons">done</span>
+            <span class="material-symbols-outlined">done</span>
             <span>Kademe {{ req.currentApprovalLevel }} Onayını Ver</span>
           </button>
         }
@@ -1060,7 +1055,7 @@
             class="btn btn-primary"
             (click)="startConvertToPurchaseOrder(req)"
           >
-            <span class="material-icons">shopping_cart</span>
+            <span class="material-symbols-outlined">shopping_cart</span>
             <span>Tedarikçiye Sipariş Emri (PO) Aç</span>
           </button>
         }
@@ -1075,14 +1070,14 @@
     <div class="modal-card modal-md" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-header-icon indigo">
-          <span class="material-icons">local_shipping</span>
+          <span class="material-symbols-outlined">local_shipping</span>
         </div>
         <div>
           <h2 class="modal-title">Satın Alma Sipariş Emri (PO) Oluştur</h2>
           <p class="modal-desc">Onaylanan talebi tedarikçiye resmi siparişe dönüştürün.</p>
         </div>
         <button type="button" class="close-btn" (click)="closeNewOrderModal()">
-          <span class="material-icons">close</span>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
@@ -1144,7 +1139,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeNewOrderModal()">İptal</button>
         <button type="button" class="btn btn-primary" (click)="savePurchaseOrder()">
-          <span class="material-icons">send</span>
+          <span class="material-symbols-outlined">send</span>
           <span>Siparişi Tedarikçiye İlet & Kaydet</span>
         </button>
       </div>
@@ -1158,14 +1153,14 @@
     <div class="modal-card modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-header-icon emerald">
-          <span class="material-icons">inventory</span>
+          <span class="material-symbols-outlined">inventory</span>
         </div>
         <div>
           <h2 class="modal-title">Mal Kabul & Depo Girişi: {{ order.poNumber }}</h2>
           <p class="modal-desc">{{ order.supplierName }} firmasından gelen sevkiyatı doğrulayın.</p>
         </div>
         <button type="button" class="close-btn" (click)="closeGoodsReceiptModal()">
-          <span class="material-icons">close</span>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
@@ -1246,7 +1241,7 @@
                   <td>{{ item.unit }}</td>
                   <td>
                     <span class="status-pill delivered">
-                      <span class="material-icons text-xs">check</span>
+                      <span class="material-symbols-outlined text-xs">check</span>
                       <span>Ambalaj Sağlam / CE Sertifikalı</span>
                     </span>
                   </td>
@@ -1270,7 +1265,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeGoodsReceiptModal()">İptal</button>
         <button type="button" class="btn btn-success" (click)="confirmGoodsReceipt()">
-          <span class="material-icons">save_alt</span>
+          <span class="material-symbols-outlined">save_alt</span>
           <span>Mal Kabul Tutanağını İmzala & Depoya Aktar</span>
         </button>
       </div>
@@ -1284,14 +1279,14 @@
     <div class="modal-card modal-sm" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-header-icon rose">
-          <span class="material-icons">warning</span>
+          <span class="material-symbols-outlined">warning</span>
         </div>
         <div>
           <h2 class="modal-title">Gerekçeli Ret Bildirimi</h2>
           <p class="modal-desc">{{ target.code }} kaydını reddetmek üzeresiniz.</p>
         </div>
         <button type="button" class="close-btn" (click)="closeRejectModal()">
-          <span class="material-icons">close</span>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
@@ -1311,7 +1306,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">Vazgeç</button>
         <button type="button" class="btn btn-danger" (click)="confirmReject()">
-          <span class="material-icons">block</span>
+          <span class="material-symbols-outlined">block</span>
           <span>Reddi Onayla</span>
         </button>
       </div>

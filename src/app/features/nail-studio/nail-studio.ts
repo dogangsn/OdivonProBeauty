@@ -32,11 +32,13 @@ import {
   NAIL_TECHNIQUES,
 } from '../../core/nail-studio/nail-studio-demo-data';
 
+import { PageHeader } from '../../shared/page-header/page-header';
+
 export type NailStudioTab = 'customizer' | 'warranty' | 'health' | 'hygiene';
 
 @Component({
   selector: 'app-nail-studio',
-  imports: [DatePipe],
+  imports: [DatePipe, PageHeader],
   styleUrl: './nail-studio.css',
   templateUrl: './nail-studio.html',
 })

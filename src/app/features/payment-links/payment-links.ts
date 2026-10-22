@@ -15,10 +15,11 @@ import {
   INITIAL_PAYMENT_LINKS,
   INITIAL_PAYMENT_STATS,
 } from '../../core/payment-link/payment-link-demo-data';
+import { PageHeader } from '../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-payment-links',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeader],
   templateUrl: './payment-links.html',
   styleUrl: './payment-links.css',
 })

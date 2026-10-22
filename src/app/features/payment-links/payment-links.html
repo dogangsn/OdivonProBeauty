@@ -1,29 +1,24 @@
 <div class="payment-links-container">
-  <!-- Header -->
-  <header class="page-header">
-    <div class="header-left">
-      <div class="title-badge">
-        <span class="badge-icon">💳</span>
-        <span class="badge-text">ONLINE TAHSİLAT & PAY-BY-LINK</span>
-      </div>
-      <h1 class="main-title">Müşteri Online Ödeme & Bağlantı Yönetimi</h1>
-      <p class="subtitle">
-        Randevu kaporaları, seans taksitleri ve temassız tahsilatlar için müşterilerinize 3D Secure güvenceli ödeme linkleri üretin; WhatsApp ve SMS ile anında iletin.
-      </p>
-    </div>
-    <div class="header-actions">
-      <button type="button" class="btn btn-primary" (click)="openCreateModal()">
-        <span class="material-icons">add_link</span>
+  <!-- 1. Executive Page Header -->
+  <app-page-header
+    icon="credit_card"
+    eyebrow="ONLINE TAHSİLAT & PAY-BY-LINK"
+    title="Müşteri Online Ödeme & Bağlantı Yönetimi"
+    description="Randevu kaporaları, seans taksitleri ve temassız tahsilatlar için müşterilerinize 3D Secure güvenceli ödeme linkleri üretin; WhatsApp ve SMS ile anında iletin."
+  >
+    <div actions class="flex items-center gap-2">
+      <button type="button" class="odv-btn-primary" (click)="openCreateModal()">
+        <span class="material-symbols-outlined icon-size-4">add_link</span>
         <span>Yeni Ödeme Linki Oluştur</span>
       </button>
     </div>
-  </header>
+  </app-page-header>
 
   <!-- KPI Overview Grid -->
   <section class="kpi-grid">
     <div class="kpi-card highlight-emerald">
       <div class="kpi-icon-wrap emerald">
-        <span class="material-icons">payments</span>
+        <span class="material-symbols-outlined">payments</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">Toplam Online Tahsilat</span>
@@ -36,7 +31,7 @@
 
     <div class="kpi-card highlight-amber">
       <div class="kpi-icon-wrap amber">
-        <span class="material-icons">hourglass_top</span>
+        <span class="material-symbols-outlined">hourglass_top</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">Bekleyen / Açık Linkler</span>
@@ -50,7 +45,7 @@
 
     <div class="kpi-card highlight-indigo">
       <div class="kpi-icon-wrap indigo">
-        <span class="material-icons">event_available</span>
+        <span class="material-symbols-outlined">event_available</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">No-Show Koruması</span>
@@ -63,7 +58,7 @@
 
     <div class="kpi-card highlight-violet">
       <div class="kpi-icon-wrap violet">
-        <span class="material-icons">bolt</span>
+        <span class="material-symbols-outlined">bolt</span>
       </div>
       <div class="kpi-content">
         <span class="kpi-label">Ortalama Ödeme Hızı</span>
@@ -78,7 +73,7 @@
   <!-- Toolbar & Filters -->
   <section class="toolbar">
     <div class="search-box">
-      <span class="material-icons">search</span>
+      <span class="material-symbols-outlined">search</span>
       <input
         type="text"
         placeholder="Müşteri adı, link kodu (Örn: LNK-8921) veya telefon ara..."
@@ -218,7 +213,7 @@
                   title="WhatsApp ile Müşteriye Gönder"
                   (click)="sendViaWhatsApp(link)"
                 >
-                  <span class="material-icons text-base">chat</span>
+                  <span class="material-symbols-outlined text-base">chat</span>
                 </button>
 
                 <!-- SMS Send -->
@@ -228,7 +223,7 @@
                   title="SMS ile İlet"
                   (click)="sendViaSms(link)"
                 >
-                  <span class="material-icons text-base">sms</span>
+                  <span class="material-symbols-outlined text-base">sms</span>
                 </button>
 
                 <!-- QR Code Modal -->
@@ -238,7 +233,7 @@
                   title="Bankoda QR Kod Göster"
                   (click)="openQrModal(link)"
                 >
-                  <span class="material-icons text-base">qr_code_scanner</span>
+                  <span class="material-symbols-outlined text-base">qr_code_scanner</span>
                 </button>
 
                 <!-- Copy Link -->
@@ -248,7 +243,7 @@
                   title="Bağlantıyı Kopyala"
                   (click)="copyLink(link)"
                 >
-                  <span class="material-icons text-base">content_copy</span>
+                  <span class="material-symbols-outlined text-base">content_copy</span>
                 </button>
 
                 <!-- Open Public Checkout Screen -->
@@ -258,7 +253,7 @@
                   title="Müşteri Gözünden Ödeme Sayfasını Aç"
                   (click)="openCustomerCheckoutView(link)"
                 >
-                  <span class="material-icons text-xs">launch</span>
+                  <span class="material-symbols-outlined text-xs">launch</span>
                   <span>Ödeme Sayfası</span>
                 </button>
               </div>
@@ -267,7 +262,7 @@
         } @empty {
           <tr>
             <td colspan="8" class="empty-cell">
-              <span class="material-icons empty-icon">link_off</span>
+              <span class="material-symbols-outlined empty-icon">link_off</span>
               <p>Arama kriterlerine uygun ödeme linki bulunamadı.</p>
             </td>
           </tr>
@@ -285,14 +280,14 @@
     <div class="modal-card modal-md" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-header-icon indigo">
-          <span class="material-icons">add_card</span>
+          <span class="material-symbols-outlined">add_card</span>
         </div>
         <div>
           <h2 class="modal-title">Yeni Müşteri Ödeme Linki Oluştur</h2>
           <p class="modal-desc">Randevu kaporası, seans veya cüzdan için 3D Secure güvenli link üretin.</p>
         </div>
         <button type="button" class="close-btn" (click)="closeCreateModal()">
-          <span class="material-icons">close</span>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
@@ -401,7 +396,7 @@
         <!-- WhatsApp Preview Box -->
         <div class="whatsapp-preview-box">
           <div class="preview-header">
-            <span class="material-icons text-emerald-600">chat</span>
+            <span class="material-symbols-outlined text-emerald-600">chat</span>
             <span class="text-xs font-bold text-slate-700">MÜŞTERİYE GİDECEK WHATSAPP / SMS MESAJI:</span>
           </div>
           <p class="preview-text">
@@ -415,7 +410,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">İptal</button>
         <button type="button" class="btn btn-primary" (click)="savePaymentLink()">
-          <span class="material-icons">check</span>
+          <span class="material-symbols-outlined">check</span>
           <span>Ödeme Linkini Oluştur</span>
         </button>
       </div>
@@ -433,7 +428,7 @@
           <span class="text-xs text-slate-500">{{ link.customerName }} | {{ link.linkCode }}</span>
         </div>
         <button type="button" class="close-btn" (click)="closeQrModal()">
-          <span class="material-icons">close</span>
+          <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
@@ -487,7 +482,7 @@
       <div class="modal-footer justify-center">
         <button type="button" class="btn btn-secondary" (click)="closeQrModal()">Kapat</button>
         <button type="button" class="btn btn-primary" (click)="copyLink(link)">
-          <span class="material-icons">content_copy</span>
+          <span class="material-symbols-outlined">content_copy</span>
           <span>Bağlantıyı Kopyala</span>
         </button>
       </div>

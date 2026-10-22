@@ -59,14 +59,20 @@
 }
 
 .kpi-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
   border-radius: 1rem;
   padding: 1.25rem;
   display: flex;
   gap: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s, box-shadow 0.2s;
+}
+
+:root.dark .kpi-card,
+html.dark .kpi-card {
+  background: #111827;
+  border-color: #334155;
 }
 
 .kpi-card:hover {
@@ -1001,4 +1007,136 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================================================
+   Dark Mode & Odivon Design System Alignment
+   ========================================================================== */
+:root.dark .kpi-number,
+html.dark .kpi-number {
+  color: #f8fafc;
+}
+:root.dark .kpi-label,
+html.dark .kpi-label,
+:root.dark .kpi-subtext,
+html.dark .kpi-subtext {
+  color: #94a3b8;
+}
+:root.dark .purchasing-tabs,
+html.dark .purchasing-tabs {
+  border-color: #334155;
+}
+:root.dark .tab-btn,
+html.dark .tab-btn {
+  color: #94a3b8;
+}
+:root.dark .tab-btn:hover,
+html.dark .tab-btn:hover {
+  background: #1e293b;
+  color: #ffffff;
+}
+:root.dark .toolbar,
+html.dark .toolbar {
+  background: #111827;
+  border-color: #334155;
+}
+:root.dark .search-box input,
+html.dark .search-box input,
+:root.dark .filter-select,
+html.dark .filter-select {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: #334155;
+  color: #ffffff;
+}
+:root.dark .table-responsive,
+html.dark .table-responsive {
+  background: #111827;
+  border-color: #334155;
+}
+:root.dark .purchasing-table th,
+html.dark .purchasing-table th {
+  background: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+:root.dark .purchasing-table td,
+html.dark .purchasing-table td {
+  border-color: #334155;
+  color: #f8fafc;
+}
+:root.dark .purchasing-table tbody tr:hover,
+html.dark .purchasing-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+:root.dark .modal-card,
+html.dark .modal-card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #ffffff;
+}
+:root.dark .modal-header,
+html.dark .modal-header,
+:root.dark .modal-footer,
+html.dark .modal-footer {
+  border-color: #334155;
+}
+:root.dark .modal-title,
+html.dark .modal-title {
+  color: #ffffff;
+}
+:root.dark .form-control,
+html.dark .form-control {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: #334155;
+  color: #ffffff;
+}
+:root.dark .supplier-card,
+html.dark .supplier-card {
+  background: #111827;
+  border-color: #334155;
+}
+:root.dark .sup-name,
+html.dark .sup-name {
+  color: #ffffff;
+}
+:root.dark .sup-contact,
+html.dark .sup-contact {
+  color: #94a3b8;
+}
+:root.dark .sup-body,
+html.dark .sup-body {
+  border-color: #334155;
+}
+:root.dark .btn-secondary,
+html.dark .btn-secondary {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+:root.dark .btn-secondary:hover,
+html.dark .btn-secondary:hover {
+  background: #334155;
+  color: #ffffff;
+}
+:root.dark .receipts-banner,
+html.dark .receipts-banner,
+:root.dark .inbox-banner,
+html.dark .inbox-banner {
+  background: #1e293b;
+  border-color: #334155;
+}
+:root.dark .inbox-banner h2,
+html.dark .inbox-banner h2,
+:root.dark .receipts-banner h2,
+html.dark .receipts-banner h2 {
+  color: #ffffff;
+}
+:root.dark .approval-card,
+html.dark .approval-card {
+  background: #111827;
+  border-color: #334155;
+}
+:root.dark .appr-title,
+html.dark .appr-title {
+  color: #ffffff;
 }

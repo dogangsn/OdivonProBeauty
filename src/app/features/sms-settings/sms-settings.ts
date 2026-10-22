@@ -16,8 +16,10 @@ import {
   SmsTemplate,
 } from '../../core/sms/sms.model';
 
+import { PageHeader } from '../../shared/page-header/page-header';
+
 @Component({
-  imports: [DatePipe, DecimalPipe, FormsModule],
+  imports: [DatePipe, DecimalPipe, FormsModule, PageHeader],
   selector: 'app-sms-settings',
   styleUrl: './sms-settings.css',
   templateUrl: './sms-settings.html',

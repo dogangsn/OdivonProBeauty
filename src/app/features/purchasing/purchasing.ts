@@ -27,6 +27,8 @@ import {
   INITIAL_SUPPLIERS,
 } from '../../core/purchasing/purchasing-demo-data';
 
+import { PageHeader } from '../../shared/page-header/page-header';
+
 export type PurchasingTab =
   | 'requisitions'
   | 'approvals'
@@ -36,7 +38,7 @@ export type PurchasingTab =
 
 @Component({
   selector: 'app-purchasing',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeader],
   templateUrl: './purchasing.html',
   styleUrl: './purchasing.css',
 })

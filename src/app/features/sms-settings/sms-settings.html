@@ -1,33 +1,26 @@
 <div class="sms-hub-page min-h-screen p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto animate-fade-in">
-  <!-- Page Header -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-wider mb-2">
-        <span class="material-symbols-outlined icon-size-4">cell_tower</span>
-        SMS Tanımları & Operatör Entegrasyonu
-      </div>
-      <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-        SMS Şirketleri & İletişim Otomasyonu
-      </h1>
-      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-        Netgsm, İleti Merkezi, Mutlucell ve Twilio entegrasyonlarıyla randevu onayları, hatırlatmalar ve kapora linklerini otomatik iletin.
-      </p>
-    </div>
-
-    <!-- Active Default Provider Pill -->
-    <div class="p-3 px-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3 shadow-xs">
-      <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
-        <span class="material-symbols-outlined icon-size-5">send</span>
-      </div>
-      <div>
-        <div class="text-[10px] font-extrabold uppercase text-slate-400">Aktif Gönderici Başlığı</div>
-        <div class="text-sm font-black text-slate-900 dark:text-white font-mono">
-          {{ defaultProvider().originator }}
-          <span class="text-xs font-normal text-slate-500">({{ defaultProvider().name }})</span>
+  <!-- 1. Executive Page Header -->
+  <app-page-header
+    icon="cell_tower"
+    eyebrow="SMS TANIMLARI & OPERATÖR ENTEGRASYONU"
+    title="SMS Şirketleri & İletişim Otomasyonu"
+    description="Netgsm, İleti Merkezi, Mutlucell ve Twilio entegrasyonlarıyla randevu onayları, hatırlatmalar ve kapora linklerini otomatik iletin."
+  >
+    <div actions class="flex items-center gap-2">
+      <div class="p-2.5 px-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 shadow-xs">
+        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
+          <span class="material-symbols-outlined icon-size-4">send</span>
+        </div>
+        <div>
+          <div class="text-[9px] font-extrabold uppercase text-slate-400">Aktif Başlık</div>
+          <div class="text-xs font-black text-slate-900 dark:text-white font-mono">
+            {{ defaultProvider().originator }}
+            <span class="text-[10px] font-normal text-slate-500">({{ defaultProvider().name }})</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </app-page-header>
 
   <!-- KPI Stats Summary Row -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">

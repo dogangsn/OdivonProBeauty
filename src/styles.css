@@ -333,6 +333,66 @@ html.dark .odv-btn-soft:hover {
   background-color: rgba(49, 46, 129, 0.8);
 }
 
+.odv-btn-secondary {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  background-color: #f1f5f9;
+  border: 1px solid rgb(226 232 240 / 0.9);
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+:root.dark .odv-btn-secondary,
+html.dark .odv-btn-secondary {
+  background-color: rgb(30 41 59 / 0.8);
+  border-color: rgb(51 65 85 / 0.85);
+  color: #cbd5e1;
+}
+.odv-btn-secondary:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+:root.dark .odv-btn-secondary:hover,
+html.dark .odv-btn-secondary:hover {
+  background-color: rgb(51 65 85 / 0.9);
+  color: #ffffff;
+}
+
+.odv-btn-danger {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  box-shadow: 0 10px 20px -5px rgba(244, 63, 94, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.odv-btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -4px rgba(244, 63, 94, 0.45);
+}
+.odv-btn-danger:active:not(:disabled) {
+  transform: translateY(0);
+}
+.odv-btn-danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .odv-icon-btn {
   width: 2rem;
   height: 2rem;
@@ -539,4 +599,192 @@ html.dark .badge-slate {
 }
 .beauty-calendar .fc .fc-timegrid-now-indicator-arrow {
   border-color: #f43f5e;
+}
+
+/* ==========================================================================
+   SweetAlert2 - Odivon SaaS Theme Overrides
+   ========================================================================== */
+html.swal2-shown,
+html.swal2-height-auto,
+body.swal2-shown,
+body.swal2-height-auto {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+body.swal2-toast-shown div.swal2-container {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none !important;
+}
+
+div.swal2-container {
+  z-index: 10000 !important;
+}
+
+div.swal2-container.swal2-backdrop-show:not(.swal2-top):not(.swal2-top-end):not(.swal2-top-start):not(.swal2-bottom):not(.swal2-bottom-end):not(.swal2-bottom-start) {
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+div.swal2-container .swal2-popup {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35) !important;
+  padding: 1.75rem !important;
+  font-family: inherit !important;
+}
+
+:root.dark div.swal2-container .swal2-popup,
+html.dark div.swal2-container .swal2-popup {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+div.swal2-container .swal2-popup .swal2-title {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  color: var(--text) !important;
+  letter-spacing: -0.02em !important;
+  padding: 0.5rem 1rem 0 !important;
+}
+
+:root.dark div.swal2-container .swal2-popup .swal2-title,
+html.dark div.swal2-container .swal2-popup .swal2-title {
+  color: #ffffff !important;
+}
+
+div.swal2-container .swal2-popup .swal2-html-container {
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  color: var(--muted) !important;
+  margin: 0.75rem 1rem 1.25rem !important;
+}
+
+div.swal2-container .swal2-popup .swal2-actions {
+  margin-top: 1.25rem !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  justify-content: flex-end !important;
+  padding: 0 0.5rem !important;
+}
+
+div.swal2-container .swal2-popup .swal2-actions button {
+  font-family: inherit !important;
+  font-size: 0.8125rem !important;
+  font-weight: 700 !important;
+  padding: 0.625rem 1.25rem !important;
+  border-radius: 0.75rem !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+div.swal2-container .swal2-popup .swal2-actions .swal2-confirm.odivon-btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25) !important;
+}
+div.swal2-container .swal2-popup .swal2-actions .swal2-confirm.odivon-btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35) !important;
+}
+
+div.swal2-container .swal2-popup .swal2-actions .swal2-confirm.odivon-btn-danger {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25) !important;
+}
+div.swal2-container .swal2-popup .swal2-actions .swal2-confirm.odivon-btn-danger:hover {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(244, 63, 94, 0.35) !important;
+}
+
+div.swal2-container .swal2-popup .swal2-actions .swal2-cancel.odivon-btn-cancel {
+  background: transparent !important;
+  color: var(--muted) !important;
+  border: 1px solid var(--border) !important;
+}
+div.swal2-container .swal2-popup .swal2-actions .swal2-cancel.odivon-btn-cancel:hover {
+  background: rgba(241, 245, 249, 0.8) !important;
+  color: var(--text) !important;
+}
+:root.dark div.swal2-container .swal2-popup .swal2-actions .swal2-cancel.odivon-btn-cancel:hover,
+html.dark div.swal2-container .swal2-popup .swal2-actions .swal2-cancel.odivon-btn-cancel:hover {
+  background: rgba(51, 65, 85, 0.6) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   Angular Material Menu Overrides (Glassmorphic Rounded Dropdown)
+   ========================================================================== */
+.mat-mdc-menu-panel {
+  border-radius: 1.25rem !important;
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 20px 35px -8px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  overflow: hidden !important;
+  min-width: 200px !important;
+}
+:root.dark .mat-mdc-menu-panel,
+html.dark .mat-mdc-menu-panel {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.mat-mdc-menu-panel .mat-mdc-menu-content {
+  padding: 6px !important;
+  background: transparent !important;
+}
+
+.mat-mdc-menu-panel .mat-mdc-menu-item {
+  border-radius: 0.75rem !important;
+  margin: 2px 0 !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 0 12px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  transition: background-color 0.12s ease, color 0.12s ease !important;
+}
+:root.dark .mat-mdc-menu-panel .mat-mdc-menu-item {
+  color: #f8fafc !important;
+}
+
+.mat-mdc-menu-panel .mat-mdc-menu-item .mat-icon,
+.mat-mdc-menu-panel .mat-mdc-menu-item .material-symbols-outlined {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 10px !important;
+  color: var(--muted) !important;
+}
+
+.mat-mdc-menu-panel .mat-mdc-menu-item:hover:not([disabled]) {
+  background-color: rgba(99, 102, 241, 0.08) !important;
+  color: var(--primary) !important;
+}
+:root.dark .mat-mdc-menu-panel .mat-mdc-menu-item:hover:not([disabled]) {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #a5b4fc !important;
+}
+.mat-mdc-menu-panel .mat-mdc-menu-item:hover:not([disabled]) .mat-icon,
+.mat-mdc-menu-panel .mat-mdc-menu-item:hover:not([disabled]) .material-symbols-outlined {
+  color: var(--primary) !important;
+}
+:root.dark .mat-mdc-menu-panel .mat-mdc-menu-item:hover:not([disabled]) .mat-icon,
+:root.dark .mat-mdc-menu-panel .mat-mdc-menu-item:hover:not([disabled]) .material-symbols-outlined {
+  color: #a5b4fc !important;
 }

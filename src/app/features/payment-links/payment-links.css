@@ -505,3 +505,107 @@
   from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* ==========================================================================
+   Dark Mode & Odivon Design System Alignment
+   ========================================================================== */
+:root.dark .kpi-card,
+html.dark .kpi-card {
+  background: #111827;
+  border-color: #334155;
+}
+:root.dark .kpi-number,
+html.dark .kpi-number {
+  color: #f8fafc;
+}
+:root.dark .kpi-label,
+html.dark .kpi-label,
+:root.dark .kpi-subtext,
+html.dark .kpi-subtext {
+  color: #94a3b8;
+}
+:root.dark .toolbar,
+html.dark .toolbar {
+  background: #111827;
+  border-color: #334155;
+}
+:root.dark .search-box input,
+html.dark .search-box input,
+:root.dark .filter-select,
+html.dark .filter-select {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: #334155;
+  color: #ffffff;
+}
+:root.dark .pill-btn,
+html.dark .pill-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+:root.dark .pill-btn:hover,
+html.dark .pill-btn:hover {
+  background: #334155;
+  color: #ffffff;
+}
+:root.dark .table-responsive,
+html.dark .table-responsive {
+  background: #111827;
+  border-color: #334155;
+}
+:root.dark .links-table th,
+html.dark .links-table th {
+  background: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+:root.dark .links-table td,
+html.dark .links-table td {
+  border-color: #334155;
+  color: #f8fafc;
+}
+:root.dark .links-table tbody tr:hover,
+html.dark .links-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.08);
+}
+:root.dark .modal-card,
+html.dark .modal-card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #ffffff;
+}
+:root.dark .modal-header,
+html.dark .modal-header,
+:root.dark .modal-footer,
+html.dark .modal-footer {
+  border-color: #334155;
+}
+:root.dark .modal-title,
+html.dark .modal-title {
+  color: #ffffff;
+}
+:root.dark .form-control,
+html.dark .form-control {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: #334155;
+  color: #ffffff;
+}
+:root.dark .btn-secondary,
+html.dark .btn-secondary {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+:root.dark .btn-secondary:hover,
+html.dark .btn-secondary:hover {
+  background: #334155;
+  color: #ffffff;
+}
+:root.dark .qr-code-box,
+html.dark .qr-code-box {
+  background: #ffffff;
+}
+:root.dark .qr-amount-pill,
+html.dark .qr-amount-pill {
+  color: #94a3b8;
+}

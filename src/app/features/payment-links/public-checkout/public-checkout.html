@@ -12,11 +12,11 @@
 
       <div class="security-badges">
         <div class="sec-badge">
-          <span class="material-icons">lock</span>
+          <span class="material-symbols-outlined">lock</span>
           <span>256-Bit SSL</span>
         </div>
         <div class="sec-badge">
-          <span class="material-icons">verified_user</span>
+          <span class="material-symbols-outlined">verified_user</span>
           <span>3D Secure 2.0</span>
         </div>
       </div>
@@ -81,7 +81,7 @@
           </div>
 
           <div class="guarantee-note">
-            <span class="material-icons text-emerald-600">security</span>
+            <span class="material-symbols-outlined text-emerald-600">security</span>
             <p class="text-xs text-slate-600">
               Ödemeniz BDDK lisanslı banka altyapısıyla 3D Secure korumalı olarak işlenir. Kart bilgileriniz kesinlikle kaydedilmez.
             </p>
@@ -98,7 +98,7 @@
               [class.active]="paymentMethod() === 'card'"
               (click)="selectPaymentMethod('card')"
             >
-              <span class="material-icons">credit_card</span>
+              <span class="material-symbols-outlined">credit_card</span>
               <span>Kredi / Banka Kartı</span>
             </button>
             <button
@@ -107,7 +107,7 @@
               [class.active]="paymentMethod() === 'apple_pay'"
               (click)="selectPaymentMethod('apple_pay')"
             >
-              <span class="material-icons">phone_iphone</span>
+              <span class="material-symbols-outlined">phone_iphone</span>
               <span>Apple Pay / Fast</span>
             </button>
             <button
@@ -116,7 +116,7 @@
               [class.active]="paymentMethod() === 'fast'"
               (click)="selectPaymentMethod('fast')"
             >
-              <span class="material-icons">account_balance</span>
+              <span class="material-symbols-outlined">account_balance</span>
               <span>Havale / FAST</span>
             </button>
           </div>
@@ -234,13 +234,13 @@
                 [disabled]="isProcessing()"
                 (click)="triggerSubmitPayment()"
               >
-                <span class="material-icons">lock</span>
+                <span class="material-symbols-outlined">lock</span>
                 <span>{{ currentTotalAmount() | currency:'TRY':'symbol':'1.0-0':'tr' }} Güvenli Öde</span>
               </button>
             </div>
           } @else if (paymentMethod() === 'apple_pay') {
             <div class="apple-pay-box">
-              <span class="material-icons apple-icon">phone_iphone</span>
+              <span class="material-symbols-outlined apple-icon">phone_iphone</span>
               <h3>Apple Pay & Google Wallet Hızlı Ödeme</h3>
               <p>Kart bilgisi girmeden tek dokunuşla biyometrik doğrulama ile ödeme yapabilirsiniz.</p>
               <button type="button" class="apple-pay-btn" (click)="triggerSubmitPayment()">
@@ -249,7 +249,7 @@
             </div>
           } @else {
             <div class="fast-payment-box">
-              <span class="material-icons fast-icon">account_balance</span>
+              <span class="material-symbols-outlined fast-icon">account_balance</span>
               <h3>FAST / 7/24 Anında Havale</h3>
               <p>Aşağıdaki IBAN numarasına gönderim yapabilirsiniz. Açıklamaya lütfen link kodunuzu yazınız.</p>
               <div class="iban-card">
@@ -266,7 +266,7 @@
       <section class="success-screen">
         <div class="success-card">
           <div class="success-checkmark-circle">
-            <span class="material-icons">check_circle</span>
+            <span class="material-symbols-outlined">check_circle</span>
           </div>
           <h1 class="success-title">Ödemeniz Başarıyla Alındı!</h1>
           <p class="success-sub">
@@ -304,11 +304,11 @@
 
           <div class="success-actions">
             <button type="button" class="btn btn-secondary" (click)="printReceipt()">
-              <span class="material-icons">print</span>
+              <span class="material-symbols-outlined">print</span>
               <span>Makbuzu Yazdır / PDF</span>
             </button>
             <a href="/" class="btn btn-primary">
-              <span class="material-icons">home</span>
+              <span class="material-symbols-outlined">home</span>
               <span>Klinik Ana Sayfasına Dön</span>
             </a>
           </div>
@@ -324,7 +324,7 @@
         <div class="bank-otp-header">
           <div class="bank-logo-row">
             <span class="bank-title">BANK 3D SECURE DOĞRULAMA</span>
-            <span class="material-icons text-emerald-600">verified</span>
+            <span class="material-symbols-outlined text-emerald-600">verified</span>
           </div>
           <span class="text-xs text-slate-500">Güvenli SMS Şifresi Onay Ekranı</span>
         </div>

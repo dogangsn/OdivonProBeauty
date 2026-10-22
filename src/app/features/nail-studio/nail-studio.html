@@ -7,30 +7,24 @@
     </div>
   }
 
-  <!-- Header -->
-  <div class="nail-header">
-    <div class="nail-header-titles">
-      <div class="nail-badge">
-        <span class="material-symbols-outlined">brush</span>
-        <span>ODIVON NAIL ART & PROTEZ TIRNAK SUITE</span>
-      </div>
-      <h1 class="nail-title">Tırnak Tasarım, Garanti ve Sterilizasyon Merkezi</h1>
-      <p class="nail-subtitle">
-        İnteraktif tırnak tasarım simülatörü, 40+ oje renk skalası, 7 günlük kırılma garantisi ve B-Class otoklav güvenlik kütüğü.
-      </p>
-    </div>
-
-    <div class="nail-header-actions">
-      <button type="button" class="btn-secondary" (click)="setTab('warranty')">
-        <span class="material-symbols-outlined">verified_user</span>
+  <!-- 1. Executive Page Header -->
+  <app-page-header
+    icon="brush"
+    eyebrow="ODIVON NAIL ART & PROTEZ TIRNAK SUITE"
+    title="Tırnak Tasarım, Garanti ve Sterilizasyon Merkezi"
+    description="İnteraktif tırnak tasarım simülatörü, 40+ oje renk skalası, 7 günlük kırılma garantisi ve B-Class otoklav güvenlik kütüğü."
+  >
+    <div actions class="flex items-center gap-2">
+      <button type="button" class="odv-btn-ghost text-xs" (click)="setTab('warranty')">
+        <span class="material-symbols-outlined icon-size-4">verified_user</span>
         <span>Garanti & Onarım</span>
       </button>
-      <button type="button" class="btn-primary" (click)="setTab('customizer')">
-        <span class="material-symbols-outlined">auto_fix_high</span>
+      <button type="button" class="odv-btn-primary text-xs" (click)="setTab('customizer')">
+        <span class="material-symbols-outlined icon-size-4">auto_fix_high</span>
         <span>Tırnak Tasarımcısı</span>
       </button>
     </div>
-  </div>
+  </app-page-header>
 
   <!-- Navigation Tabs -->
   <div class="nail-tabs">

@@ -14,4 +14,4 @@ export function compareVersions(a: string, b: string): number {
 }
 
 /** Storage keys that survive an update: the user's own display preferences. */
-export const PRESERVED_STORAGE_KEYS = ['odivon:preferred_lang', 'odivon:theme'];
+export const PRESERVED_STORAGE_KEYS = ['odivon:preferred_lang', 'odivon:theme', 'odivon:cookie_consent'];

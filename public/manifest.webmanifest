@@ -1,6 +1,11 @@
 {
-  "name": "odivon-pro-beauty",
-  "short_name": "odivon-pro-beauty",
+  "name": "OdivonPro Beauty",
+  "short_name": "OdivonPro",
+  "description": "Güzellik, spa ve wellness merkezleri için randevu ve işletme yönetimi.",
+  "lang": "tr",
+  "dir": "ltr",
+  "theme_color": "#4f46e5",
+  "background_color": "#0c0a1d",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

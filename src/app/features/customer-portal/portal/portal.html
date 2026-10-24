@@ -1,6 +1,6 @@
 <div class="portal-shell">
   <header>
-    <a href="/"><span>O</span><strong>OdivonPro Beauty</strong></a>
+    <a routerLink="/portal" aria-label="OdivonPro Beauty müşteri portalı"><span>O</span><strong>OdivonPro Beauty</strong></a>
     @if (signedIn()) {
       <button type="button" (click)="auth.logout()">Güvenli çıkış</button>
     }

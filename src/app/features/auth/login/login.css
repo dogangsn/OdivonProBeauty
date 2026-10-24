@@ -589,3 +589,11 @@ label {
     transition-duration: 0.01ms !important;
   }
 }
+.legal a {
+  color: #e9d5ff;
+  font-weight: 700;
+}
+.legal a:focus-visible {
+  outline: 3px solid #7c3aed;
+  outline-offset: 2px;
+}

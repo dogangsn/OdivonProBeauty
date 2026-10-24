@@ -1,0 +1,23 @@
+# OdivonPro Beauty
+# Only the public pages are meant for search engines. The management panel
+# requires sign-in and is not indexed. Scripts, styles and translations stay
+# crawlable so search engines can render the single-page app.
+User-agent: *
+Disallow: /
+Allow: /$
+Allow: /login
+Allow: /register
+Allow: /portal
+Allow: /terms
+Allow: /privacy
+Allow: /cookies
+Allow: /llms.txt
+Allow: /sitemap.xml
+Allow: /manifest.webmanifest
+Allow: /favicon.ico
+Allow: /icons/
+Allow: /i18n/
+Allow: /*.js$
+Allow: /*.css$
+
+Sitemap: https://odivonpro-beauty.pages.dev/sitemap.xml

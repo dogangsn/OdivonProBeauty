@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeTr from '@angular/common/locales/tr';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 import {
   InstallmentOption,
@@ -17,7 +17,7 @@ registerLocaleData(localeTr);
 
 @Component({
   selector: 'app-public-checkout',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './public-checkout.html',
   styleUrl: './public-checkout.css',
 })

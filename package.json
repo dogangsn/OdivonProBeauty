@@ -10,7 +10,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
-    "check": "npm run test && npm run build",
+    "check": "npm run test && npm run check:links && npm run build",
+    "check:links": "node scripts/check-links.mjs",
     "format:check": "prettier --check .",
     "e2e": "playwright test",
     "deploy:cloudflare": "npm run build && wrangler pages deploy dist/odivon-pro-beauty/browser --project-name=odivonpro-beauty --branch=main"

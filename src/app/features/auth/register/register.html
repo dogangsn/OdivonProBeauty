@@ -207,7 +207,11 @@
             <span class="consent__box" aria-hidden="true"
               ><i class="material-symbols-outlined">check</i></span
             >
-            <span>KVKK aydınlatma metnini ve kullanım koşullarını okudum, kabul ediyorum.</span>
+            <span
+              ><a routerLink="/privacy" target="_blank" rel="noopener">KVKK aydınlatma metnini</a> ve
+              <a routerLink="/terms" target="_blank" rel="noopener">kullanım şartlarını</a> okudum,
+              kabul ediyorum.</span
+            >
           </label>
 
           @if (error()) {

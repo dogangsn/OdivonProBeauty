@@ -1,3 +1,4 @@
+import { RouterLink } from '@angular/router';
 import { Component, computed, inject, resource, signal } from '@angular/core';
 import { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
 import { firstValueFrom } from 'rxjs';
@@ -6,7 +7,7 @@ import { Auth } from '../../../core/auth';
 import { BeautyRecord } from '../../../core/beauty.model';
 
 @Component({
-  imports: [],
+  imports: [RouterLink],
   selector: 'app-portal',
   styleUrl: './portal.css',
   templateUrl: './portal.html',

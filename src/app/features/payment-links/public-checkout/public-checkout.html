@@ -224,7 +224,7 @@
               <div class="agreement-box">
                 <input type="checkbox" id="agree" [(ngModel)]="cardSaveAgreement" />
                 <label for="agree" class="text-xs text-slate-600">
-                  <a href="javascript:void(0)" class="text-indigo-600 font-medium">Mesafeli Satış Sözleşmesi</a>'ni ve iptal/iade şartlarını okudum, kabul ediyorum.
+                  <a routerLink="/terms" fragment="odeme-baglantilari" target="_blank" rel="noopener" class="text-indigo-600 font-medium">Mesafeli Satış Sözleşmesi</a>'ni ve iptal/iade şartlarını okudum, kabul ediyorum.
                 </label>
               </div>
 
@@ -307,9 +307,9 @@
               <span class="material-symbols-outlined">print</span>
               <span>Makbuzu Yazdır / PDF</span>
             </button>
-            <a href="/" class="btn btn-primary">
-              <span class="material-symbols-outlined">home</span>
-              <span>Klinik Ana Sayfasına Dön</span>
+            <a routerLink="/portal" class="btn btn-primary">
+              <span class="material-symbols-outlined" aria-hidden="true">person_heart</span>
+              <span>Müşteri portalına git</span>
             </a>
           </div>
         </div>

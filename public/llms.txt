@@ -1,0 +1,27 @@
+# OdivonPro Beauty
+
+> OdivonPro Beauty, güzellik, spa ve wellness merkezleri için Türkçe bulut yönetim yazılımıdır (web + PWA). Randevu planlama, müşteri kayıtları (CRM), paket ve seans takibi, personel ve vardiya, kasa ve ödeme, stok, kampanya, raporlama ve müşteri portalını tek panelde sunar. Yeni işletmeler 14 gün ücretsiz deneyebilir; kredi kartı gerekmez.
+
+Yönetim paneli giriş gerektirir ve arama motorlarına kapalıdır. Aşağıdaki sayfalar herkese açıktır.
+
+## Ana sayfalar
+
+- [Giriş](https://odivonpro-beauty.pages.dev/login): İşletme sahipleri ve personel için yönetim paneline giriş.
+- [Ücretsiz deneme / Kayıt](https://odivonpro-beauty.pages.dev/register): Güzellik merkezi hesabı oluşturma, 14 gün ücretsiz.
+- [Müşteri portalı](https://odivonpro-beauty.pages.dev/portal): Merkezlerin müşterileri telefon numarasıyla randevu, paket ve kalan seanslarını görür.
+
+## Özellikler
+
+- Randevu takvimi: personel, oda ve cihaz bazlı planlama, bekleme listesi.
+- Müşteri yönetimi: danışma (konsültasyon) kayıtları, sağlık formu, KVKK ve uygulama onamları.
+- Paket ve seans takibi, hizmet ve kategori tanımları.
+- Finans: tahsilat, fatura, gider, prim (komisyon), 3D Secure ödeme bağlantıları.
+- Stok, ürün, tedarikçi ve satın alma.
+- SMS bildirimleri ve kampanyalar, raporlar, yapay zekâ önerileri.
+- Çoklu şube ve rol tabanlı yetkilendirme, işlem kayıtları.
+
+## Yasal
+
+- [Kullanım Şartları](https://odivonpro-beauty.pages.dev/terms)
+- [Gizlilik Politikası ve KVKK Aydınlatma Metni](https://odivonpro-beauty.pages.dev/privacy)
+- [Çerez Politikası](https://odivonpro-beauty.pages.dev/cookies)

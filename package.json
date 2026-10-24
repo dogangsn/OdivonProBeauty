@@ -8,6 +8,7 @@
     "prebuild": "node scripts/write-version.mjs",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "pretest": "node scripts/write-version.mjs",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
     "check": "npm run test && npm run check:links && npm run build",

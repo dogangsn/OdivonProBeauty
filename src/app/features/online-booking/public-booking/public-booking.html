@@ -1,0 +1,342 @@
+<div class="booking-page">
+  <header class="booking-header">
+    <div class="booking-wrap flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        @if (info.hasValue() && info.value().logoUrl) {
+          <img [src]="info.value().logoUrl" alt="" class="h-10 w-10 rounded-xl object-cover" />
+        } @else {
+          <span class="brand-mark" aria-hidden="true">
+            {{ info.hasValue() ? info.value().businessName.charAt(0) : 'O' }}
+          </span>
+        }
+        <div class="min-w-0">
+          <strong class="block truncate text-slate-900">
+            {{ info.hasValue() ? info.value().businessName : 'Online randevu' }}
+          </strong>
+          @if (info.hasValue()) {
+            <span class="block truncate text-xs text-slate-500">{{ info.value().branchName }}</span>
+          }
+        </div>
+      </div>
+      @if (info.hasValue() && info.value().phone) {
+        <a class="header-call" [href]="telUrl(info.value().phone)">
+          <span class="material-symbols-outlined icon-size-4" aria-hidden="true">call</span>
+          <span class="hidden sm:inline">Salonu ara</span>
+        </a>
+      }
+    </div>
+  </header>
+
+  <main class="booking-wrap py-6 sm:py-10">
+    @if (info.isLoading()) {
+      <div class="state-card" role="status">Randevu sayfası yükleniyor…</div>
+    } @else if (info.error()) {
+      <section class="state-card">
+        <span class="material-symbols-outlined text-4xl text-slate-400" aria-hidden="true"
+          >event_busy</span
+        >
+        <h1 class="text-xl font-extrabold text-slate-900">Randevu sayfası açılamadı</h1>
+        <p class="text-slate-600">{{ errorText(info.error()) }}</p>
+        <p class="text-sm text-slate-500">
+          Linkin doğru olduğundan emin olun ya da randevu için salonu doğrudan arayın.
+        </p>
+      </section>
+    } @else if (appointment(); as appt) {
+      <section class="confirm-card" aria-live="polite">
+        <div
+          class="confirm-icon"
+          [class.cancelled]="appt.status === 'cancelled'"
+          aria-hidden="true"
+        >
+          <span class="material-symbols-outlined">{{
+            appt.status === 'cancelled' ? 'event_busy' : 'event_available'
+          }}</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-slate-900">
+          {{ appt.status === 'cancelled' ? 'Randevunuz iptal edildi' : 'Randevu talebiniz alındı' }}
+        </h1>
+        @if (appt.status === 'pending') {
+          <p class="text-slate-600">
+            Salon randevunuzu onayladığında sizinle iletişime geçecek. Bu sayfayı kaydederek randevunuzu
+            daha sonra görüntüleyebilir veya iptal edebilirsiniz.
+          </p>
+        }
+        <dl class="summary">
+          <div><dt>Durum</dt><dd>{{ statusLabel(appt.status) }}</dd></div>
+          <div><dt>Hizmet</dt><dd>{{ appt.serviceName }}</dd></div>
+          <div><dt>Uzman</dt><dd>{{ appt.staffName }}</dd></div>
+          <div><dt>Tarih ve saat</dt><dd>{{ when(appt) }}</dd></div>
+          <div><dt>Salon</dt><dd>{{ appt.businessName }} · {{ appt.branchName }}</dd></div>
+          <div><dt>Ad soyad</dt><dd>{{ appt.customerName }}</dd></div>
+        </dl>
+        <div class="flex flex-wrap justify-center gap-2">
+          @if (appt.canCancel) {
+            <button
+              type="button"
+              class="odv-btn-secondary"
+              [disabled]="cancelling()"
+              (click)="cancelAppointment()"
+            >
+              {{ cancelling() ? 'İptal ediliyor…' : 'Randevuyu iptal et' }}
+            </button>
+          }
+          @if (appt.branchPhone) {
+            <a class="odv-btn-secondary" [href]="telUrl(appt.branchPhone)">Salonu ara</a>
+          }
+          <button type="button" class="odv-btn-primary" (click)="newBooking()">
+            Yeni randevu al
+          </button>
+        </div>
+      </section>
+    } @else if (existing.isLoading()) {
+      <div class="state-card" role="status">Randevunuz yükleniyor…</div>
+    } @else if (info.hasValue()) {
+      @let salon = info.value();
+      <section class="mb-6">
+        <p class="eyebrow">ONLINE RANDEVU</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          {{ salon.businessName }}
+        </h1>
+        <p class="mt-1 text-sm text-slate-600">
+          @if (salon.address || salon.city) {
+            <a
+              class="underline-offset-2 hover:underline"
+              [href]="mapsUrl(salon.address, salon.city)"
+              target="_blank"
+              rel="noopener"
+              >{{ salon.address }} {{ salon.district }} {{ salon.city }}</a
+            >
+            ·
+          }
+          Çalışma saatleri {{ salon.workDayStart }} – {{ salon.workDayEnd }}
+        </p>
+      </section>
+
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div class="grid min-w-0 grid-cols-1 gap-5">
+          <!-- 1. Service -->
+          <section class="step-card" aria-labelledby="step-service">
+            <h2 id="step-service" class="step-title"><span>1</span> Hizmet seçin</h2>
+            @if (services.isLoading()) {
+              <p class="muted">Hizmetler yükleniyor…</p>
+            } @else if (services.error()) {
+              <p class="error-text">{{ errorText(services.error()) }}</p>
+            } @else if (services.hasValue() && services.value().length === 0) {
+              <p class="muted">Bu salon henüz online randevuya açık hizmet eklememiş.</p>
+            } @else if (services.hasValue()) {
+              <div class="grid gap-2 sm:grid-cols-2">
+                @for (service of services.value(); track service.id) {
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="service.id === serviceId()"
+                    [attr.aria-pressed]="service.id === serviceId()"
+                    (click)="chooseService(service.id)"
+                  >
+                    <strong>{{ service.name }}</strong>
+                    <span>
+                      {{ service.durationMin }} dk
+                      @if (service.price !== null) {
+                        · {{ price(service.price) }}
+                      }
+                    </span>
+                  </button>
+                }
+              </div>
+            }
+          </section>
+
+          @if (serviceId()) {
+            <!-- 2. Specialist -->
+            <section class="step-card" aria-labelledby="step-staff">
+              <h2 id="step-staff" class="step-title"><span>2</span> Uzman seçin</h2>
+              @if (staff.isLoading()) {
+                <p class="muted">Uzmanlar yükleniyor…</p>
+              } @else if (staff.hasValue()) {
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="chip"
+                    [class.selected]="staffId() === ''"
+                    [attr.aria-pressed]="staffId() === ''"
+                    (click)="chooseStaff('')"
+                  >
+                    Fark etmez
+                  </button>
+                  @for (member of staff.value(); track member.id) {
+                    <button
+                      type="button"
+                      class="chip"
+                      [class.selected]="staffId() === member.id"
+                      [attr.aria-pressed]="staffId() === member.id"
+                      (click)="chooseStaff(member.id)"
+                    >
+                      {{ member.name }}
+                    </button>
+                  }
+                </div>
+                @if (staff.value().length === 0) {
+                  <p class="muted mt-2">Bu hizmet için online randevu veren uzman bulunmuyor.</p>
+                }
+              }
+            </section>
+
+            <!-- 3. Day & time -->
+            <section class="step-card" aria-labelledby="step-time">
+              <h2 id="step-time" class="step-title"><span>3</span> Gün ve saat seçin</h2>
+              <div class="day-strip" role="list">
+                @for (day of days(); track day.value) {
+                  <button
+                    type="button"
+                    role="listitem"
+                    class="day"
+                    [class.selected]="day.value === date()"
+                    [attr.aria-pressed]="day.value === date()"
+                    (click)="chooseDate(day.value)"
+                  >
+                    <span>{{ day.weekday }}</span>
+                    <strong>{{ day.day }}</strong>
+                    <span>{{ day.month }}</span>
+                  </button>
+                }
+              </div>
+              <label class="mt-3 flex items-center gap-2 text-sm text-slate-600">
+                Başka bir tarih:
+                <input
+                  type="date"
+                  class="odv-input max-w-[180px]"
+                  [value]="date()"
+                  (change)="chooseDate(input($event.target))"
+                />
+              </label>
+
+              <div class="mt-4">
+                @if (slots.isLoading()) {
+                  <p class="muted" role="status">Uygun saatler aranıyor…</p>
+                } @else if (slots.error()) {
+                  <p class="error-text">{{ errorText(slots.error()) }}</p>
+                } @else if (slots.hasValue()) {
+                  @if (slots.value().slots.length === 0) {
+                    <p class="muted">Bu gün için uygun saat kalmadı. Lütfen başka bir gün seçin.</p>
+                  } @else {
+                    <div class="slot-grid">
+                      @for (slot of slots.value().slots; track slot.time) {
+                        <button
+                          type="button"
+                          class="slot"
+                          [class.selected]="slot.time === time()"
+                          [attr.aria-pressed]="slot.time === time()"
+                          (click)="time.set(slot.time)"
+                        >
+                          {{ slot.time }}
+                        </button>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </section>
+          }
+
+          @if (selectedSlot()) {
+            <!-- 4. Contact -->
+            <section class="step-card" aria-labelledby="step-contact">
+              <h2 id="step-contact" class="step-title"><span>4</span> Bilgileriniz</h2>
+              <form class="grid gap-3 sm:grid-cols-2" (submit)="$event.preventDefault(); submit()">
+                <label class="field">
+                  Ad soyad *
+                  <input
+                    class="odv-input"
+                    autocomplete="name"
+                    required
+                    [value]="fullName()"
+                    (input)="fullName.set(input($event.target))"
+                  />
+                </label>
+                <label class="field">
+                  Cep telefonu *
+                  <input
+                    class="odv-input"
+                    type="tel"
+                    autocomplete="tel"
+                    placeholder="05xx xxx xx xx"
+                    required
+                    [value]="phone()"
+                    (input)="phone.set(input($event.target))"
+                  />
+                </label>
+                <label class="field sm:col-span-2">
+                  E-posta (isteğe bağlı)
+                  <input
+                    class="odv-input"
+                    type="email"
+                    autocomplete="email"
+                    [value]="email()"
+                    (input)="email.set(input($event.target))"
+                  />
+                </label>
+                <label class="field sm:col-span-2">
+                  Not (isteğe bağlı)
+                  <textarea
+                    class="odv-input"
+                    rows="2"
+                    maxlength="500"
+                    [value]="notes()"
+                    (input)="notes.set(input($event.target))"
+                  ></textarea>
+                </label>
+                <label class="sm:col-span-2 flex items-start gap-2 text-sm text-slate-600">
+                  <input
+                    type="checkbox"
+                    class="mt-1"
+                    [checked]="kvkk()"
+                    (change)="kvkk.set(checked($event.target))"
+                  />
+                  <span>
+                    Kişisel verilerimin randevu oluşturmak amacıyla işlenmesine ilişkin
+                    <a routerLink="/privacy" target="_blank" class="font-semibold text-indigo-600 underline"
+                      >KVKK aydınlatma metnini</a
+                    >
+                    okudum, onaylıyorum.
+                  </span>
+                </label>
+                @if (formError()) {
+                  <p class="error-text sm:col-span-2" role="alert">{{ formError() }}</p>
+                }
+                <button type="submit" class="odv-btn-primary sm:col-span-2 justify-center" [disabled]="!canSubmit()">
+                  {{ submitting() ? 'Randevu oluşturuluyor…' : 'Randevuyu onayla' }}
+                </button>
+              </form>
+            </section>
+          }
+        </div>
+
+        <aside class="step-card lg:sticky lg:top-24" aria-label="Randevu özeti">
+          <h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-500">Özet</h2>
+          <dl class="summary compact">
+            <div><dt>Hizmet</dt><dd>{{ selectedService()?.name || '—' }}</dd></div>
+            <div>
+              <dt>Uzman</dt>
+              <dd>{{ selectedStaffName() || (staffId() ? '—' : 'Fark etmez') }}</dd>
+            </div>
+            <div><dt>Tarih</dt><dd>{{ date() || '—' }}</dd></div>
+            <div><dt>Saat</dt><dd>{{ time() || '—' }}</dd></div>
+            @if (selectedService(); as service) {
+              <div><dt>Süre</dt><dd>{{ service.durationMin }} dk</dd></div>
+              @if (service.price !== null) {
+                <div><dt>Ücret</dt><dd>{{ price(service.price) }}</dd></div>
+              }
+            }
+          </dl>
+          <p class="text-xs text-slate-500">
+            Ödeme salonda yapılır. Randevunuz salon onayından sonra kesinleşir.
+          </p>
+        </aside>
+      </div>
+    }
+  </main>
+
+  <footer class="booking-wrap pb-8 text-center text-xs text-slate-400">
+    OdivonPro Beauty ile online randevu
+  </footer>
+</div>

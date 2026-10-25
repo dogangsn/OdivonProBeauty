@@ -60,6 +60,7 @@ export class Shell {
       items: [
         { key: 'nav.dashboard', icon: 'space_dashboard', route: '/dashboard' },
         { key: 'nav.calendar', icon: 'calendar_month', route: '/appointments' },
+        { key: 'nav.bookingLink', icon: 'share', route: '/booking-link' },
         { key: 'nav.waitlist', icon: 'hourglass_top', route: '/waitlist' },
       ],
     },

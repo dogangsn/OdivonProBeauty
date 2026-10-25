@@ -1,0 +1,172 @@
+<app-page-header
+  icon="share"
+  eyebrow="ONLINE RANDEVU"
+  title="Randevu Linki"
+  description="Müşterilerinizle paylaşacağınız linkten, giriş yapmadan 7/24 randevu alabilirler. Gelen randevular takvime 'Bekleyen' olarak düşer, siz onaylarsınız."
+/>
+
+<section class="odv-card p-4 mb-5 flex flex-col sm:flex-row sm:items-center gap-3">
+  <label for="booking-link-branch" class="text-xs font-bold text-slate-500 dark:text-slate-400"
+    >Şube</label
+  >
+  <select
+    id="booking-link-branch"
+    class="odv-input max-w-xs font-semibold"
+    [value]="branchId()"
+    (change)="changeBranch($event)"
+  >
+    @if (branches.hasValue()) {
+      @for (branch of branches.value(); track branch.id) {
+        <option [value]="branch.id" [selected]="branch.id === branchId()">{{ branch.name }}</option>
+      }
+    }
+  </select>
+</section>
+
+@if (error()) {
+  <p
+    class="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+    role="alert"
+  >
+    {{ error() }}
+  </p>
+}
+
+@if (branches.hasValue() && branches.value().length === 0) {
+  <section class="odv-card p-8 text-center text-slate-600 dark:text-slate-300">
+    Randevu linki oluşturmak için önce bir şube tanımlayın.
+  </section>
+} @else if (loading() && !link()) {
+  <section class="odv-card p-8 text-center text-slate-500" role="status">Yükleniyor…</section>
+} @else if (loadError()) {
+  <section class="odv-card p-8 text-center text-rose-700">{{ loadError() }}</section>
+} @else if (link(); as current) {
+  @if (!current.slug) {
+    <section class="odv-card p-8 grid justify-items-center gap-3 text-center">
+      <span class="material-symbols-outlined text-5xl text-indigo-500" aria-hidden="true">link</span>
+      <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">Henüz randevu linkiniz yok</h2>
+      <p class="max-w-md text-sm text-slate-600 dark:text-slate-300">
+        Linki oluşturun; Instagram profilinize, WhatsApp'a veya Google işletme sayfanıza ekleyin.
+        Müşteriler hizmet, uzman, gün ve saat seçerek randevu talep eder.
+      </p>
+      <button type="button" class="odv-btn-primary" [disabled]="saving()" (click)="create()">
+        <span class="material-symbols-outlined icon-size-4" aria-hidden="true">add_link</span>
+        {{ saving() ? 'Oluşturuluyor…' : 'Randevu linki oluştur' }}
+      </button>
+    </section>
+  } @else {
+    <div class="grid gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
+      <section class="odv-card p-5 grid gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Salon randevu linki</h2>
+          <span
+            class="odv-badge"
+            [class.text-emerald-700]="current.enabled"
+            [class.text-slate-500]="!current.enabled"
+          >
+            {{ current.enabled ? 'Yayında' : 'Kapalı' }}
+          </span>
+        </div>
+
+        <div
+          class="flex flex-col sm:flex-row gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60"
+        >
+          <code class="flex-1 break-all text-sm font-semibold text-indigo-700 dark:text-indigo-300">{{
+            url()
+          }}</code>
+          <div class="flex gap-2">
+            <button type="button" class="odv-btn-secondary" (click)="copy(url(), 'main')">
+              <span class="material-symbols-outlined icon-size-4" aria-hidden="true">content_copy</span>
+              {{ copied() === 'main' ? 'Kopyalandı' : 'Kopyala' }}
+            </button>
+            <a class="odv-btn-secondary" [href]="url()" target="_blank" rel="noopener">
+              <span class="material-symbols-outlined icon-size-4" aria-hidden="true">open_in_new</span>
+              Aç
+            </a>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <a class="odv-btn-primary" [href]="whatsappUrl()" target="_blank" rel="noopener">
+            <span class="material-symbols-outlined icon-size-4" aria-hidden="true">chat</span>
+            WhatsApp ile paylaş
+          </a>
+          <button type="button" class="odv-btn-secondary" [disabled]="saving()" (click)="toggle()">
+            <span class="material-symbols-outlined icon-size-4" aria-hidden="true">{{
+              current.enabled ? 'pause_circle' : 'play_circle'
+            }}</span>
+            {{ current.enabled ? 'Online randevuyu durdur' : 'Online randevuyu aç' }}
+          </button>
+        </div>
+
+        <div class="grid gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+          <label for="booking-slug" class="text-xs font-bold text-slate-500 dark:text-slate-400"
+            >Link adı</label
+          >
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input
+              id="booking-slug"
+              class="odv-input flex-1"
+              maxlength="40"
+              [value]="slugDraft()"
+              (input)="slugDraft.set(input($event))"
+            />
+            <button
+              type="button"
+              class="odv-btn-secondary"
+              [disabled]="saving() || slugDraft().trim() === current.slug"
+              (click)="rename()"
+            >
+              Kaydet
+            </button>
+            <button type="button" class="odv-btn-ghost" [disabled]="saving()" (click)="regenerate()">
+              Yeni link üret
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Küçük harf, rakam ve tire kullanın (ör. lumiere-kadikoy). Link adı değişince eski link
+            çalışmaz.
+          </p>
+        </div>
+      </section>
+
+      <aside class="odv-card p-5 grid gap-3">
+        <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Uzmana özel linkler</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Bu linkler randevu sayfasını ilgili uzman seçili olarak açar.
+        </p>
+        @if (staff.isLoading()) {
+          <p class="text-sm text-slate-500">Yükleniyor…</p>
+        } @else if (staff.hasValue() && staff.value().length === 0) {
+          <p class="text-sm text-slate-500">Bu şubede aktif uzman yok.</p>
+        } @else if (staff.hasValue()) {
+          <ul class="grid gap-2">
+            @for (member of staff.value(); track member.id) {
+              <li
+                class="flex items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-700"
+              >
+                <span class="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{{
+                  staffName(member)
+                }}</span>
+                <button
+                  type="button"
+                  class="odv-btn-ghost"
+                  (click)="copy(staffUrl(member.id), member.id)"
+                >
+                  {{ copied() === member.id ? 'Kopyalandı' : 'Linki kopyala' }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+        <div
+          class="mt-2 rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200"
+        >
+          İpucu: Online randevular şube çalışma saatlerine, uzman vardiyalarına, izinlerine ve mevcut
+          randevulara göre hesaplanır. Bir hizmeti veya uzmanı online randevudan çıkarmak için durumunu
+          "Pasif" yapabilirsiniz.
+        </div>
+      </aside>
+    </div>
+  }
+}

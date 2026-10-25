@@ -100,6 +100,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'book/:slug',
+    title: 'Online randevu',
+    loadComponent: () =>
+      import('./features/online-booking/public-booking/public-booking').then(
+        (m) => m.PublicBooking,
+      ),
+  },
+  {
     path: 'terms',
     title: 'Kullanım Şartları',
     data: {
@@ -161,6 +169,14 @@ export const routes: Routes = [
         title: 'Randevular',
         loadComponent: () =>
           import('./features/appointments/calendar/calendar').then((m) => m.Calendar),
+      },
+      {
+        path: 'booking-link',
+        title: 'Randevu linki',
+        loadComponent: () =>
+          import('./features/online-booking/booking-link/booking-link').then(
+            (m) => m.BookingLinkPage,
+          ),
       },
       {
         path: 'reports',

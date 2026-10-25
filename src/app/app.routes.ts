@@ -146,6 +146,11 @@ export const routes: Routes = [
           import('./features/subscription/subscription').then((m) => m.Subscription),
       },
       {
+        path: 'support',
+        title: 'Destek talepleri',
+        loadComponent: () => import('./features/support/support').then((m) => m.Support),
+      },
+      {
         path: 'dashboard',
         title: 'Panel',
         loadComponent: () =>

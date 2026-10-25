@@ -51,6 +51,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.audit': 'Denetim Kayıtları',
     'nav.settings': 'Ayarlar',
     'nav.portal': 'Müşteri Portalı',
+    'nav.support': 'Destek Talepleri',
 
     // Topbar & System
     'topbar.title': 'Güzellik Operasyon Merkezi',
@@ -155,6 +156,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.audit': 'Audit Logs',
     'nav.settings': 'Settings',
     'nav.portal': 'Customer Portal',
+    'nav.support': 'Support Requests',
 
     // Topbar & System
     'topbar.title': 'Beauty Operations Center',
@@ -259,6 +261,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.audit': 'Audit-Protokolle',
     'nav.settings': 'Einstellungen',
     'nav.portal': 'Kundenportal',
+    'nav.support': 'Support-Anfragen',
 
     // Topbar & System
     'topbar.title': 'Beauty-Betriebszentrum',
@@ -363,6 +366,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.audit': 'Journal d’audit',
     'nav.settings': 'Paramètres',
     'nav.portal': 'Portail client',
+    'nav.support': 'Demandes d’assistance',
 
     // Topbar & System
     'topbar.title': 'Centre d’opérations Beauté',
@@ -467,6 +471,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.audit': 'Registros de Auditoría',
     'nav.settings': 'Configuración',
     'nav.portal': 'Portal de Clientes',
+    'nav.support': 'Solicitudes de soporte',
 
     // Topbar & System
     'topbar.title': 'Centro de Operaciones Beauty',
@@ -571,6 +576,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.audit': 'سجلات التدقيق',
     'nav.settings': 'الإعدادات',
     'nav.portal': 'بوابة العملاء',
+    'nav.support': 'طلبات الدعم',
 
     // Topbar & System
     'topbar.title': 'مركز عمليات التجميل',

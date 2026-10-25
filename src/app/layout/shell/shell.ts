@@ -202,7 +202,7 @@ export class Shell {
   }
 
   protected handleNavClick(event: MouseEvent, route: string): void {
-    if (this.subscription.isLocked() && route !== '/subscription') {
+    if (this.subscription.isLocked() && route !== '/subscription' && route !== '/support') {
       event.preventDefault();
       this.router.navigateByUrl('/subscription');
     } else {

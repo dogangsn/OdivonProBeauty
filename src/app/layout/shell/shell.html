@@ -161,6 +161,22 @@
       </a>
 
       <a
+        routerLink="/support"
+        routerLinkActive="active"
+        (click)="menuOpen.set(false)"
+        class="flex items-center justify-between p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 text-xs font-bold no-underline transition-all group"
+      >
+        <span class="flex items-center gap-2">
+          <span class="material-symbols-outlined icon-size-4 text-emerald-400">support_agent</span>
+          <span>{{ 'nav.support' | t }}</span>
+        </span>
+        <span
+          class="material-symbols-outlined icon-size-4 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 transition-transform rtl:rotate-180"
+          >arrow_forward</span
+        >
+      </a>
+
+      <a
         routerLink="/portal"
         class="portal-button flex items-center justify-between p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 text-xs font-bold no-underline transition-all group"
       >

@@ -7,8 +7,8 @@ export const subscriptionGuard: CanActivateFn = (_route, state) => {
   const router = inject(Router);
 
   if (subscription.isLocked()) {
-    // If user is already heading to /subscription, allow it
-    if (state.url.startsWith('/subscription')) {
+    // Subscription and support stay reachable so a locked customer can still ask for help.
+    if (state.url.startsWith('/subscription') || state.url.startsWith('/support')) {
       return true;
     }
     // Otherwise redirect to /subscription paywall

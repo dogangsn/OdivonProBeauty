@@ -129,6 +129,11 @@ export class VersionService {
     this.stopCountdown();
 
     const doPurgeAndRedirect = async () => {
+      // Drop the service worker first, so the reload below is served from the network
+      // and always lands on the latest deployed build in one step, however many
+      // releases were published since this tab loaded.
+      await this.unregisterServiceWorkers();
+
       try {
         await this.auth.signOutIfAuthenticated().catch(() => undefined);
       } catch {
@@ -147,17 +152,10 @@ export class VersionService {
       this.clearStorage();
       this.clearCookies();
       await this.clearIndexedDb();
-
-      if (this.sw?.isEnabled) {
-        await this.sw.activateUpdate().catch(() => false);
-      }
     };
 
     // Guarantee that redirect runs within 2.5 seconds max even if any step stalls
-    await Promise.race([
-      doPurgeAndRedirect(),
-      new Promise((resolve) => setTimeout(resolve, 2500)),
-    ]);
+    await Promise.race([doPurgeAndRedirect(), new Promise((resolve) => setTimeout(resolve, 2500))]);
 
     const targetWindow = this.document.defaultView ?? window;
     targetWindow.location.replace('/login?updated=1');
@@ -207,6 +205,17 @@ export class VersionService {
       }
     } catch {
       // Offline or network error: will retry next interval
+    }
+  }
+
+  private async unregisterServiceWorkers(): Promise<void> {
+    try {
+      const container = (this.document.defaultView ?? window).navigator.serviceWorker;
+      if (!container) return;
+      const registrations = await container.getRegistrations();
+      await Promise.all(registrations.map((r) => r.unregister().catch(() => false)));
+    } catch {
+      // Service workers unsupported or blocked
     }
   }
 

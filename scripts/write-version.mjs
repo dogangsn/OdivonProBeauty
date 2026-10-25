@@ -23,12 +23,18 @@ try {
 } catch {
   // not a git checkout: keep "local"
 }
+// CI builds number their releases with the workflow run (e.g. 1.0.57), so every deploy
+// shows a distinct version without bumping package.json by hand. Local builds keep it.
+const runNumber = Number.parseInt(process.env.GITHUB_RUN_NUMBER ?? '', 10);
+const [major = '1', minor = '0'] = String(pkg.version).split('.');
+const version =
+  Number.isFinite(runNumber) && runNumber > 0 ? `${major}.${minor}.${runNumber}` : pkg.version;
 const builtAt = new Date().toISOString();
 const info = {
-  version: pkg.version,
+  version,
   commit,
   builtAt,
-  buildId: `${pkg.version}+${commit}.${builtAt.replace(/\D/g, '').slice(0, 12)}`,
+  buildId: `${version}+${commit}.${builtAt.replace(/\D/g, '').slice(0, 12)}`,
   notes: typeof release.notes === 'string' ? release.notes : '',
   forceLogout: release.forceLogout === true,
   minVersion: typeof release.minVersion === 'string' ? release.minVersion : null,

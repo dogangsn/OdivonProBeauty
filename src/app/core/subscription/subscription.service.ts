@@ -15,6 +15,55 @@ import {
 const STORAGE_KEY = 'odivon_beauty_subscription';
 const INVOICES_KEY = 'odivon_beauty_invoices';
 
+interface PublicSaasPricingPlan {
+  id: string;
+  name: string;
+  module: string;
+  monthly: number | null;
+  yearly: number | null;
+}
+
+interface PublicSaasPricingResponse {
+  success: boolean;
+  data?: {
+    currency: 'TRY';
+    product: string;
+    updatedAt: string;
+    plans: PublicSaasPricingPlan[];
+  };
+}
+
+interface SaasStatusResponse {
+  success: boolean;
+  data?: {
+    membershipStatus?: string;
+    subscriptionEndsAt?: string | null;
+    trialEndsAt?: string | null;
+    daysLeft?: number | null;
+    inGrace?: boolean;
+    graceDays?: number;
+    graceEndsAt?: string | null;
+  };
+}
+
+interface SaasPaymentApiItem {
+  id: string;
+  receiptNo: string;
+  planId: string;
+  billingCycle: SubscriptionCycle;
+  amountKurus?: number;
+  amount?: number;
+  currency?: 'TRY';
+  paidAt: string;
+  periodStartsAt: string;
+  periodEndsAt: string;
+}
+
+interface SaasPaymentsResponse {
+  success: boolean;
+  data?: SaasPaymentApiItem[];
+}
+
 function createDefaultTrialState(): TenantSubscriptionState {
   const now = new Date();
   const trialDays = 14;
@@ -38,7 +87,6 @@ function loadStoredState(): TenantSubscriptionState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as TenantSubscriptionState;
-      // Re-calculate daysLeft dynamically against current date
       const nowMs = Date.now();
       if (parsed.membershipStatus === 'trial' && parsed.trialEndsAt) {
         const endMs = Date.parse(parsed.trialEndsAt);
@@ -55,7 +103,6 @@ function loadStoredState(): TenantSubscriptionState {
         if (Number.isFinite(endMs)) {
           const diffDays = Math.ceil((endMs - nowMs) / (24 * 60 * 60 * 1000));
           parsed.daysLeft = Math.max(0, diffDays);
-          // Grace period: 3 days
           parsed.isLocked = diffDays < -3;
           if (parsed.isLocked) {
             parsed.membershipStatus = 'expired';
@@ -68,7 +115,7 @@ function loadStoredState(): TenantSubscriptionState {
       return parsed;
     }
   } catch {
-    // Ignore JSON parse errors and fallback
+    // Ignore JSON errors
   }
 
   const def = createDefaultTrialState();
@@ -96,16 +143,20 @@ export class SubscriptionService {
   private readonly http = inject(HttpClient);
   private readonly apiBaseUrl = environment.apiBaseUrl.replace(/\/$/, '');
 
+  private readonly plansSignal = signal<readonly SubscriptionPlan[]>(SAAS_BEAUTY_PLANS);
   private readonly stateSignal = signal<TenantSubscriptionState>(loadStoredState());
   private readonly invoicesSignal = signal<SaasInvoiceRecord[]>(loadStoredInvoices());
 
+  get plans(): readonly SubscriptionPlan[] {
+    return this.plansSignal();
+  }
+
   readonly state = this.stateSignal.asReadonly();
   readonly invoices = this.invoicesSignal.asReadonly();
-  readonly plans = SAAS_BEAUTY_PLANS;
 
   readonly isLocked = computed(() => {
     const st = this.stateSignal();
-    return st.isLocked || st.membershipStatus === 'expired' || st.daysLeft <= 0 && st.membershipStatus === 'trial';
+    return st.isLocked || st.membershipStatus === 'expired' || (st.daysLeft <= 0 && st.membershipStatus === 'trial');
   });
 
   readonly isInTrial = computed(() => {
@@ -117,7 +168,7 @@ export class SubscriptionService {
 
   readonly activePlan = computed<SubscriptionPlan>(() => {
     const st = this.stateSignal();
-    return this.plans.find((p) => p.id === st.planId) ?? this.plans[1];
+    return this.plans.find((p) => p.id === st.planId) ?? this.plans[1] ?? SAAS_BEAUTY_PLANS[1];
   });
 
   readonly statusBadge = computed(() => {
@@ -135,7 +186,123 @@ export class SubscriptionService {
   });
 
   constructor() {
+    this.refreshAll();
+  }
+
+  /**
+   * Refreshes plans, status, and invoices from the backend API.
+   */
+  refreshAll(): void {
+    this.syncWithBackendPlans();
     this.syncWithBackendStatus();
+    this.syncWithBackendPayments();
+  }
+
+  /**
+   * Fetches real live plan pricing from MainApi.
+   * Eliminates static price hardcoding.
+   */
+  syncWithBackendPlans(): void {
+    firstValueFrom(
+      this.http.get<PublicSaasPricingResponse>(
+        `${this.apiBaseUrl}/public/saas-pricing?product=beauty`,
+      ),
+    )
+      .then((res) => {
+        const apiPlans = res?.data?.plans;
+        if (Array.isArray(apiPlans) && apiPlans.length > 0) {
+          const updated = this.plansSignal().map((basePlan) => {
+            const matched = apiPlans.find((p) => p.id === basePlan.id);
+            if (!matched) return basePlan;
+            const monthlyPrice =
+              typeof matched.monthly === 'number' ? matched.monthly : basePlan.monthlyPrice;
+            const yearlyPrice =
+              typeof matched.yearly === 'number' ? matched.yearly : basePlan.yearlyPrice;
+            const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
+            return {
+              ...basePlan,
+              name: matched.name?.trim() ? matched.name : basePlan.name,
+              monthlyPrice,
+              yearlyPrice,
+              yearlyMonthlyEquivalent,
+            };
+          });
+          this.plansSignal.set(updated);
+        }
+      })
+      .catch(() => {
+        // Keep baseline in case of network disconnect
+      });
+  }
+
+  /**
+   * Syncs subscription status and remaining days from MainApi.
+   */
+  syncWithBackendStatus(): void {
+    firstValueFrom(
+      this.http.get<SaasStatusResponse>(`${this.apiBaseUrl}/beauty/saas-billing/status`),
+    )
+      .then((res) => {
+        const statusData = res?.data ?? (res as unknown as SaasStatusResponse['data']);
+        if (statusData && statusData.membershipStatus) {
+          const current = this.stateSignal();
+          const rawDays = typeof statusData.daysLeft === 'number' ? statusData.daysLeft : 0;
+          const isExp =
+            statusData.membershipStatus === 'expired' ||
+            (rawDays <= 0 && statusData.membershipStatus === 'trial');
+          const daysLeft = Math.max(0, rawDays);
+
+          const updated: TenantSubscriptionState = {
+            ...current,
+            membershipStatus: isExp
+              ? 'expired'
+              : (statusData.membershipStatus as TenantSubscriptionState['membershipStatus']),
+            subscriptionEndsAt: statusData.subscriptionEndsAt ?? current.subscriptionEndsAt,
+            trialEndsAt: statusData.trialEndsAt ?? current.trialEndsAt,
+            daysLeft,
+            isLocked: isExp,
+            inGrace: Boolean(statusData.inGrace),
+          };
+          this.saveState(updated);
+        }
+      })
+      .catch(() => {
+        // Offline fallback
+      });
+  }
+
+  /**
+   * Fetches real payment history and receipts from MainApi.
+   */
+  syncWithBackendPayments(): void {
+    firstValueFrom(
+      this.http.get<SaasPaymentsResponse>(`${this.apiBaseUrl}/beauty/saas-billing/payments`),
+    )
+      .then((res) => {
+        const records = res?.data;
+        if (Array.isArray(records)) {
+          const mapped: SaasInvoiceRecord[] = records.map((p) => ({
+            id: p.id || `inv-${Date.now()}`,
+            receiptNo: p.receiptNo || 'ODV-REC',
+            planId: (p.planId as SubscriptionPlanId) || 'pro',
+            planName: this.plans.find((pl) => pl.id === p.planId)?.name ?? p.planId ?? 'Pro',
+            billingCycle: p.billingCycle || 'monthly',
+            amount: typeof p.amountKurus === 'number' ? p.amountKurus / 100 : (p.amount ?? 0),
+            currency: p.currency || 'TRY',
+            paidAt: p.paidAt || new Date().toISOString(),
+            periodStartsAt: p.periodStartsAt || new Date().toISOString(),
+            periodEndsAt: p.periodEndsAt || new Date().toISOString(),
+            status: 'paid',
+          }));
+
+          if (mapped.length > 0 || this.invoicesSignal().length === 0) {
+            this.saveInvoices(mapped);
+          }
+        }
+      })
+      .catch(() => {
+        // Retain local invoices
+      });
   }
 
   private saveState(updated: TenantSubscriptionState): void {
@@ -157,47 +324,14 @@ export class SubscriptionService {
   }
 
   /**
-   * Syncs status with backend if authenticated and available.
-   */
-  syncWithBackendStatus(): void {
-    firstValueFrom(
-      this.http.get<{
-        membershipStatus?: string;
-        subscriptionEndsAt?: string | null;
-        trialEndsAt?: string | null;
-        daysLeft?: number | null;
-      }>(`${this.apiBaseUrl}/beauty/saas-billing/status`)
-    )
-      .then((res) => {
-        if (res && res.membershipStatus) {
-          const current = this.stateSignal();
-          const isExp = res.membershipStatus === 'expired';
-          const updated: TenantSubscriptionState = {
-            ...current,
-            membershipStatus: (res.membershipStatus as any) || current.membershipStatus,
-            subscriptionEndsAt: res.subscriptionEndsAt ?? current.subscriptionEndsAt,
-            trialEndsAt: res.trialEndsAt ?? current.trialEndsAt,
-            daysLeft: typeof res.daysLeft === 'number' ? res.daysLeft : current.daysLeft,
-            isLocked: isExp,
-          };
-          this.saveState(updated);
-        }
-      })
-      .catch(() => {
-        // Offline or local mock mode: local state works seamlessly
-      });
-  }
-
-  /**
-   * Subscribe and activate plan.
-   * Unlocks all menus immediately and registers payment record.
+   * Subscribe and activate plan via backend API.
    */
   async subscribe(
     planId: SubscriptionPlanId,
     cycle: SubscriptionCycle,
-    cardHolderName = 'Güzellik Merkezi Sahibi'
+    cardHolderName = 'Güzellik Merkezi Sahibi',
   ): Promise<{ success: boolean; receiptNo: string }> {
-    const plan = this.plans.find((p) => p.id === planId) ?? this.plans[1];
+    const plan = this.plans.find((p) => p.id === planId) ?? this.plans[1] ?? SAAS_BEAUTY_PLANS[1];
     const now = new Date();
     const periodMonths = cycle === 'yearly' ? 12 : 1;
     const endsAt = new Date(now.getFullYear(), now.getMonth() + periodMonths, now.getDate());
@@ -205,7 +339,22 @@ export class SubscriptionService {
     const randomHex = Math.random().toString(36).substring(2, 8).toUpperCase();
     const receiptNo = `ODV-SUB-${now.toISOString().slice(0, 10).replace(/-/g, '')}-${randomHex}`;
 
-    // Update state
+    firstValueFrom(
+      this.http.post<{ success: boolean; data?: { receiptNo?: string } }>(
+        `${this.apiBaseUrl}/beauty/saas-billing/subscribe`,
+        {
+          planId,
+          billingCycle: cycle,
+          cardHolderName,
+        },
+      ),
+    )
+      .then(() => {
+        this.syncWithBackendStatus();
+        this.syncWithBackendPayments();
+      })
+      .catch(() => {});
+
     const newState: TenantSubscriptionState = {
       membershipStatus: 'active',
       trialEndsAt: null,
@@ -226,7 +375,6 @@ export class SubscriptionService {
 
     this.saveState(newState);
 
-    // Record invoice
     const newInvoice: SaasInvoiceRecord = {
       id: `INV-${Date.now()}`,
       receiptNo,
@@ -241,18 +389,7 @@ export class SubscriptionService {
       status: 'paid',
     };
 
-    const currentInvoices = [newInvoice, ...this.invoicesSignal()];
-    this.saveInvoices(currentInvoices);
-
-    // Call backend API in background
-    firstValueFrom(
-      this.http.post(`${this.apiBaseUrl}/beauty/saas-billing/subscribe`, {
-        planId,
-        billingCycle: cycle,
-        cardHolderName,
-      })
-    ).catch(() => {});
-
+    this.saveInvoices([newInvoice, ...this.invoicesSignal()]);
     return { success: true, receiptNo };
   }
 
@@ -273,7 +410,7 @@ export class SubscriptionService {
     this.saveState(updated);
 
     firstValueFrom(
-      this.http.post(`${this.apiBaseUrl}/beauty/saas-billing/test/expire-trial`, {})
+      this.http.post(`${this.apiBaseUrl}/beauty/saas-billing/test/expire-trial`, {}),
     ).catch(() => {});
 
     await this.router.navigateByUrl('/subscription').catch(() => {});
@@ -287,7 +424,7 @@ export class SubscriptionService {
     this.saveState(def);
 
     firstValueFrom(
-      this.http.post(`${this.apiBaseUrl}/beauty/saas-billing/test/reset-trial`, {})
+      this.http.post(`${this.apiBaseUrl}/beauty/saas-billing/test/reset-trial`, {}),
     ).catch(() => {});
   }
 

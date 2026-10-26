@@ -82,6 +82,7 @@ export class Auth {
   }
 
   async token(forceRefresh = false): Promise<string | null> {
+    await this.authReady;
     return this.firebaseAuth.currentUser?.getIdToken(forceRefresh) ?? null;
   }
 

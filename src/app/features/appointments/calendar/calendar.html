@@ -167,27 +167,17 @@
       <!-- Section: Şube Seçimi -->
       <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="appt-branch"
-          >
-            Şube <span class="text-rose-500">*</span>
-          </label>
-          <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 icon-size-4.5 pointer-events-none">
-              store
-            </span>
-            <select
-              id="appt-branch"
-              [formField]="appointmentForm.branchId"
-              class="odv-input pl-10 text-xs sm:text-sm font-semibold"
-            >
-              <option value="">Şube Seçin</option>
-              @for (item of branches.value() ?? []; track item.id) {
-                <option [value]="item.id">{{ item.name }}</option>
-              }
-            </select>
-          </div>
+          <app-searchable-select
+            label="Şube"
+            [required]="true"
+            icon="store"
+            placeholder="Şube Seçin"
+            searchPlaceholder="Şubelerde ara…"
+            [options]="branchOptions()"
+            [value]="appointmentModel().branchId"
+            (valueChange)="onBranchFormSelected($event)"
+          />
+          <input type="hidden" [formField]="appointmentForm.branchId" />
         </div>
 
         <!-- Section: High-Performance Searchable Customer Combobox -->
@@ -205,58 +195,37 @@
         </div>
       </div>
 
-      <!-- Section: Hizmet & Uzman Seçimi -->
+      <!-- Section: Hizmet & Uzman Seçimi (Searchable Selects) -->
       <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- Hizmet Seçimi -->
           <div>
-            <label
-              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-              for="appt-service"
-            >
-              Hizmet <span class="text-rose-500">*</span>
-            </label>
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 icon-size-4.5 pointer-events-none">
-                spa
-              </span>
-              <select
-                id="appt-service"
-                [formField]="appointmentForm.serviceId"
-                (change)="onServiceChange($event)"
-                class="odv-input pl-10 text-xs sm:text-sm font-semibold"
-              >
-                <option value="">Hizmet Seçin</option>
-                @for (item of services.value() ?? []; track item.id) {
-                  <option [value]="item.id">{{ serviceLabel(item) }}</option>
-                }
-              </select>
-            </div>
+            <app-searchable-select
+              label="Hizmet"
+              [required]="true"
+              icon="spa"
+              placeholder="Hizmet Seçin"
+              searchPlaceholder="Hizmet veya kategori ara…"
+              [options]="serviceOptions()"
+              [value]="appointmentModel().serviceId"
+              (valueChange)="onServiceSelected($event)"
+            />
+            <input type="hidden" [formField]="appointmentForm.serviceId" />
           </div>
 
           <!-- Uzman Seçimi -->
           <div>
-            <label
-              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-              for="appt-staff"
-            >
-              Uzman <span class="text-rose-500">*</span>
-            </label>
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 icon-size-4.5 pointer-events-none">
-                badge
-              </span>
-              <select
-                id="appt-staff"
-                [formField]="appointmentForm.staffId"
-                class="odv-input pl-10 text-xs sm:text-sm font-semibold"
-              >
-                <option value="">Uzman Seçin</option>
-                @for (item of staff.value() ?? []; track item.id) {
-                  <option [value]="item.id">{{ staffName(item) }}</option>
-                }
-              </select>
-            </div>
+            <app-searchable-select
+              label="Uzman"
+              [required]="true"
+              icon="badge"
+              placeholder="Uzman Seçin"
+              searchPlaceholder="Uzman veya ünvan ara…"
+              [options]="staffOptions()"
+              [value]="appointmentModel().staffId"
+              (valueChange)="onStaffSelected($event)"
+            />
+            <input type="hidden" [formField]="appointmentForm.staffId" />
           </div>
         </div>
       </div>
@@ -331,47 +300,33 @@
         </div>
       </div>
 
-      <!-- Section: Kaynaklar (Oda & Cihaz) -->
+      <!-- Section: Kaynaklar (Oda & Cihaz - Searchable Selects) -->
       <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label
-              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-              for="appt-room"
-            >
-              Oda / Kabin
-            </label>
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 icon-size-4.5 pointer-events-none">
-                meeting_room
-              </span>
-              <select id="appt-room" [formField]="appointmentForm.roomId" class="odv-input pl-10 text-xs sm:text-sm">
-                <option value="">Oda Seçilmedi</option>
-                @for (item of rooms.value() ?? []; track item.id) {
-                  <option [value]="item.id">{{ name(item) }}</option>
-                }
-              </select>
-            </div>
+            <app-searchable-select
+              label="Oda / Kabin"
+              icon="meeting_room"
+              placeholder="Oda Seçilmedi"
+              searchPlaceholder="Odalarda ara…"
+              [options]="roomOptions()"
+              [value]="appointmentModel().roomId"
+              (valueChange)="onRoomSelected($event)"
+            />
+            <input type="hidden" [formField]="appointmentForm.roomId" />
           </div>
 
           <div>
-            <label
-              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-              for="appt-device"
-            >
-              Cihaz
-            </label>
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 icon-size-4.5 pointer-events-none">
-                precision_manufacturing
-              </span>
-              <select id="appt-device" [formField]="appointmentForm.deviceId" class="odv-input pl-10 text-xs sm:text-sm">
-                <option value="">Cihaz Seçilmedi</option>
-                @for (item of devices.value() ?? []; track item.id) {
-                  <option [value]="item.id">{{ name(item) }}</option>
-                }
-              </select>
-            </div>
+            <app-searchable-select
+              label="Cihaz"
+              icon="precision_manufacturing"
+              placeholder="Cihaz Seçilmedi"
+              searchPlaceholder="Cihaz veya marka ara…"
+              [options]="deviceOptions()"
+              [value]="appointmentModel().deviceId"
+              (valueChange)="onDeviceSelected($event)"
+            />
+            <input type="hidden" [formField]="appointmentForm.deviceId" />
           </div>
         </div>
       </div>

@@ -12,6 +12,10 @@ import { BeautyRecord, BranchRecord } from '../../../core/beauty.model';
 import { CustomerProfile } from '../../../core/customer/customer.model';
 import { CustomerCombobox } from '../../../shared/components/customer-combobox/customer-combobox';
 import { CustomerFormModal } from '../../../shared/components/customer-form-modal/customer-form-modal';
+import {
+  SearchableSelect,
+  SearchableSelectOption,
+} from '../../../shared/components/searchable-select/searchable-select';
 import { PageHeader } from '../../../shared/page-header/page-header';
 import { SlideOver } from '../../../shared/slide-over/slide-over';
 
@@ -34,6 +38,7 @@ interface AppointmentForm {
     FormField,
     FullCalendarModule,
     PageHeader,
+    SearchableSelect,
     SlideOver,
   ],
   selector: 'app-calendar',
@@ -126,6 +131,74 @@ export class Calendar {
       waiting: rows.filter((item) => item.status === 'pending').length,
       completed: rows.filter((item) => item.status === 'completed').length,
     };
+  });
+
+  // Searchable select options for Hizmet (Services)
+  protected readonly serviceOptions = computed<SearchableSelectOption[]>(() => {
+    return (this.services.value() ?? []).map((s) => {
+      const duration = typeof s['durationMin'] === 'number' ? `${s['durationMin']} dk` : '';
+      const price = typeof s['price'] === 'number' ? `₺${s['price']}` : '';
+      const badge = [duration, price].filter(Boolean).join(' · ');
+      return {
+        value: s.id,
+        label: String(s['name'] || s.id),
+        badge: badge || undefined,
+        icon: 'spa',
+        raw: s,
+      };
+    });
+  });
+
+  // Searchable select options for Uzman (Staff)
+  protected readonly staffOptions = computed<SearchableSelectOption[]>(() => {
+    return (this.staff.value() ?? []).map((stf) => {
+      const name = String(stf['fullName'] || stf['name'] || stf.id);
+      const role = String(stf['role'] || '');
+      const parts = name.split(/\s+/).filter(Boolean);
+      const initials =
+        parts.length >= 2
+          ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+          : name.slice(0, 2).toUpperCase();
+      return {
+        value: stf.id,
+        label: name,
+        badge: role ? `[${role}]` : undefined,
+        icon: 'badge',
+        avatarText: initials,
+        raw: stf,
+      };
+    });
+  });
+
+  // Searchable select options for Şube (Branches)
+  protected readonly branchOptions = computed<SearchableSelectOption[]>(() => {
+    return (this.branches.value() ?? []).map((b) => ({
+      value: b.id,
+      label: b.name,
+      icon: 'store',
+      raw: b,
+    }));
+  });
+
+  // Searchable select options for Oda / Kabin (Rooms)
+  protected readonly roomOptions = computed<SearchableSelectOption[]>(() => {
+    return (this.rooms.value() ?? []).map((r) => ({
+      value: r.id,
+      label: String(r['name'] || r['title'] || r.id),
+      icon: 'meeting_room',
+      raw: r,
+    }));
+  });
+
+  // Searchable select options for Cihaz (Devices)
+  protected readonly deviceOptions = computed<SearchableSelectOption[]>(() => {
+    return (this.devices.value() ?? []).map((d) => ({
+      value: d.id,
+      label: String(d['name'] || d.id),
+      badge: d['brand'] ? String(d['brand']) : undefined,
+      icon: 'precision_manufacturing',
+      raw: d,
+    }));
   });
 
   // Dynamic derivations for live preview summary in drawer
@@ -227,6 +300,35 @@ export class Calendar {
     }
   }
 
+  // Handle Service Selection with automatic duration calculation
+  protected onServiceSelected(serviceId: string): void {
+    this.appointmentModel.update((m) => ({ ...m, serviceId }));
+    const service = this.services.value()?.find((s) => s.id === serviceId);
+    if (service && typeof service['durationMin'] === 'number' && service['durationMin'] > 0) {
+      this.setDuration(service['durationMin']);
+    }
+  }
+
+  // Handle Staff Selection
+  protected onStaffSelected(staffId: string): void {
+    this.appointmentModel.update((m) => ({ ...m, staffId }));
+  }
+
+  // Handle Branch Selection in Drawer Form
+  protected onBranchFormSelected(branchId: string): void {
+    this.appointmentModel.update((m) => ({ ...m, branchId }));
+  }
+
+  // Handle Room Selection
+  protected onRoomSelected(roomId: string): void {
+    this.appointmentModel.update((m) => ({ ...m, roomId }));
+  }
+
+  // Handle Device Selection
+  protected onDeviceSelected(deviceId: string): void {
+    this.appointmentModel.update((m) => ({ ...m, deviceId }));
+  }
+
   // Open Quick Customer Form Modal
   protected openNewCustomerModal(searchQuery?: string): void {
     const trimmed = (searchQuery || '').trim();
@@ -244,16 +346,6 @@ export class Calendar {
     this.appointmentModel.update((m) => ({ ...m, customerId: customer.id }));
     this.selectedCustomerRecord.set(customer);
     this.customers.reload();
-  }
-
-  // When a service is picked, automatically set duration based on service's durationMin
-  protected onServiceChange(event: Event): void {
-    const serviceId = (event.target as HTMLSelectElement).value;
-    this.appointmentModel.update((m) => ({ ...m, serviceId }));
-    const service = this.services.value()?.find((s) => s.id === serviceId);
-    if (service && typeof service['durationMin'] === 'number' && service['durationMin'] > 0) {
-      this.setDuration(service['durationMin']);
-    }
   }
 
   // Recalculate endAt by adding minutes to startAt
@@ -314,14 +406,6 @@ export class Calendar {
     const name = String(item['fullName'] || item['name'] || item.id).trim();
     const role = String(item['role'] || '').trim();
     return role ? `${name} [${role}]` : name;
-  }
-
-  protected serviceLabel(item: BeautyRecord): string {
-    const name = String(item['name'] || item.id).trim();
-    const duration = typeof item['durationMin'] === 'number' ? `${item['durationMin']} dk` : '';
-    const price = typeof item['price'] === 'number' ? `₺${item['price']}` : '';
-    const details = [duration, price].filter(Boolean).join(' · ');
-    return details ? `${name} (${details})` : name;
   }
 
   private lookup<T extends BeautyRecord = BeautyRecord>(resourceName: string, branchScoped = true) {

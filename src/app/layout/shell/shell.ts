@@ -35,15 +35,74 @@ export class Shell {
   protected readonly subscription = inject(SubscriptionService);
   protected readonly menuOpen = signal(false);
   protected readonly activeBranchId = signal('');
+  protected readonly menuSearch = signal('');
 
   // Collapsible menu groups state: mapping section label -> boolean
   protected readonly expandedSections = signal<Record<string, boolean>>({
     'nav.section.operation': true,
     'nav.section.customerCare': true,
+    'nav.section.nailStudio': true,
     'nav.section.definitions': true,
     'nav.section.team': false,
     'nav.section.financeStock': false,
     'nav.section.growthManagement': false,
+  });
+
+  // Check if all navigation sections are currently expanded
+  protected readonly isAllExpanded = computed<boolean>(() => {
+    const state = this.expandedSections();
+    return this.sections.every((s) => state[s.key] === true);
+  });
+
+  // Toggle all sections between expanded and collapsed
+  protected toggleAllSections(): void {
+    const nextState = !this.isAllExpanded();
+    const updated: Record<string, boolean> = {};
+    for (const section of this.sections) {
+      updated[section.key] = nextState;
+    }
+    this.expandedSections.set(updated);
+  }
+
+  // Filter sections and items based on search query
+  protected readonly filteredSections = computed<readonly CollapsibleNavSection[]>(() => {
+    const query = this.menuSearch().trim();
+    if (!query) {
+      return this.sections;
+    }
+    const normQuery = this.normalize(query);
+
+    return this.sections
+      .map((section) => {
+        const sectionTitle = this.i18n.t(section.key);
+        const normSectionTitle = this.normalize(sectionTitle);
+
+        const matchingItems = section.items.filter((item) => {
+          const itemLabel = this.i18n.t(item.key);
+          const normLabel = this.normalize(itemLabel);
+          const normRoute = this.normalize(item.route);
+          return (
+            normLabel.includes(normQuery) ||
+            normRoute.includes(normQuery) ||
+            normSectionTitle.includes(normQuery)
+          );
+        });
+
+        // If section title itself matches, show section with all items
+        if (normSectionTitle.includes(normQuery) && matchingItems.length === 0) {
+          return section;
+        }
+
+        if (matchingItems.length > 0) {
+          return {
+            ...section,
+            items: matchingItems,
+          };
+        }
+
+        return null;
+      })
+      .filter((s): s is CollapsibleNavSection => s !== null);
   });
 
   protected readonly branches = resource({
@@ -161,7 +220,23 @@ export class Shell {
   }
 
   protected isSectionExpanded(key: string): boolean {
+    // When searching, auto-expand matching sections so all results are immediately visible
+    if (this.menuSearch().trim().length > 0) {
+      return true;
+    }
     return this.expandedSections()[key] ?? true;
+  }
+
+  private normalize(text: string): string {
+    return (text || '')
+      .toLocaleLowerCase('tr-TR')
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/ı/g, 'i')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/[^a-z0-9]/g, '');
   }
 
   protected toggleSection(key: string): void {

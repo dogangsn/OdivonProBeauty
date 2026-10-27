@@ -13,6 +13,11 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.section.team': 'EKİP',
     'nav.section.financeStock': 'FİNANS VE STOK',
     'nav.section.growthManagement': 'BÜYÜME VE YÖNETİM',
+    'nav.searchPlaceholder': 'Menüde ara',
+    'nav.expandAll': 'Tümünü Genişlet',
+    'nav.collapseAll': 'Tümünü Daralt',
+    'nav.noMenuMatch': 'Eşleşen menü bulunamadı',
+    'nav.clearSearch': 'Aramayı Temizle',
 
     // Nav Items
     'nav.dashboard': 'Genel Bakış',
@@ -119,6 +124,11 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'nav.section.team': 'TEAM',
     'nav.section.financeStock': 'FINANCE & INVENTORY',
     'nav.section.growthManagement': 'GROWTH & SETTINGS',
+    'nav.searchPlaceholder': 'Search menu',
+    'nav.expandAll': 'Expand All',
+    'nav.collapseAll': 'Collapse All',
+    'nav.noMenuMatch': 'No menu items found',
+    'nav.clearSearch': 'Clear Search',
 
     // Nav Items
     'nav.dashboard': 'Dashboard',

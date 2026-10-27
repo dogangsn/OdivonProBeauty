@@ -1,0 +1,325 @@
+<div>
+  <!-- Field Label -->
+  <label
+    class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+    id="combobox-label"
+  >
+    {{ label() }}
+    @if (required()) {
+      <span class="text-rose-500">*</span>
+    }
+  </label>
+
+  <!-- State 1: Selected Customer Card -->
+  @if (selectedItem(); as customer) {
+    <div
+      class="group relative flex items-center justify-between p-3 rounded-xl border border-indigo-200/90 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-50/50 via-white to-purple-50/30 dark:from-indigo-950/30 dark:via-slate-900 dark:to-slate-900 shadow-xs transition-all hover:border-indigo-300 dark:hover:border-indigo-700"
+    >
+      <div class="flex items-center gap-3 min-w-0 pr-2">
+        <!-- Avatar Initials -->
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br {{
+            getAvatarGradient(customer.id)
+          }} text-white font-black text-xs flex items-center justify-center shadow-xs flex-shrink-0"
+          aria-hidden="true"
+        >
+          {{ customer.initials }}
+        </div>
+
+        <!-- Name & Details -->
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span
+              class="font-black text-sm text-slate-900 dark:text-white truncate tracking-tight"
+            >
+              {{ customer.fullName }}
+            </span>
+            @if (customer.segment === 'vip') {
+              <span
+                class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-2xs"
+              >
+                VIP
+              </span>
+            } @else {
+              <span class="badge-emerald odv-badge text-[10px] font-bold">
+                {{ customer.status === 'active' ? 'Aktif' : 'Kayıtlı' }}
+              </span>
+            }
+          </div>
+
+          <div class="flex items-center gap-3 mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            @if (customer.phone) {
+              <span class="inline-flex items-center gap-1 font-mono text-[11px]">
+                <span class="material-symbols-outlined icon-size-3.5 text-slate-400">call</span>
+                {{ customer.phone }}
+              </span>
+            }
+            @if (customer.walletBalance !== undefined && customer.walletBalance > 0) {
+              <span
+                class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400"
+              >
+                <span class="material-symbols-outlined icon-size-3.5">account_balance_wallet</span>
+                ₺{{ customer.walletBalance }}
+              </span>
+            }
+            @if (customer.healthWarning) {
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900"
+                title="Sağlık Uyarısı"
+              >
+                ⚠️ {{ customer.healthWarning }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions: Change or Clear -->
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button
+          type="button"
+          (click)="open()"
+          [disabled]="disabled()"
+          class="odv-btn-soft text-xs py-1.5 px-3 flex items-center gap-1 cursor-pointer font-bold"
+          title="Farklı bir müşteri seç"
+        >
+          <span class="material-symbols-outlined icon-size-3.5">swap_horiz</span>
+          <span class="hidden sm:inline">Değiştir</span>
+        </button>
+        <button
+          type="button"
+          (click)="clearSelection($event)"
+          [disabled]="disabled()"
+          class="w-7 h-7 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center justify-center cursor-pointer transition-colors"
+          title="Seçimi Kaldır"
+          aria-label="Müşteri seçimini kaldır"
+        >
+          <span class="material-symbols-outlined icon-size-4">close</span>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- State 2: Trigger Button to Open Search -->
+    <div
+      role="combobox"
+      aria-expanded="isOpen()"
+      aria-haspopup="listbox"
+      aria-labelledby="combobox-label"
+      tabindex="0"
+      (click)="toggleOpen()"
+      class="combobox-trigger odv-input flex items-center justify-between cursor-pointer select-none transition-all hover:border-indigo-400 dark:hover:border-indigo-600 focus:ring-2 focus:ring-indigo-500/30"
+      [class.opacity-50]="disabled()"
+      [class.pointer-events-none]="disabled()"
+      [class.border-indigo-500]="isOpen()"
+      [class.ring-2]="isOpen()"
+      [class.ring-indigo-500/30]="isOpen()"
+    >
+      <div class="flex items-center gap-2.5 text-slate-400 dark:text-slate-500 truncate">
+        <span class="material-symbols-outlined icon-size-4.5 text-indigo-500 dark:text-indigo-400">
+          person_search
+        </span>
+        <span class="text-xs sm:text-sm font-medium truncate">
+          {{ placeholder() }}
+        </span>
+      </div>
+
+      <span
+        class="material-symbols-outlined icon-size-4.5 text-slate-400 transition-transform duration-200"
+        [class.rotate-180]="isOpen()"
+      >
+        expand_more
+      </span>
+    </div>
+  }
+
+  <!-- State 3: Floating Dropdown Panel with Search & Performance Windowing -->
+  @if (isOpen()) {
+    <div
+      class="combobox-dropdown-panel absolute left-0 right-0 z-50 mt-1.5 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden"
+    >
+      <!-- Sticky Search Bar -->
+      <div
+        class="p-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/60 flex items-center gap-2.5"
+      >
+        <div class="relative flex-1">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 icon-size-4.5"
+          >
+            search
+          </span>
+          <input
+            type="search"
+            [value]="searchQuery()"
+            (input)="onSearchInput($event)"
+            placeholder="İsim, telefon veya e-posta yazın…"
+            class="combobox-search-input w-full pl-9 pr-8 py-2 rounded-xl text-xs sm:text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all font-medium"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          @if (searchQuery()) {
+            <button
+              type="button"
+              (click)="clearSearch()"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center p-0.5 cursor-pointer"
+              title="Aramayı temizle"
+            >
+              <span class="material-symbols-outlined icon-size-3.5">cancel</span>
+            </button>
+          }
+        </div>
+
+        <!-- Performance / Live Search Status Indicator -->
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          @if (isSearchingRemote()) {
+            <span
+              class="material-symbols-outlined icon-size-4 text-indigo-500 animate-spin"
+              title="Veritabanında aranıyor…"
+            >
+              progress_activity
+            </span>
+          }
+          <span
+            class="px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-950/80 dark:text-indigo-300"
+          >
+            {{ totalMatchesCount() }} Kayıt
+          </span>
+        </div>
+      </div>
+
+      <!-- Scrollable Customer Results List -->
+      <div
+        role="listbox"
+        class="max-h-64 overflow-y-auto custom-scroll divide-y divide-slate-100 dark:divide-slate-800/80 p-1.5"
+      >
+        @if (displayedCustomers().length === 0) {
+          <!-- Empty State -->
+          <div class="py-8 px-4 flex flex-col items-center justify-center text-center">
+            <div
+              class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-2"
+            >
+              <span class="material-symbols-outlined icon-size-6">person_search</span>
+            </div>
+            <p class="text-xs font-bold text-slate-700 dark:text-slate-300 m-0">
+              Müşteri Bulunamadı
+            </p>
+            @if (searchQuery()) {
+              <p class="text-[11px] text-slate-400 mt-1 mb-3">
+                "{{ searchQuery() }}" aramasına uygun kayıt bulunamadı.
+              </p>
+            } @else {
+              <p class="text-[11px] text-slate-400 mt-1 mb-3">
+                Listelenecek müşteri kaydı bulunamadı.
+              </p>
+            }
+            <button
+              type="button"
+              (click)="onRequestCreate()"
+              class="odv-btn-primary text-xs py-2 px-3 inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <span class="material-symbols-outlined icon-size-4">person_add</span>
+              <span>Yeni Müşteri Oluştur</span>
+            </button>
+          </div>
+        } @else {
+          <!-- Items List -->
+          @for (item of displayedCustomers(); track item.id; let idx = $index) {
+            <div
+              role="option"
+              [attr.aria-selected]="item.id === value()"
+              (click)="selectCustomer(item)"
+              class="p-2.5 rounded-xl flex items-center justify-between gap-3 cursor-pointer transition-colors group select-none"
+              [class.bg-indigo-50/80]="idx === highlightedIndex() && item.id !== value()"
+              [class.dark:bg-indigo-950/60]="idx === highlightedIndex() && item.id !== value()"
+              [class.bg-indigo-50]="item.id === value()"
+              [class.dark:bg-indigo-900/40]="item.id === value()"
+              [class.is-highlighted]="idx === highlightedIndex()"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <!-- Initials Avatar -->
+                <div
+                  class="w-8 h-8 rounded-lg bg-gradient-to-br {{
+                    getAvatarGradient(item.id)
+                  }} text-white font-bold text-[11px] flex items-center justify-center shadow-2xs flex-shrink-0"
+                >
+                  {{ item.initials }}
+                </div>
+
+                <!-- Text Details -->
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                    >
+                      {{ item.fullName }}
+                    </span>
+                    @if (item.segment === 'vip') {
+                      <span
+                        class="px-1.5 py-0.2 rounded-md text-[9px] font-black uppercase bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                      >
+                        VIP
+                      </span>
+                    }
+                  </div>
+                  <div
+                    class="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400"
+                  >
+                    @if (item.phone) {
+                      <span class="font-mono text-[10px]">{{ item.phone }}</span>
+                    }
+                    @if (item.healthWarning) {
+                      <span class="text-rose-500 font-semibold text-[10px]">
+                        ⚠️ {{ item.healthWarning }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selection Checkmark -->
+              @if (item.id === value()) {
+                <span
+                  class="material-symbols-outlined icon-size-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0"
+                >
+                  check_circle
+                </span>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Performance Cap Banner (When thousands of records match) -->
+      @if (hasMoreMatches()) {
+        <div
+          class="px-3 py-2 bg-amber-50/70 dark:bg-amber-950/40 border-t border-amber-200/50 dark:border-amber-900/50 text-[11px] text-amber-800 dark:text-amber-200 flex items-center justify-between"
+        >
+          <span class="inline-flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-3.5 text-amber-600">info</span>
+            İlk {{ MAX_DOM_ITEMS }} / {{ totalMatchesCount() }} kayıt gösteriliyor.
+          </span>
+          <span class="text-[10px] text-amber-600 dark:text-amber-300 font-medium hidden sm:inline">
+            Aramayı daraltarak spesifik sonuca ulaşabilirsiniz.
+          </span>
+        </div>
+      }
+
+      <!-- Dropdown Bottom Toolbar -->
+      <div
+        class="p-2.5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs"
+      >
+        <span class="text-[11px] text-slate-400 font-medium">
+          Klavyeden <kbd class="px-1 py-0.5 rounded bg-white dark:bg-slate-700 shadow-2xs font-mono text-[10px]">↓</kbd> <kbd class="px-1 py-0.5 rounded bg-white dark:bg-slate-700 shadow-2xs font-mono text-[10px]">↑</kbd> ile gezinebilirsiniz
+        </span>
+
+        <button
+          type="button"
+          (click)="onRequestCreate()"
+          class="odv-btn-soft text-[11px] py-1 px-2.5 inline-flex items-center gap-1 font-bold cursor-pointer"
+        >
+          <span class="material-symbols-outlined icon-size-3.5">add</span>
+          <span>+ Yeni Müşteri</span>
+        </button>
+      </div>
+    </div>
+  }
+</div>

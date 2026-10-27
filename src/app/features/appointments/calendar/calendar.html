@@ -15,46 +15,58 @@
 
 <!-- 2. Operational Stats Strip -->
 <section class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5" aria-label="Takvim Özeti">
-  <div class="odv-card p-4">
-    <span
-      class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-    >
-      Görünen Randevu
-    </span>
-    <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+  <div class="odv-card p-4 relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        Görünen Randevu
+      </span>
+      <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-4">calendar_view_week</span>
+      </span>
+    </div>
+    <strong class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1.5 block tracking-tight">
       {{ appointmentStats().total }}
     </strong>
   </div>
 
-  <div class="odv-card p-4">
-    <span
-      class="block text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
-    >
-      Onaylı
-    </span>
-    <strong class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5 block">
+  <div class="odv-card p-4 relative overflow-hidden group hover:border-indigo-300 dark:hover:border-indigo-800 transition-all">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+        Onaylı
+      </span>
+      <span class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-4">verified</span>
+      </span>
+    </div>
+    <strong class="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1.5 block tracking-tight">
       {{ appointmentStats().confirmed }}
     </strong>
   </div>
 
-  <div class="odv-card p-4">
-    <span
-      class="block text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400"
-    >
-      Bekleyen
-    </span>
-    <strong class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">
+  <div class="odv-card p-4 relative overflow-hidden group hover:border-amber-300 dark:hover:border-amber-800 transition-all">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+        Bekleyen
+      </span>
+      <span class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-4">schedule</span>
+      </span>
+    </div>
+    <strong class="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 mt-1.5 block tracking-tight">
       {{ appointmentStats().waiting }}
     </strong>
   </div>
 
-  <div class="odv-card p-4">
-    <span
-      class="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400"
-    >
-      Tamamlanan
-    </span>
-    <strong class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+  <div class="odv-card p-4 relative overflow-hidden group hover:border-emerald-300 dark:hover:border-emerald-800 transition-all">
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+        Tamamlanan
+      </span>
+      <span class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-4">check_circle</span>
+      </span>
+    </div>
+    <strong class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1.5 block tracking-tight">
       {{ appointmentStats().completed }}
     </strong>
   </div>
@@ -69,19 +81,25 @@
     <label
       class="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap hidden sm:inline"
       for="calendar-branch-select"
-      >Şube:</label
     >
-    <select
-      id="calendar-branch-select"
-      [value]="branchId()"
-      (change)="changeBranch($event)"
-      class="odv-input max-w-xs font-semibold cursor-pointer"
-    >
-      <option value="">Tüm Şubeler</option>
-      @for (branch of branches.value() ?? []; track branch.id) {
-        <option [value]="branch.id">{{ branch.name }}</option>
-      }
-    </select>
+      Şube:
+    </label>
+    <div class="relative flex-1 sm:w-64">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 icon-size-4.5 pointer-events-none">
+        store
+      </span>
+      <select
+        id="calendar-branch-select"
+        [value]="branchId()"
+        (change)="changeBranch($event)"
+        class="odv-input pl-10 text-xs sm:text-sm font-semibold cursor-pointer"
+      >
+        <option value="">Tüm Şubeler</option>
+        @for (branch of branches.value() ?? []; track branch.id) {
+          <option [value]="branch.id">{{ branch.name }}</option>
+        }
+      </select>
+    </div>
   </div>
 
   <div
@@ -135,142 +153,230 @@
     eyebrow="Takvim Planlama"
     (closed)="closeDrawer()"
   >
-    <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+    <form class="space-y-5" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
       @if (error()) {
         <div
-          class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold"
+          class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2"
           role="alert"
         >
-          {{ error() }}
+          <span class="material-symbols-outlined icon-size-4.5 text-rose-600">error</span>
+          <span>{{ error() }}</span>
         </div>
       }
 
-      <div>
-        <label
-          class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-          for="appt-branch"
-        >
-          Şube <span class="text-rose-500">*</span>
-        </label>
-        <select id="appt-branch" [formField]="appointmentForm.branchId" class="odv-input">
-          <option value="">Şube Seçin</option>
-          @for (item of branches.value() ?? []; track item.id) {
-            <option [value]="item.id">{{ item.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div>
-        <label
-          class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-          for="appt-customer"
-        >
-          Müşteri <span class="text-rose-500">*</span>
-        </label>
-        <select id="appt-customer" [formField]="appointmentForm.customerId" class="odv-input">
-          <option value="">Müşteri Seçin</option>
-          @for (item of customers.value() ?? []; track item.id) {
-            <option [value]="item.id">{{ name(item) }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Section: Şube Seçimi -->
+      <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
         <div>
           <label
             class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="appt-staff"
+            for="appt-branch"
           >
-            Uzman <span class="text-rose-500">*</span>
+            Şube <span class="text-rose-500">*</span>
           </label>
-          <select id="appt-staff" [formField]="appointmentForm.staffId" class="odv-input">
-            <option value="">Uzman Seçin</option>
-            @for (item of staff.value() ?? []; track item.id) {
-              <option [value]="item.id">{{ name(item) }}</option>
-            }
-          </select>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 icon-size-4.5 pointer-events-none">
+              store
+            </span>
+            <select
+              id="appt-branch"
+              [formField]="appointmentForm.branchId"
+              class="odv-input pl-10 text-xs sm:text-sm font-semibold"
+            >
+              <option value="">Şube Seçin</option>
+              @for (item of branches.value() ?? []; track item.id) {
+                <option [value]="item.id">{{ item.name }}</option>
+              }
+            </select>
+          </div>
         </div>
 
+        <!-- Section: High-Performance Searchable Customer Combobox -->
         <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="appt-service"
-          >
-            Hizmet <span class="text-rose-500">*</span>
-          </label>
-          <select id="appt-service" [formField]="appointmentForm.serviceId" class="odv-input">
-            <option value="">Hizmet Seçin</option>
-            @for (item of services.value() ?? []; track item.id) {
-              <option [value]="item.id">{{ name(item) }}</option>
-            }
-          </select>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="appt-start"
-          >
-            Başlangıç <span class="text-rose-500">*</span>
-          </label>
-          <input
-            id="appt-start"
-            type="datetime-local"
-            [formField]="appointmentForm.startAt"
-            class="odv-input"
+          <app-customer-combobox
+            [value]="appointmentModel().customerId"
+            [branchId]="appointmentModel().branchId || branchId()"
+            [preloadedCustomers]="customers.value() ?? []"
+            (valueChange)="onCustomerChange($event)"
+            (customerSelected)="onCustomerSelected($event)"
+            (createRequested)="openNewCustomerModal($event)"
           />
-        </div>
-
-        <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="appt-end"
-          >
-            Bitiş <span class="text-rose-500">*</span>
-          </label>
-          <input
-            id="appt-end"
-            type="datetime-local"
-            [formField]="appointmentForm.endAt"
-            class="odv-input"
-          />
+          <!-- Hidden input bound to Signal Form to satisfy formField validation -->
+          <input type="hidden" [formField]="appointmentForm.customerId" />
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="appt-room"
-          >
-            Oda / Kabin
-          </label>
-          <select id="appt-room" [formField]="appointmentForm.roomId" class="odv-input">
-            <option value="">Oda Seçilmedi</option>
-            @for (item of rooms.value() ?? []; track item.id) {
-              <option [value]="item.id">{{ name(item) }}</option>
-            }
-          </select>
-        </div>
+      <!-- Section: Hizmet & Uzman Seçimi -->
+      <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Hizmet Seçimi -->
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="appt-service"
+            >
+              Hizmet <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 icon-size-4.5 pointer-events-none">
+                spa
+              </span>
+              <select
+                id="appt-service"
+                [formField]="appointmentForm.serviceId"
+                (change)="onServiceChange($event)"
+                class="odv-input pl-10 text-xs sm:text-sm font-semibold"
+              >
+                <option value="">Hizmet Seçin</option>
+                @for (item of services.value() ?? []; track item.id) {
+                  <option [value]="item.id">{{ serviceLabel(item) }}</option>
+                }
+              </select>
+            </div>
+          </div>
 
-        <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="appt-device"
-          >
-            Cihaz
-          </label>
-          <select id="appt-device" [formField]="appointmentForm.deviceId" class="odv-input">
-            <option value="">Cihaz Seçilmedi</option>
-            @for (item of devices.value() ?? []; track item.id) {
-              <option [value]="item.id">{{ name(item) }}</option>
-            }
-          </select>
+          <!-- Uzman Seçimi -->
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="appt-staff"
+            >
+              Uzman <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 icon-size-4.5 pointer-events-none">
+                badge
+              </span>
+              <select
+                id="appt-staff"
+                [formField]="appointmentForm.staffId"
+                class="odv-input pl-10 text-xs sm:text-sm font-semibold"
+              >
+                <option value="">Uzman Seçin</option>
+                @for (item of staff.value() ?? []; track item.id) {
+                  <option [value]="item.id">{{ staffName(item) }}</option>
+                }
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- Section: Tarih, Saat & Hızlı Süre Planlaması -->
+      <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="appt-start"
+            >
+              Başlangıç <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="appt-start"
+              type="datetime-local"
+              [formField]="appointmentForm.startAt"
+              (change)="onStartChange($event)"
+              class="odv-input font-semibold"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="appt-end"
+            >
+              Bitiş <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="appt-end"
+              type="datetime-local"
+              [formField]="appointmentForm.endAt"
+              class="odv-input font-semibold"
+            />
+          </div>
+        </div>
+
+        <!-- Quick Duration Chips -->
+        <div>
+          <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+            Hızlı Seans Süresi:
+          </span>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            @for (dur of durationPills; track dur) {
+              <button
+                type="button"
+                (click)="setDuration(dur)"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer"
+                [class.bg-indigo-600]="currentDurationMinutes() === dur"
+                [class.text-white]="currentDurationMinutes() === dur"
+                [class.border-indigo-600]="currentDurationMinutes() === dur"
+                [class.shadow-xs]="currentDurationMinutes() === dur"
+                [class.bg-white]="currentDurationMinutes() !== dur"
+                [class.dark:bg-slate-900]="currentDurationMinutes() !== dur"
+                [class.text-slate-700]="currentDurationMinutes() !== dur"
+                [class.dark:text-slate-300]="currentDurationMinutes() !== dur"
+                [class.border-slate-200]="currentDurationMinutes() !== dur"
+                [class.dark:border-slate-700]="currentDurationMinutes() !== dur"
+                [class.hover:border-indigo-400]="currentDurationMinutes() !== dur"
+              >
+                {{ dur }} dk
+              </button>
+            }
+            @if (currentDurationMinutes() > 0) {
+              <span class="text-[11px] text-slate-400 font-mono ml-auto">
+                (Toplam {{ currentDurationMinutes() }} dk)
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Kaynaklar (Oda & Cihaz) -->
+      <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="appt-room"
+            >
+              Oda / Kabin
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 icon-size-4.5 pointer-events-none">
+                meeting_room
+              </span>
+              <select id="appt-room" [formField]="appointmentForm.roomId" class="odv-input pl-10 text-xs sm:text-sm">
+                <option value="">Oda Seçilmedi</option>
+                @for (item of rooms.value() ?? []; track item.id) {
+                  <option [value]="item.id">{{ name(item) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="appt-device"
+            >
+              Cihaz
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 icon-size-4.5 pointer-events-none">
+                precision_manufacturing
+              </span>
+              <select id="appt-device" [formField]="appointmentForm.deviceId" class="odv-input pl-10 text-xs sm:text-sm">
+                <option value="">Cihaz Seçilmedi</option>
+                @for (item of devices.value() ?? []; track item.id) {
+                  <option [value]="item.id">{{ name(item) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Randevu Notu -->
       <div>
         <label
           class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
@@ -280,20 +386,77 @@
         </label>
         <textarea
           id="appt-notes"
-          rows="3"
+          rows="2"
           placeholder="Müşteri talebi, özel hassasiyetler veya uygulama notları…"
           [formField]="appointmentForm.notes"
-          class="odv-input"
+          class="odv-input text-xs sm:text-sm"
         ></textarea>
       </div>
+
+      <!-- Section: Canlı Randevu Özeti & Tutar Önizlemesi (Live Preview Card) -->
+      @if (selectedCustomerRecord() || selectedService() || selectedStaff()) {
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-200/80 dark:border-indigo-900/60 shadow-xs">
+          <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-indigo-100 dark:border-indigo-900/60">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4">event_available</span>
+              <span>Randevu Özeti</span>
+            </span>
+            @if (selectedService()?.['price']) {
+              <span class="font-mono font-black text-sm text-indigo-600 dark:text-indigo-400">
+                ₺{{ selectedService()?.['price'] }}
+              </span>
+            }
+          </div>
+
+          <div class="space-y-1.5 text-xs">
+            @if (selectedCustomerRecord(); as cust) {
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-medium">Müşteri:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">
+                  {{ cust['fullName'] || cust['name'] }}
+                  @if (cust['phone']) {
+                    <span class="text-[11px] font-mono text-slate-400">({{ cust['phone'] }})</span>
+                  }
+                </span>
+              </div>
+            }
+
+            @if (selectedService(); as srv) {
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-medium">Hizmet:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">
+                  {{ srv['name'] }}
+                  @if (srv['durationMin']) {
+                    <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-[11px]">({{ srv['durationMin'] }} dk)</span>
+                  }
+                </span>
+              </div>
+            }
+
+            @if (selectedStaff(); as stf) {
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-medium">Uzman:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">{{ staffName(stf) }}</span>
+              </div>
+            }
+
+            @if (currentDurationMinutes() > 0) {
+              <div class="flex items-center justify-between pt-1 border-t border-dashed border-slate-200 dark:border-slate-800">
+                <span class="text-slate-400 font-medium">Planlanan Süre:</span>
+                <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ currentDurationMinutes() }} Dakika</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
 
       <button class="hidden" type="submit">Kaydet</button>
     </form>
 
     <div drawer-footer class="flex items-center justify-between gap-3">
-      <span class="text-[11px] text-slate-400 hidden sm:inline"
-        >Çakışmalar otomatik kontrol edilir</span
-      >
+      <span class="text-[11px] text-slate-400 hidden sm:inline">
+        Çakışmalar MainApi tarafından otomatik kontrol edilir
+      </span>
       <div class="flex items-center gap-2.5 ml-auto">
         <button type="button" (click)="closeDrawer()" class="odv-btn-ghost">Vazgeç</button>
         <button
@@ -302,10 +465,23 @@
           (click)="save()"
           class="odv-btn-primary"
         >
-          <span class="material-symbols-outlined icon-size-4">event_available</span>
-          <span>{{ saving() ? 'Oluşturuluyor…' : 'Randevu Oluştur' }}</span>
+          @if (saving()) {
+            <span class="material-symbols-outlined icon-size-4 animate-spin">progress_activity</span>
+            <span>Oluşturuluyor…</span>
+          } @else {
+            <span class="material-symbols-outlined icon-size-4">event_available</span>
+            <span>Randevu Oluştur</span>
+          }
         </button>
       </div>
     </div>
   </app-slide-over>
 }
+
+<!-- Quick Customer Creation Modal (Opened from combobox "+ Yeni Müşteri" button) -->
+<app-customer-form-modal
+  [open]="isCustomerModalOpen()"
+  [initialData]="newCustomerInitialData()"
+  (close)="isCustomerModalOpen.set(false)"
+  (saved)="onCustomerCreated($event)"
+/>

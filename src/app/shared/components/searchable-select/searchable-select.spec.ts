@@ -102,4 +102,22 @@ describe('SearchableSelect', () => {
     const rendered = fixture.nativeElement.querySelectorAll('[role="option"]');
     expect(rendered.length).toBe(40);
   });
+
+  it('toggles dropdown expand mode when expand button is clicked', () => {
+    fixture.componentRef.setInput('options', mockOptions);
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector('.searchable-trigger') as HTMLElement;
+    trigger.click();
+    fixture.detectChanges();
+
+    const expandBtn = fixture.nativeElement.querySelector('button[title*="Genişlet"]') as HTMLButtonElement;
+    expect(expandBtn).toBeTruthy();
+
+    expandBtn.click();
+    fixture.detectChanges();
+
+    const dropdown = fixture.nativeElement.querySelector('.searchable-dropdown-panel') as HTMLElement;
+    expect(dropdown.classList.contains('sm:min-w-[600px]')).toBe(true);
+  });
 });

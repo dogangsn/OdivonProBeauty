@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import { BeautyRecord, BranchRecord } from '../../../core/beauty.model';
 import { CustomerProfile } from '../../../core/customer/customer.model';
+import { DefinitionsService } from '../../../core/definitions/definitions.service';
 import { CustomerCombobox } from '../../../shared/components/customer-combobox/customer-combobox';
 import { CustomerFormModal } from '../../../shared/components/customer-form-modal/customer-form-modal';
 import {
@@ -47,6 +48,7 @@ interface AppointmentForm {
 })
 export class Calendar {
   private readonly api = inject(ApiClient);
+  private readonly definitions = inject(DefinitionsService);
   protected readonly drawerOpen = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
@@ -59,8 +61,8 @@ export class Calendar {
   protected readonly customers = this.lookup('customers');
   protected readonly staff = this.lookup('staff');
   protected readonly services = this.lookup('services');
-  protected readonly rooms = this.lookup('rooms');
-  protected readonly devices = this.lookup('devices');
+  protected readonly rooms = this.lookup('rooms', false);
+  protected readonly devices = this.lookup('devices', false);
 
   // Customer creation modal & selection state
   protected readonly isCustomerModalOpen = signal(false);
@@ -180,19 +182,64 @@ export class Calendar {
     }));
   });
 
-  // Searchable select options for Oda / Kabin (Rooms)
+  // Searchable select options for Oda / Kabin (Rooms & Defined Cabins)
   protected readonly roomOptions = computed<SearchableSelectOption[]>(() => {
-    return (this.rooms.value() ?? []).map((r) => ({
-      value: r.id,
-      label: String(r['name'] || r['title'] || r.id),
-      icon: 'meeting_room',
-      raw: r,
-    }));
+    const definedTypes = this.definitions.getActiveItems('room-types');
+    const physicalRooms = this.rooms.value() ?? [];
+    const activeBranchId = this.appointmentModel().branchId || this.branchId();
+
+    const options: SearchableSelectOption[] = [];
+
+    // 1. Physical rooms from /rooms (filtered by active branch if present)
+    const filteredPhysical = physicalRooms.filter((r) => {
+      if (!activeBranchId) return true;
+      const bId = r['branchId'] || r['branch_id'];
+      return !bId || bId === activeBranchId;
+    });
+
+    for (const r of filteredPhysical) {
+      const typeCode = String(r['roomType'] || r['type'] || '');
+      const typeName = typeCode ? this.definitions.resolveLabel('room-types', typeCode) : '';
+      options.push({
+        value: r.id,
+        label: String(r['name'] || r['title'] || r.id),
+        badge: typeName || undefined,
+        icon: 'meeting_room',
+        raw: r,
+      });
+    }
+
+    // 2. Defined Cabin & Room Types from Tanımlar > Oda / Kabin Türleri
+    for (const def of definedTypes) {
+      const alreadyHas = options.some(
+        (o) => o.label.toLowerCase() === def.name.toLowerCase() || o.value === def.code,
+      );
+      if (!alreadyHas) {
+        options.push({
+          value: def.code || def.id,
+          label: def.name,
+          badge: options.length > 0 ? 'Kabin Türü' : 'Tanımlı Kabin',
+          icon: 'meeting_room',
+          raw: def,
+        });
+      }
+    }
+
+    return options;
   });
 
   // Searchable select options for Cihaz (Devices)
   protected readonly deviceOptions = computed<SearchableSelectOption[]>(() => {
-    return (this.devices.value() ?? []).map((d) => ({
+    const physicalDevices = this.devices.value() ?? [];
+    const activeBranchId = this.appointmentModel().branchId || this.branchId();
+
+    const filtered = physicalDevices.filter((d) => {
+      if (!activeBranchId) return true;
+      const bId = d['branchId'] || d['branch_id'];
+      return !bId || bId === activeBranchId;
+    });
+
+    return filtered.map((d) => ({
       value: d.id,
       label: String(d['name'] || d.id),
       badge: d['brand'] ? String(d['brand']) : undefined,
@@ -215,6 +262,20 @@ export class Calendar {
   protected readonly selectedBranch = computed(() => {
     const id = this.appointmentModel().branchId;
     return this.branches.value()?.find((b) => b.id === id);
+  });
+
+  protected readonly selectedRoomLabel = computed<string>(() => {
+    const id = this.appointmentModel().roomId;
+    if (!id) return '';
+    const opt = this.roomOptions().find((o) => o.value === id);
+    return opt ? opt.label : id;
+  });
+
+  protected readonly selectedDeviceLabel = computed<string>(() => {
+    const id = this.appointmentModel().deviceId;
+    if (!id) return '';
+    const opt = this.deviceOptions().find((o) => o.value === id);
+    return opt ? opt.label : id;
   });
 
   protected readonly selectedRoom = computed(() => {

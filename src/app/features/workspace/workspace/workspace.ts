@@ -20,6 +20,11 @@ import { StatusBadge } from '../../../shared/status-badge/status-badge';
 import { ServiceWizard, WizardCompletionResult } from '../../../shared/components/service-wizard/service-wizard';
 import { CustomerDetailModal, DetailTab } from '../../../shared/components/customer-detail-modal/customer-detail-modal';
 import { CustomerFormModal } from '../../../shared/components/customer-form-modal/customer-form-modal';
+import { CustomerCombobox } from '../../../shared/components/customer-combobox/customer-combobox';
+import {
+  SearchableSelect,
+  SearchableSelectOption,
+} from '../../../shared/components/searchable-select/searchable-select';
 import { CustomerConsultation, CustomerProfile, calculateAge } from '../../../core/customer/customer.model';
 import { DEMO_CUSTOMERS } from '../../../core/customer/customer-demo-data';
 import { DEMO_CONSULTATIONS } from '../../../core/customer/consultation-demo-data';
@@ -29,13 +34,15 @@ type Draft = Record<string, DraftValue>;
 
 @Component({
   imports: [
-    PageHeader,
-    SlideOver,
-    StatusBadge,
-    ServiceWizard,
+    CustomerCombobox,
     CustomerDetailModal,
     CustomerFormModal,
     DecimalPipe,
+    PageHeader,
+    SearchableSelect,
+    ServiceWizard,
+    SlideOver,
+    StatusBadge,
   ],
   selector: 'app-workspace',
   styleUrl: './workspace.css',
@@ -69,6 +76,93 @@ export class Workspace {
   protected readonly isConsultationWorkspace = computed(
     () => this.definition.resource === 'consultations',
   );
+  protected readonly isWaitlistWorkspace = computed(
+    () => this.definition.resource === 'waitlist',
+  );
+
+  protected readonly allCustomers = computed<BeautyRecord[]>(() => {
+    return this.entityLookup.getRecords('customers');
+  });
+
+  protected readonly allServices = computed<BeautyRecord[]>(() => {
+    return this.entityLookup.getRecords('services');
+  });
+
+  protected readonly allStaff = computed<BeautyRecord[]>(() => {
+    return this.entityLookup.getRecords('staff');
+  });
+
+  protected readonly waitlistServiceOptions = computed<SearchableSelectOption[]>(() => {
+    return this.allServices().map((s) => {
+      const duration = typeof s['durationMin'] === 'number' ? `${s['durationMin']} dk` : '';
+      const price = typeof s['price'] === 'number' ? `₺${s['price']}` : '';
+      const badge = [duration, price].filter(Boolean).join(' · ');
+      return {
+        value: s.id,
+        label: String(s['name'] || s.id),
+        badge: badge || undefined,
+        icon: 'spa',
+        raw: s,
+      };
+    });
+  });
+
+  protected readonly waitlistStaffOptions = computed<SearchableSelectOption[]>(() => {
+    const list: SearchableSelectOption[] = [
+      {
+        value: '',
+        label: 'Fark Etmez / İlk Müsait Uzman',
+        icon: 'group',
+        badge: 'Esnek',
+      },
+    ];
+    for (const stf of this.allStaff()) {
+      const name = String(stf['fullName'] || stf['name'] || stf.id);
+      const role = String(stf['role'] || '');
+      const parts = name.split(/\s+/).filter(Boolean);
+      const initials =
+        parts.length >= 2
+          ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+          : name.slice(0, 2).toUpperCase();
+      list.push({
+        value: stf.id,
+        label: name,
+        badge: role ? `[${role}]` : undefined,
+        icon: 'badge',
+        avatarText: initials,
+        raw: stf,
+      });
+    }
+    return list;
+  });
+
+  protected readonly waitlistBranchOptions = computed<SearchableSelectOption[]>(() => {
+    return (this.branches.value() ?? []).map((b) => ({
+      value: b.id,
+      label: b.name,
+      icon: 'store',
+      raw: b,
+    }));
+  });
+
+  protected readonly waitlistSelectedCustomer = computed(() => {
+    const id = String(this.fieldValue('customerId') || '');
+    if (!id) return null;
+    return this.allCustomers().find((c) => c.id === id) ?? null;
+  });
+
+  protected readonly waitlistSelectedService = computed(() => {
+    const id = String(this.fieldValue('serviceId') || '');
+    if (!id) return null;
+    return this.allServices().find((s) => s.id === id) ?? null;
+  });
+
+  protected readonly waitlistSelectedStaff = computed(() => {
+    const id = String(this.fieldValue('preferredStaffId') || '');
+    if (!id) return null;
+    return this.allStaff().find((s) => s.id === id) ?? null;
+  });
+
   protected readonly selectedCustomer = signal<CustomerProfile | null>(null);
   protected readonly customerDetailOpen = signal<boolean>(false);
   protected readonly customerDetailInitialTab = signal<DetailTab>('overview');
@@ -236,6 +330,12 @@ export class Workspace {
   private preloadLookups(): void {
     void this.definitions.syncRemote();
 
+    if (this.isWaitlistWorkspace()) {
+      void this.entityLookup.ensure('customers');
+      void this.entityLookup.ensure('services');
+      void this.entityLookup.ensure('staff');
+    }
+
     const needed = new Set<string>();
     for (const field of this.definition.fields ?? []) {
       if (field.lookup && this.entityLookup.isEntityResource(field.lookup)) {
@@ -298,6 +398,7 @@ export class Workspace {
     this.customerFormOpen.set(false);
     this.feedback.set('Yeni müşteri başarıyla eklendi.');
     this.remote.reload();
+    void this.entityLookup.refresh('customers');
   }
 
   protected async seedDemoCustomers(): Promise<void> {
@@ -350,10 +451,104 @@ export class Workspace {
       this.openCustomerCreateModal();
       return;
     }
+    if (this.isWaitlistWorkspace()) {
+      void this.entityLookup.ensure('customers');
+      void this.entityLookup.ensure('services');
+      void this.entityLookup.ensure('staff');
+      const draft = this.emptyDraft();
+      draft['priority'] = 'normal';
+      draft['status'] = 'pending';
+      draft['timeSlot'] = 'any';
+      const now = new Date();
+      now.setHours(9, 0, 0, 0);
+      const end = new Date(now);
+      end.setDate(end.getDate() + 3);
+      end.setHours(19, 0, 0, 0);
+      draft['preferredFrom'] = this.toLocalDatetimeString(now);
+      draft['preferredTo'] = this.toLocalDatetimeString(end);
+      this.editingId.set(null);
+      this.draft.set(draft);
+      this.feedback.set('');
+      this.drawerOpen.set(true);
+      return;
+    }
     this.editingId.set(null);
     this.draft.set(this.emptyDraft());
     this.feedback.set('');
     this.drawerOpen.set(true);
+  }
+
+  protected setDraftValue(key: string, value: DraftValue): void {
+    this.draft.update((curr) => ({ ...curr, [key]: value }));
+  }
+
+  protected onWaitlistCustomerChange(customerId: string): void {
+    this.setDraftValue('customerId', customerId);
+    const found = this.allCustomers().find((c) => c.id === customerId);
+    if (found && found['preferredStaffId'] && !this.fieldValue('preferredStaffId')) {
+      this.setDraftValue('preferredStaffId', String(found['preferredStaffId']));
+    }
+  }
+
+  protected onWaitlistCustomerSelected(rec: BeautyRecord | null): void {
+    if (rec && rec['preferredStaffId'] && !this.fieldValue('preferredStaffId')) {
+      this.setDraftValue('preferredStaffId', String(rec['preferredStaffId']));
+    }
+  }
+
+  protected setWaitlistQuickDate(type: 'today' | 'tomorrow' | 'weekend' | 'nextWeek'): void {
+    const now = new Date();
+    let start = new Date(now);
+    let end = new Date(now);
+
+    switch (type) {
+      case 'today':
+        start.setHours(9, 0, 0, 0);
+        end.setHours(19, 0, 0, 0);
+        break;
+      case 'tomorrow':
+        start.setDate(start.getDate() + 1);
+        start.setHours(9, 0, 0, 0);
+        end = new Date(start);
+        end.setHours(19, 0, 0, 0);
+        break;
+      case 'weekend': {
+        const day = start.getDay();
+        const daysToSaturday = (6 - day + 7) % 7 || 7;
+        start.setDate(start.getDate() + daysToSaturday);
+        start.setHours(9, 0, 0, 0);
+        end = new Date(start);
+        end.setDate(start.getDate() + 1);
+        end.setHours(19, 0, 0, 0);
+        break;
+      }
+      case 'nextWeek':
+        start.setDate(start.getDate() + 7);
+        start.setHours(9, 0, 0, 0);
+        end = new Date(start);
+        end.setDate(start.getDate() + 5);
+        end.setHours(19, 0, 0, 0);
+        break;
+    }
+
+    this.draft.update((curr) => ({
+      ...curr,
+      preferredFrom: this.toLocalDatetimeString(start),
+      preferredTo: this.toLocalDatetimeString(end),
+    }));
+  }
+
+  protected setWaitlistTimeSlot(slot: string): void {
+    this.setDraftValue('timeSlot', slot);
+  }
+
+  protected setWaitlistPriority(priority: string): void {
+    this.setDraftValue('priority', priority);
+  }
+
+  protected toLocalDatetimeString(date: Date): string {
+    const offset = date.getTimezoneOffset() * 60_000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
   }
 
   protected openEdit(row: BeautyRecord): void {

@@ -30,6 +30,11 @@ export class EntityLookupService {
   private readonly store = signal<Record<string, BeautyRecord[]>>({});
   private readonly inFlight = new Map<string, Promise<BeautyRecord[]>>();
 
+  // Read raw records for a resource
+  getRecords(resource: string): BeautyRecord[] {
+    return this.store()[resource] ?? [];
+  }
+
   // Read options for a resource
   getOptions(resource: string): LookupOption[] {
     const list = this.store()[resource] ?? [];

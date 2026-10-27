@@ -816,100 +816,511 @@
 <!-- 5. Slide-Over Edit / Create Drawer -->
 @if (drawerOpen()) {
   <app-slide-over
-    [title]="editingId() ? 'Kaydı Düzenle' : definition.primaryAction"
-    [description]="definition.description"
-    [eyebrow]="editingId() ? 'Kayıt Güncelleme' : 'Yeni Kayıt Oluşturma'"
+    [title]="editingId() ? 'Kaydı Düzenle' : (isWaitlistWorkspace() ? 'Yeni Bekleme Talebi' : definition.primaryAction)"
+    [description]="isWaitlistWorkspace() ? 'Müsaitlik açıldığında veya randevu iptalinde müşteriye hemen teklif gönderin.' : definition.description"
+    [eyebrow]="editingId() ? 'Kayıt Güncelleme' : (isWaitlistWorkspace() ? 'KAPASİTE & TALEP YÖNETİMİ' : 'Yeni Kayıt Oluşturma')"
     (closed)="closeDrawer()"
   >
-    <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
-      @if (feedback()) {
-        <div
-          class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold"
-          role="alert"
-        >
-          {{ feedback() }}
-        </div>
-      }
-
-      @if (definition.branchRequired && (branches.value()?.length ?? 0) > 0) {
-        <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            for="workspace-branch"
+    @if (isWaitlistWorkspace()) {
+      <!-- Specialized High-End Waitlist Form -->
+      <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+        @if (feedback()) {
+          <div
+            class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2"
+            role="alert"
           >
-            Şube <span class="text-rose-500">*</span>
-          </label>
-          <select
-            id="workspace-branch"
-            required
-            [value]="fieldValue('branchId') || branches.value()?.[0]?.id || ''"
-            (change)="updateField({ key: 'branchId', label: 'Şube', type: 'select' }, $event)"
-            class="odv-input"
-          >
-            @for (branch of branches.value() ?? []; track branch.id) {
-              <option [value]="branch.id">{{ branch.name }}</option>
-            }
-          </select>
-        </div>
-      }
+            <span class="material-symbols-outlined icon-size-4.5 text-rose-600">error</span>
+            <span>{{ feedback() }}</span>
+          </div>
+        }
 
-      @for (field of definition.fields ?? []; track field.key) {
-        <div>
-          <label
-            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
-            [for]="fieldId(field)"
-          >
-            {{ field.label }}
-            @if (field.required) {
-              <span class="text-rose-500">*</span>
-            }
-          </label>
-
-          @switch (field.type) {
-            @case ('textarea') {
-              <textarea
-                [id]="fieldId(field)"
-                rows="3"
-                [value]="fieldValue(field.key)"
-                [placeholder]="field.placeholder || ''"
-                [required]="field.required || false"
-                (input)="updateField(field, $event)"
-                class="odv-input"
-              ></textarea>
-            }
-            @case ('select') {
-              <select
-                [id]="fieldId(field)"
-                [value]="fieldValue(field.key)"
-                [required]="field.required || false"
-                (change)="updateField(field, $event)"
-                class="odv-input"
-              >
-                <option value="">Seçin</option>
-                @for (option of optionsForField(field); track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            }
-            @default {
-              <input
-                [id]="fieldId(field)"
-                [type]="field.type"
-                [value]="fieldValue(field.key)"
-                [placeholder]="field.placeholder || ''"
-                [required]="field.required || false"
-                [min]="field.min ?? null"
-                [step]="field.step ?? null"
-                (input)="updateField(field, $event)"
-                class="odv-input"
+        <!-- Section 1: Şube & Müşteri Seçimi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
+          @if ((branches.value()?.length ?? 0) > 1) {
+            <div>
+              <app-searchable-select
+                label="Şube"
+                [required]="true"
+                icon="store"
+                placeholder="Şube Seçin"
+                searchPlaceholder="Şubelerde ara…"
+                dropdownWidth="wide"
+                [options]="waitlistBranchOptions()"
+                [value]="asString(fieldValue('branchId')) || (branches.value()?.[0]?.id ?? '')"
+                (valueChange)="setDraftValue('branchId', $event)"
               />
-            }
+            </div>
           }
-        </div>
-      }
 
-      <button class="hidden" type="submit">Kaydet</button>
-    </form>
+          <div>
+            <app-customer-combobox
+              [value]="asString(fieldValue('customerId'))"
+              [branchId]="asString(fieldValue('branchId')) || branchFilter()"
+              [preloadedCustomers]="allCustomers()"
+              (valueChange)="onWaitlistCustomerChange($event)"
+              (customerSelected)="onWaitlistCustomerSelected($event)"
+              (createRequested)="openCustomerCreateModal()"
+            />
+          </div>
+        </div>
+
+        <!-- Section 2: Talep Edilen Hizmet & Tercih Edilen Uzman -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
+          <div>
+            <app-searchable-select
+              label="Talep Edilen Hizmet"
+              [required]="true"
+              icon="spa"
+              placeholder="Hizmet Seçin"
+              searchPlaceholder="Hizmet veya kategori ara…"
+              dropdownWidth="wide"
+              [options]="waitlistServiceOptions()"
+              [value]="asString(fieldValue('serviceId'))"
+              (valueChange)="setDraftValue('serviceId', $event)"
+            />
+          </div>
+
+          <div>
+            <app-searchable-select
+              label="Tercih Edilen Uzman"
+              icon="badge"
+              placeholder="Fark Etmez / İlk Müsait Uzman"
+              searchPlaceholder="Uzman veya ünvan ara…"
+              dropdownWidth="wide"
+              [options]="waitlistStaffOptions()"
+              [value]="asString(fieldValue('preferredStaffId'))"
+              (valueChange)="setDraftValue('preferredStaffId', $event)"
+            />
+          </div>
+        </div>
+
+        <!-- Section 3: Tercih Edilen Tarih & Zaman Aralığı -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <div>
+            <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              Hızlı Gün Planlaması
+            </span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                (click)="setWaitlistQuickDate('today')"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                Bugün
+              </button>
+              <button
+                type="button"
+                (click)="setWaitlistQuickDate('tomorrow')"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                Yarın
+              </button>
+              <button
+                type="button"
+                (click)="setWaitlistQuickDate('weekend')"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                Bu Hafta Sonu
+              </button>
+              <button
+                type="button"
+                (click)="setWaitlistQuickDate('nextWeek')"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                Gelecek Hafta
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="wl-preferred-from"
+              >
+                Tercih Başlangıcı <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="wl-preferred-from"
+                type="datetime-local"
+                required
+                [value]="fieldValue('preferredFrom')"
+                (input)="setDraftValue('preferredFrom', $any($event.target).value)"
+                class="odv-input font-semibold"
+              />
+            </div>
+
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="wl-preferred-to"
+              >
+                Tercih Bitişi <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="wl-preferred-to"
+                type="datetime-local"
+                required
+                [value]="fieldValue('preferredTo')"
+                (input)="setDraftValue('preferredTo', $any($event.target).value)"
+                class="odv-input font-semibold"
+              />
+            </div>
+          </div>
+
+          <!-- Time Slot Preference Chips -->
+          <div class="pt-1">
+            <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+              Tercih Edilen Saat Dilimi:
+            </span>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                (click)="setWaitlistTimeSlot('morning')"
+                class="p-2 rounded-xl text-xs font-bold border text-left flex items-center gap-1.5 cursor-pointer transition-all"
+                [class.bg-indigo-600]="fieldValue('timeSlot') === 'morning'"
+                [class.text-white]="fieldValue('timeSlot') === 'morning'"
+                [class.border-indigo-600]="fieldValue('timeSlot') === 'morning'"
+                [class.bg-white]="fieldValue('timeSlot') !== 'morning'"
+                [class.dark:bg-slate-900]="fieldValue('timeSlot') !== 'morning'"
+                [class.text-slate-700]="fieldValue('timeSlot') !== 'morning'"
+                [class.dark:text-slate-300]="fieldValue('timeSlot') !== 'morning'"
+                [class.border-slate-200]="fieldValue('timeSlot') !== 'morning'"
+                [class.dark:border-slate-700]="fieldValue('timeSlot') !== 'morning'"
+              >
+                <span>🌅</span>
+                <span>Sabah (09–12)</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setWaitlistTimeSlot('afternoon')"
+                class="p-2 rounded-xl text-xs font-bold border text-left flex items-center gap-1.5 cursor-pointer transition-all"
+                [class.bg-indigo-600]="fieldValue('timeSlot') === 'afternoon'"
+                [class.text-white]="fieldValue('timeSlot') === 'afternoon'"
+                [class.border-indigo-600]="fieldValue('timeSlot') === 'afternoon'"
+                [class.bg-white]="fieldValue('timeSlot') !== 'afternoon'"
+                [class.dark:bg-slate-900]="fieldValue('timeSlot') !== 'afternoon'"
+                [class.text-slate-700]="fieldValue('timeSlot') !== 'afternoon'"
+                [class.dark:text-slate-300]="fieldValue('timeSlot') !== 'afternoon'"
+                [class.border-slate-200]="fieldValue('timeSlot') !== 'afternoon'"
+                [class.dark:border-slate-700]="fieldValue('timeSlot') !== 'afternoon'"
+              >
+                <span>☀️</span>
+                <span>Öğle (12–15)</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setWaitlistTimeSlot('evening')"
+                class="p-2 rounded-xl text-xs font-bold border text-left flex items-center gap-1.5 cursor-pointer transition-all"
+                [class.bg-indigo-600]="fieldValue('timeSlot') === 'evening'"
+                [class.text-white]="fieldValue('timeSlot') === 'evening'"
+                [class.border-indigo-600]="fieldValue('timeSlot') === 'evening'"
+                [class.bg-white]="fieldValue('timeSlot') !== 'evening'"
+                [class.dark:bg-slate-900]="fieldValue('timeSlot') !== 'evening'"
+                [class.text-slate-700]="fieldValue('timeSlot') !== 'evening'"
+                [class.dark:text-slate-300]="fieldValue('timeSlot') !== 'evening'"
+                [class.border-slate-200]="fieldValue('timeSlot') !== 'evening'"
+                [class.dark:border-slate-700]="fieldValue('timeSlot') !== 'evening'"
+              >
+                <span>🌙</span>
+                <span>Akşam (18–20)</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setWaitlistTimeSlot('any')"
+                class="p-2 rounded-xl text-xs font-bold border text-left flex items-center gap-1.5 cursor-pointer transition-all col-span-2 sm:col-span-3"
+                [class.bg-indigo-600]="fieldValue('timeSlot') === 'any' || !fieldValue('timeSlot')"
+                [class.text-white]="fieldValue('timeSlot') === 'any' || !fieldValue('timeSlot')"
+                [class.border-indigo-600]="fieldValue('timeSlot') === 'any' || !fieldValue('timeSlot')"
+                [class.bg-white]="fieldValue('timeSlot') !== 'any' && fieldValue('timeSlot')"
+                [class.dark:bg-slate-900]="fieldValue('timeSlot') !== 'any' && fieldValue('timeSlot')"
+                [class.text-slate-700]="fieldValue('timeSlot') !== 'any' && fieldValue('timeSlot')"
+                [class.dark:text-slate-300]="fieldValue('timeSlot') !== 'any' && fieldValue('timeSlot')"
+                [class.border-slate-200]="fieldValue('timeSlot') !== 'any' && fieldValue('timeSlot')"
+                [class.dark:border-slate-700]="fieldValue('timeSlot') !== 'any' && fieldValue('timeSlot')"
+              >
+                <span>⚡</span>
+                <span>Fark Etmez / İlk Uygun Boşluk</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Öncelik & Talep Durumu -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <div>
+            <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              Talep Önceliği
+            </span>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                (click)="setWaitlistPriority('urgent')"
+                class="p-2.5 rounded-xl text-xs font-bold border text-center cursor-pointer transition-all flex flex-col items-center gap-1"
+                [class.bg-rose-50]="fieldValue('priority') === 'urgent'"
+                [class.border-rose-400]="fieldValue('priority') === 'urgent'"
+                [class.text-rose-700]="fieldValue('priority') === 'urgent'"
+                [class.dark:bg-rose-950/60]="fieldValue('priority') === 'urgent'"
+                [class.dark:text-rose-300]="fieldValue('priority') === 'urgent'"
+                [class.border-slate-200]="fieldValue('priority') !== 'urgent'"
+                [class.dark:border-slate-700]="fieldValue('priority') !== 'urgent'"
+                [class.bg-white]="fieldValue('priority') !== 'urgent'"
+                [class.dark:bg-slate-900]="fieldValue('priority') !== 'urgent'"
+                [class.text-slate-600]="fieldValue('priority') !== 'urgent'"
+                [class.dark:text-slate-400]="fieldValue('priority') !== 'urgent'"
+              >
+                <span class="text-base">🔥</span>
+                <span>Acil</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setWaitlistPriority('normal')"
+                class="p-2.5 rounded-xl text-xs font-bold border text-center cursor-pointer transition-all flex flex-col items-center gap-1"
+                [class.bg-amber-50]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.border-amber-400]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.text-amber-700]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.dark:bg-amber-950/60]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.dark:text-amber-300]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.border-slate-200]="fieldValue('priority') !== 'normal' && fieldValue('priority')"
+                [class.dark:border-slate-700]="fieldValue('priority') !== 'normal' && fieldValue('priority')"
+                [class.bg-white]="fieldValue('priority') !== 'normal' && fieldValue('priority')"
+                [class.dark:bg-slate-900]="fieldValue('priority') !== 'normal' && fieldValue('priority')"
+                [class.text-slate-600]="fieldValue('priority') !== 'normal' && fieldValue('priority')"
+                [class.dark:text-slate-400]="fieldValue('priority') !== 'normal' && fieldValue('priority')"
+              >
+                <span class="text-base">⚡</span>
+                <span>Normal</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setWaitlistPriority('flexible')"
+                class="p-2.5 rounded-xl text-xs font-bold border text-center cursor-pointer transition-all flex flex-col items-center gap-1"
+                [class.bg-indigo-50]="fieldValue('priority') === 'flexible'"
+                [class.border-indigo-400]="fieldValue('priority') === 'flexible'"
+                [class.text-indigo-700]="fieldValue('priority') === 'flexible'"
+                [class.dark:bg-indigo-950/60]="fieldValue('priority') === 'flexible'"
+                [class.dark:text-indigo-300]="fieldValue('priority') === 'flexible'"
+                [class.border-slate-200]="fieldValue('priority') !== 'flexible'"
+                [class.dark:border-slate-700]="fieldValue('priority') !== 'flexible'"
+                [class.bg-white]="fieldValue('priority') !== 'flexible'"
+                [class.dark:bg-slate-900]="fieldValue('priority') !== 'flexible'"
+                [class.text-slate-600]="fieldValue('priority') !== 'flexible'"
+                [class.dark:text-slate-400]="fieldValue('priority') !== 'flexible'"
+              >
+                <span class="text-base">❄️</span>
+                <span>Esnek</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="wl-status"
+            >
+              Talep Durumu
+            </label>
+            <select
+              id="wl-status"
+              [value]="fieldValue('status') || 'pending'"
+              (change)="setDraftValue('status', $any($event.target).value)"
+              class="odv-input font-semibold"
+            >
+              <option value="pending">⏳ Bekliyor (Müsaitlik Aranıyor)</option>
+              <option value="contacted">📞 Teklif / Bilgi Gönderildi</option>
+              <option value="converted">✅ Randevuya Dönüştü</option>
+              <option value="cancelled">❌ Vazgeçti / İptal</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section 5: Operasyon Notu -->
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="wl-notes"
+          >
+            Operasyon Notu
+          </label>
+          <textarea
+            id="wl-notes"
+            rows="2"
+            [value]="fieldValue('notes')"
+            (input)="setDraftValue('notes', $any($event.target).value)"
+            placeholder="Müşterinin aranma tercihi, özel zaman kısıtı veya seans talebi…"
+            class="odv-input text-xs sm:text-sm"
+          ></textarea>
+        </div>
+
+        <!-- Section 6: Canlı Talep Önizleme Kartı (Live Waitlist Preview) -->
+        @if (waitlistSelectedCustomer() || waitlistSelectedService()) {
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-200/80 dark:border-indigo-900/60 shadow-xs">
+            <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-indigo-100 dark:border-indigo-900/60">
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                <span class="material-symbols-outlined icon-size-4">hourglass_top</span>
+                <span>Talep Özeti</span>
+              </span>
+              <span
+                class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
+                [class.bg-rose-100]="fieldValue('priority') === 'urgent'"
+                [class.text-rose-700]="fieldValue('priority') === 'urgent'"
+                [class.dark:bg-rose-950]="fieldValue('priority') === 'urgent'"
+                [class.bg-amber-100]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.text-amber-700]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.dark:bg-amber-950]="fieldValue('priority') === 'normal' || !fieldValue('priority')"
+                [class.bg-indigo-100]="fieldValue('priority') === 'flexible'"
+                [class.text-indigo-700]="fieldValue('priority') === 'flexible'"
+                [class.dark:bg-indigo-950]="fieldValue('priority') === 'flexible'"
+              >
+                {{ fieldValue('priority') === 'urgent' ? '🔥 Acil Öncelik' : fieldValue('priority') === 'flexible' ? '❄️ Esnek Talep' : '⚡ Normal Öncelik' }}
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+              @if (waitlistSelectedCustomer(); as cust) {
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium">Müşteri:</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-200">
+                    {{ cust['fullName'] || cust['name'] }}
+                    @if (cust['phone']) {
+                      <span class="text-[11px] font-mono text-slate-400">({{ cust['phone'] }})</span>
+                    }
+                  </span>
+                </div>
+              }
+
+              @if (waitlistSelectedService(); as srv) {
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium">Hizmet:</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-200">
+                    {{ srv['name'] }}
+                    @if (srv['price']) {
+                      <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-[11px]">(₺{{ srv['price'] }})</span>
+                    }
+                  </span>
+                </div>
+              }
+
+              @if (waitlistSelectedStaff(); as stf) {
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium">Uzman:</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-200">
+                    {{ stf['fullName'] || stf['name'] }}
+                  </span>
+                </div>
+              }
+
+              @if (fieldValue('preferredFrom')) {
+                <div class="flex items-center justify-between pt-1 border-t border-dashed border-slate-200 dark:border-slate-800">
+                  <span class="text-slate-400 font-medium">İstenen Aralık:</span>
+                  <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono text-[11px]">
+                    {{ formatDate(fieldValue('preferredFrom')) }} – {{ formatDate(fieldValue('preferredTo')) }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <button class="hidden" type="submit">Kaydet</button>
+      </form>
+    } @else {
+      <!-- Generic Workspace Form -->
+      <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+        @if (feedback()) {
+          <div
+            class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold"
+            role="alert"
+          >
+            {{ feedback() }}
+          </div>
+        }
+
+        @if (definition.branchRequired && (branches.value()?.length ?? 0) > 0) {
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="workspace-branch"
+            >
+              Şube <span class="text-rose-500">*</span>
+            </label>
+            <select
+              id="workspace-branch"
+              required
+              [value]="fieldValue('branchId') || branches.value()?.[0]?.id || ''"
+              (change)="updateField({ key: 'branchId', label: 'Şube', type: 'select' }, $event)"
+              class="odv-input"
+            >
+              @for (branch of branches.value() ?? []; track branch.id) {
+                <option [value]="branch.id">{{ branch.name }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @for (field of definition.fields ?? []; track field.key) {
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              [for]="fieldId(field)"
+            >
+              {{ field.label }}
+              @if (field.required) {
+                <span class="text-rose-500">*</span>
+              }
+            </label>
+
+            @switch (field.type) {
+              @case ('textarea') {
+                <textarea
+                  [id]="fieldId(field)"
+                  rows="3"
+                  [value]="fieldValue(field.key)"
+                  [placeholder]="field.placeholder || ''"
+                  [required]="field.required || false"
+                  (input)="updateField(field, $event)"
+                  class="odv-input"
+                ></textarea>
+              }
+              @case ('select') {
+                <select
+                  [id]="fieldId(field)"
+                  [value]="fieldValue(field.key)"
+                  [required]="field.required || false"
+                  (change)="updateField(field, $event)"
+                  class="odv-input"
+                >
+                  <option value="">Seçin</option>
+                  @for (option of optionsForField(field); track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              }
+              @default {
+                <input
+                  [id]="fieldId(field)"
+                  [type]="field.type"
+                  [value]="fieldValue(field.key)"
+                  [placeholder]="field.placeholder || ''"
+                  [required]="field.required || false"
+                  [min]="field.min ?? null"
+                  [step]="field.step ?? null"
+                  (input)="updateField(field, $event)"
+                  class="odv-input"
+                />
+              }
+            }
+          </div>
+        }
+
+        <button class="hidden" type="submit">Kaydet</button>
+      </form>
+    }
 
     <div drawer-footer class="flex items-center justify-between gap-3">
       <span class="text-[11px] text-slate-400 hidden sm:inline"
@@ -924,7 +1335,7 @@
           class="odv-btn-primary"
         >
           <span class="material-symbols-outlined icon-size-4">save</span>
-          <span>{{ saving() ? 'Kaydediliyor…' : editingId() ? 'Güncelle' : 'Kaydet' }}</span>
+          <span>{{ saving() ? 'Kaydediliyor…' : editingId() ? 'Güncelle' : (isWaitlistWorkspace() ? 'Talebi Kaydet' : 'Kaydet') }}</span>
         </button>
       </div>
     </div>
@@ -949,7 +1360,7 @@
   />
 }
 
-@if ((isCustomerWorkspace() || isConsultationWorkspace()) && customerFormOpen()) {
+@if ((isCustomerWorkspace() || isConsultationWorkspace() || isWaitlistWorkspace()) && customerFormOpen()) {
   <app-customer-form-modal
     [open]="customerFormOpen()"
     (close)="closeCustomerCreateModal()"

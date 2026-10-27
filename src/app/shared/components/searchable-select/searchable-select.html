@@ -53,7 +53,7 @@
 
         @if (sel.badge) {
           <span
-            class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-950/80 dark:text-indigo-300 flex-shrink-0 truncate max-w-[140px]"
+            class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-950/80 dark:text-indigo-300 flex-shrink-0 whitespace-nowrap ml-auto"
           >
             {{ sel.badge }}
           </span>
@@ -91,7 +91,16 @@
   <!-- Floating Dropdown Panel -->
   @if (isOpen()) {
     <div
-      class="searchable-dropdown-panel absolute left-0 right-0 z-50 mt-1.5 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden"
+      class="searchable-dropdown-panel absolute z-50 mt-1.5 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden transition-all duration-200"
+      [class.left-0]="dropdownPosition() === 'left' || dropdownPosition() === 'auto'"
+      [class.right-0]="dropdownPosition() === 'right'"
+      [class.w-full]="dropdownWidth() === 'full'"
+      [class.min-w-full]="dropdownWidth() === 'full' || dropdownWidth() === 'auto'"
+      [class.sm:min-w-[440px]]="dropdownWidth() !== 'full' && !isDropdownExpanded()"
+      [class.sm:max-w-[560px]]="dropdownWidth() !== 'full' && !isDropdownExpanded()"
+      [class.sm:min-w-[600px]]="isDropdownExpanded()"
+      [class.sm:max-w-[760px]]="isDropdownExpanded()"
+      [class.max-w-[calc(100vw-2rem)]]="true"
     >
       <!-- Search Input Header -->
       <div
@@ -129,12 +138,27 @@
         >
           {{ totalCount() }}
         </span>
+
+        <button
+          type="button"
+          (click)="toggleDropdownExpand($event)"
+          class="p-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-200/70 dark:hover:bg-slate-700 dark:hover:text-indigo-400 transition-colors flex items-center justify-center cursor-pointer bg-transparent border-0 flex-shrink-0"
+          [attr.aria-label]="isDropdownExpanded() ? 'Menüyü Daralt' : 'Menüyü Genişlet'"
+          [title]="isDropdownExpanded() ? 'Standart Genişliğe Dön' : 'Menüyü Genişlet'"
+        >
+          <span class="material-symbols-outlined icon-size-4">
+            {{ isDropdownExpanded() ? 'close_fullscreen' : 'aspect_ratio' }}
+          </span>
+        </button>
       </div>
 
       <!-- Options List -->
       <div
         role="listbox"
-        class="max-h-60 overflow-y-auto custom-scroll divide-y divide-slate-100 dark:divide-slate-800/80 p-1"
+        class="overflow-y-auto custom-scroll divide-y divide-slate-100 dark:divide-slate-800/80 p-1"
+        [class.max-h-64]="!isDropdownExpanded()"
+        [class.sm:max-h-80]="!isDropdownExpanded()"
+        [class.max-h-96]="isDropdownExpanded()"
       >
         @if (displayedOptions().length === 0) {
           <!-- Empty State -->
@@ -178,7 +202,7 @@
                   </span>
                 } @else if (opt.icon || icon()) {
                   <span
-                    class="material-symbols-outlined icon-size-4 text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors flex-shrink-0"
+                    class="material-symbols-outlined icon-size-4.5 text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors flex-shrink-0"
                   >
                     {{ opt.icon || icon() }}
                   </span>
@@ -186,12 +210,12 @@
 
                 <div class="min-w-0 flex-1">
                   <span
-                    class="font-bold text-slate-800 dark:text-slate-200 block truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                    class="font-bold text-slate-800 dark:text-slate-200 block text-xs leading-snug break-words group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
                   >
                     {{ opt.label }}
                   </span>
                   @if (opt.subtitle) {
-                    <span class="text-[11px] text-slate-400 block truncate">
+                    <span class="text-[11px] text-slate-400 block truncate mt-0.5">
                       {{ opt.subtitle }}
                     </span>
                   }
@@ -199,10 +223,10 @@
               </div>
 
               <!-- Badge / Extra -->
-              <div class="flex items-center gap-2 flex-shrink-0">
+              <div class="flex items-center gap-2 flex-shrink-0 ml-2">
                 @if (opt.badge) {
                   <span
-                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-950 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors"
+                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-950 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors whitespace-nowrap"
                   >
                     {{ opt.badge }}
                   </span>

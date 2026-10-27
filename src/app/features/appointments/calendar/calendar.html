@@ -197,36 +197,38 @@
 
       <!-- Section: Hizmet & Uzman Seçimi (Searchable Selects) -->
       <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Hizmet Seçimi -->
-          <div>
-            <app-searchable-select
-              label="Hizmet"
-              [required]="true"
-              icon="spa"
-              placeholder="Hizmet Seçin"
-              searchPlaceholder="Hizmet veya kategori ara…"
-              [options]="serviceOptions()"
-              [value]="appointmentModel().serviceId"
-              (valueChange)="onServiceSelected($event)"
-            />
-            <input type="hidden" [formField]="appointmentForm.serviceId" />
-          </div>
+        <!-- Hizmet Seçimi (Geniş / Tam Alan) -->
+        <div>
+          <app-searchable-select
+            label="Hizmet"
+            [required]="true"
+            icon="spa"
+            placeholder="Hizmet Seçin"
+            searchPlaceholder="Hizmet veya kategori ara…"
+            dropdownWidth="wide"
+            dropdownPosition="left"
+            [options]="serviceOptions()"
+            [value]="appointmentModel().serviceId"
+            (valueChange)="onServiceSelected($event)"
+          />
+          <input type="hidden" [formField]="appointmentForm.serviceId" />
+        </div>
 
-          <!-- Uzman Seçimi -->
-          <div>
-            <app-searchable-select
-              label="Uzman"
-              [required]="true"
-              icon="badge"
-              placeholder="Uzman Seçin"
-              searchPlaceholder="Uzman veya ünvan ara…"
-              [options]="staffOptions()"
-              [value]="appointmentModel().staffId"
-              (valueChange)="onStaffSelected($event)"
-            />
-            <input type="hidden" [formField]="appointmentForm.staffId" />
-          </div>
+        <!-- Uzman Seçimi -->
+        <div>
+          <app-searchable-select
+            label="Uzman"
+            [required]="true"
+            icon="badge"
+            placeholder="Uzman Seçin"
+            searchPlaceholder="Uzman veya ünvan ara…"
+            dropdownWidth="wide"
+            dropdownPosition="left"
+            [options]="staffOptions()"
+            [value]="appointmentModel().staffId"
+            (valueChange)="onStaffSelected($event)"
+          />
+          <input type="hidden" [formField]="appointmentForm.staffId" />
         </div>
       </div>
 
@@ -309,6 +311,7 @@
               icon="meeting_room"
               placeholder="Oda Seçilmedi"
               searchPlaceholder="Odalarda ara…"
+              dropdownPosition="left"
               [options]="roomOptions()"
               [value]="appointmentModel().roomId"
               (valueChange)="onRoomSelected($event)"
@@ -322,6 +325,7 @@
               icon="precision_manufacturing"
               placeholder="Cihaz Seçilmedi"
               searchPlaceholder="Cihaz veya marka ara…"
+              dropdownPosition="right"
               [options]="deviceOptions()"
               [value]="appointmentModel().deviceId"
               (valueChange)="onDeviceSelected($event)"
@@ -392,6 +396,20 @@
               <div class="flex items-center justify-between">
                 <span class="text-slate-400 font-medium">Uzman:</span>
                 <span class="font-bold text-slate-800 dark:text-slate-200">{{ staffName(stf) }}</span>
+              </div>
+            }
+
+            @if (selectedRoomLabel(); as rLabel) {
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-medium">Oda / Kabin:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">{{ rLabel }}</span>
+              </div>
+            }
+
+            @if (selectedDeviceLabel(); as dLabel) {
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-medium">Cihaz:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">{{ dLabel }}</span>
               </div>
             }
 

@@ -45,6 +45,8 @@ export class SearchableSelect {
   readonly disabled = input<boolean>(false);
   readonly clearable = input<boolean>(true);
   readonly emptyMessage = input<string>('Eşleşen sonuç bulunamadı');
+  readonly dropdownWidth = input<'auto' | 'full' | 'wide'>('auto');
+  readonly dropdownPosition = input<'auto' | 'left' | 'right'>('auto');
 
   // Outputs
   readonly selectionChange = output<SearchableSelectOption | null>();
@@ -53,6 +55,7 @@ export class SearchableSelect {
   protected readonly isOpen = signal<boolean>(false);
   protected readonly searchQuery = signal<string>('');
   protected readonly highlightedIndex = signal<number>(0);
+  protected readonly isDropdownExpanded = signal<boolean>(false);
 
   // Maximum items to render into DOM simultaneously for performance protection
   protected readonly MAX_DOM_ITEMS = 40;
@@ -132,6 +135,12 @@ export class SearchableSelect {
     this.isOpen.set(false);
     this.searchQuery.set('');
     this.highlightedIndex.set(0);
+    this.isDropdownExpanded.set(false);
+  }
+
+  protected toggleDropdownExpand(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.isDropdownExpanded.update((v) => !v);
   }
 
   protected onSearchInput(event: Event): void {

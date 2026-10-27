@@ -85,4 +85,51 @@ describe('Workspace', () => {
     (component as any).closeWizard();
     expect((component as any).wizardOpen()).toBe(false);
   });
+
+  it('should initialize waitlist smart defaults when creating new waitlist record', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [Workspace],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              data: { definition: WORKSPACES['waitlist'] },
+              queryParamMap: { get: () => null },
+            },
+          },
+        },
+        { provide: Router, useValue: routerMock },
+        { provide: ApiClient, useValue: apiMock },
+        { provide: BranchService, useValue: branchServiceMock },
+        DefinitionsService,
+        EntityLookupService,
+      ],
+    });
+
+    const fixture = TestBed.createComponent(Workspace);
+    const component = fixture.componentInstance as any;
+    expect(component.isWaitlistWorkspace()).toBe(true);
+
+    component.openCreate();
+    expect(component.drawerOpen()).toBe(true);
+    expect(component.draft()['priority']).toBe('normal');
+    expect(component.draft()['status']).toBe('pending');
+    expect(component.draft()['timeSlot']).toBe('any');
+    expect(component.draft()['preferredFrom']).toBeTruthy();
+    expect(component.draft()['preferredTo']).toBeTruthy();
+
+    // Test quick priority selection
+    component.setWaitlistPriority('urgent');
+    expect(component.draft()['priority']).toBe('urgent');
+
+    // Test time slot selection
+    component.setWaitlistTimeSlot('morning');
+    expect(component.draft()['timeSlot']).toBe('morning');
+
+    // Test quick date selection
+    component.setWaitlistQuickDate('tomorrow');
+    expect(component.draft()['preferredFrom']).toBeTruthy();
+  });
 });

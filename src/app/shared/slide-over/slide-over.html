@@ -8,6 +8,7 @@
   cdkTrapFocus
   [cdkTrapFocusAutoCapture]="true"
   class="slide-over-panel"
+  [class.is-expanded]="isExpanded()"
 >
   <div class="accent-line" aria-hidden="true"></div>
   <header class="slide-over-header">
@@ -21,14 +22,29 @@
         <span id="slide-over-description">{{ description() }}</span>
       </div>
     </div>
-    <button
-      class="close-button odv-icon-btn"
-      type="button"
-      aria-label="Kapat"
-      (click)="requestClose()"
-    >
-      <span class="material-symbols-outlined icon-size-5">close</span>
-    </button>
+    <div class="flex items-center gap-1.5 flex-shrink-0">
+      @if (allowExpand()) {
+        <button
+          class="expand-button odv-icon-btn"
+          type="button"
+          [attr.aria-label]="isExpanded() ? 'Daralt' : 'Genişlet'"
+          [title]="isExpanded() ? 'Standart Boyuta Dön' : 'Paneli Genişlet'"
+          (click)="toggleExpand()"
+        >
+          <span class="material-symbols-outlined icon-size-5">
+            {{ isExpanded() ? 'close_fullscreen' : 'open_in_full' }}
+          </span>
+        </button>
+      }
+      <button
+        class="close-button odv-icon-btn"
+        type="button"
+        aria-label="Kapat"
+        (click)="requestClose()"
+      >
+        <span class="material-symbols-outlined icon-size-5">close</span>
+      </button>
+    </div>
   </header>
 
   <section class="drawer-body custom-scroll">

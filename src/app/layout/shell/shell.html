@@ -1,5 +1,10 @@
 <div
-  class="app-shell flex min-h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 font-sans"
+  class="app-shell flex min-h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 font-sans transition-all duration-300"
+  [class.pointer-events-none]="screenLock.isLocked()"
+  [class.select-none]="screenLock.isLocked()"
+  [class.blur-2xl]="screenLock.isLocked()"
+  [class.opacity-40]="screenLock.isLocked()"
+  [attr.aria-hidden]="screenLock.isLocked()"
 >
   <!-- Mobile Toggle Button -->
   <button
@@ -266,15 +271,26 @@
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          aria-label="Çıkış yap"
-          (click)="auth.logout()"
-          class="w-7 h-7 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 flex items-center justify-center border-0 bg-transparent cursor-pointer transition-colors"
-          [title]="'topbar.logout' | t"
-        >
-          <span class="material-symbols-outlined icon-size-4 rtl:rotate-180">logout</span>
-        </button>
+        <div class="flex items-center gap-1">
+          <button
+            type="button"
+            aria-label="Ekranı kilitle"
+            (click)="screenLock.lock()"
+            class="w-7 h-7 rounded-lg hover:bg-indigo-950/60 text-slate-400 hover:text-indigo-400 flex items-center justify-center border-0 bg-transparent cursor-pointer transition-colors"
+            [title]="('topbar.lock' | t) + ' (Ctrl+L)'"
+          >
+            <span class="material-symbols-outlined icon-size-4">lock</span>
+          </button>
+          <button
+            type="button"
+            aria-label="Çıkış yap"
+            (click)="auth.logout()"
+            class="w-7 h-7 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 flex items-center justify-center border-0 bg-transparent cursor-pointer transition-colors"
+            [title]="'topbar.logout' | t"
+          >
+            <span class="material-symbols-outlined icon-size-4 rtl:rotate-180">logout</span>
+          </button>
+        </div>
       </div>
     </div>
   </aside>
@@ -388,6 +404,17 @@
         <!-- Language Selector Dropdown -->
         <app-language-selector />
 
+        <!-- Screen Lock Button -->
+        <button
+          type="button"
+          aria-label="Ekranı kilitle"
+          (click)="screenLock.lock()"
+          class="odv-icon-btn border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400"
+          [title]="('topbar.lock' | t) + ' (Ctrl+L)'"
+        >
+          <span class="material-symbols-outlined icon-size-4.5">lock</span>
+        </button>
+
         <!-- Theme Toggle Button -->
         <button
           type="button"
@@ -425,3 +452,6 @@
     </section>
   </main>
 </div>
+
+<!-- Screen Lock Overlay & PIN Modal -->
+<app-screen-lock />

@@ -67,6 +67,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'topbar.activeBranch': 'AKTİF ŞUBE',
     'topbar.live': 'Canlı',
     'topbar.theme': 'Açık / Koyu Tema',
+    'topbar.lock': 'Ekranı Kilitle',
     'topbar.logout': 'Oturumu Kapat',
 
     // Common Actions
@@ -178,6 +179,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'topbar.activeBranch': 'ACTIVE BRANCH',
     'topbar.live': 'Live',
     'topbar.theme': 'Toggle Theme',
+    'topbar.lock': 'Lock Screen',
     'topbar.logout': 'Sign Out',
 
     // Common Actions
@@ -284,6 +286,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'topbar.activeBranch': 'AKTIVE FILIALE',
     'topbar.live': 'Live',
     'topbar.theme': 'Design umschalten',
+    'topbar.lock': 'Bildschirm sperren',
     'topbar.logout': 'Abmelden',
 
     // Common Actions
@@ -390,6 +393,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'topbar.activeBranch': 'SUCCURSALE ACTIVE',
     'topbar.live': 'En direct',
     'topbar.theme': 'Changer de thème',
+    'topbar.lock': 'Verrouiller l’écran',
     'topbar.logout': 'Déconnexion',
 
     // Common Actions
@@ -496,6 +500,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'topbar.activeBranch': 'SUCURSAL ACTIVA',
     'topbar.live': 'En vivo',
     'topbar.theme': 'Cambiar tema',
+    'topbar.lock': 'Bloquear pantalla',
     'topbar.logout': 'Cerrar sesión',
 
     // Common Actions
@@ -602,6 +607,7 @@ export const CORE_DICTIONARIES: Record<SupportedLang, TranslationMap> = {
     'topbar.activeBranch': 'الفرع النشط',
     'topbar.live': 'مباشر',
     'topbar.theme': 'تغيير المظهر',
+    'topbar.lock': 'قفل الشاشة',
     'topbar.logout': 'تسجيل الخروج',
 
     // Common Actions

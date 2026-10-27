@@ -1,0 +1,283 @@
+<!-- SCREEN LOCK FULLSCREEN OVERLAY -->
+@if (screenLock.isLocked()) {
+  <div
+    class="screen-lock-overlay fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-3xl transition-all duration-300 select-none overflow-y-auto"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Ekran Kilidi"
+  >
+    <!-- Background Ambient Lighting -->
+    <div
+      class="w-96 h-96 rounded-full bg-indigo-600/20 blur-3xl pointer-events-none absolute -top-16 -left-16"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="w-96 h-96 rounded-full bg-purple-600/20 blur-3xl pointer-events-none absolute -bottom-16 -right-16"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Central Keypad Card -->
+    <div
+      class="relative w-full max-w-sm rounded-3xl bg-slate-900/80 border border-slate-800 p-6 sm:p-7 shadow-2xl backdrop-blur-xl flex flex-col items-center"
+      [class.animate-lock-shake]="isShaking()"
+    >
+      <!-- Lock Header Badge -->
+      <div
+        class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-3"
+      >
+        <span class="material-symbols-outlined text-2xl font-bold">lock</span>
+      </div>
+
+      <h2 class="text-xl font-black text-white tracking-tight mb-1">Ekran Kilitli</h2>
+
+      <!-- User Profile Snapshot -->
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 mb-5">
+        <div class="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-black">
+          {{ userInitials() }}
+        </div>
+        <div class="text-start leading-tight">
+          <span class="block text-xs font-bold text-white truncate max-w-[150px]">{{ userName() }}</span>
+          <span class="block text-[10px] text-slate-400 truncate max-w-[150px]">{{ userRole() }} · {{ branchName() }}</span>
+        </div>
+      </div>
+
+      <!-- 4 PIN Indicator Dots -->
+      <div
+        class="flex items-center justify-center gap-4 py-2 mb-2"
+        aria-live="polite"
+        [attr.aria-label]="enteredPin().length + ' hane girildi'"
+      >
+        @for (dot of [0, 1, 2, 3]; track dot) {
+          <div
+            class="transition-all duration-200"
+            [class.w-4]="true"
+            [class.h-4]="true"
+            [class.rounded-full]="true"
+            [class.bg-gradient-to-tr]="enteredPin().length > dot"
+            [class.from-indigo-500]="enteredPin().length > dot"
+            [class.to-purple-500]="enteredPin().length > dot"
+            [class.pin-dot-active]="enteredPin().length > dot"
+            [class.scale-125]="enteredPin().length > dot"
+            [class.border-2]="enteredPin().length <= dot"
+            [class.border-slate-700]="enteredPin().length <= dot"
+            [class.bg-slate-800/80]="enteredPin().length <= dot"
+          ></div>
+        }
+      </div>
+
+      <!-- Feedback / Rate limit / Error Alert -->
+      @if (screenLock.feedback()) {
+        <div class="text-center my-1.5 px-3 py-1 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-bold">
+          {{ screenLock.feedback() }}
+        </div>
+      } @else {
+        <p class="text-[11px] text-slate-400 font-medium my-1.5">
+          Devam etmek için 4 haneli PIN kodunuzu girin
+        </p>
+      }
+
+      <!-- Numeric Keypad Grid (1-9, Backspace, 0, Clear) -->
+      <div class="grid grid-cols-3 gap-2.5 sm:gap-3 w-full max-w-[260px] my-4">
+        <!-- Digits 1 to 9 -->
+        @for (digit of ['1', '2', '3', '4', '5', '6', '7', '8', '9']; track digit) {
+          <button
+            type="button"
+            (click)="appendDigit(digit)"
+            [disabled]="isVerifying() || screenLock.lockoutRemainingSeconds() > 0"
+            class="h-14 sm:h-15 rounded-2xl bg-slate-800/60 hover:bg-indigo-600/20 hover:border-indigo-500/40 active:scale-95 text-xl font-black text-white border border-slate-700/60 transition-all cursor-pointer flex items-center justify-center shadow-md disabled:opacity-40 disabled:pointer-events-none"
+            [attr.aria-label]="digit"
+          >
+            {{ digit }}
+          </button>
+        }
+
+        <!-- Backspace Button -->
+        <button
+          type="button"
+          (click)="deleteDigit()"
+          [disabled]="isVerifying() || enteredPin().length === 0"
+          class="h-14 sm:h-15 rounded-2xl bg-slate-800/40 hover:bg-slate-700/60 active:scale-95 text-slate-400 hover:text-white border border-slate-700/50 transition-all cursor-pointer flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none"
+          title="Geri Sil"
+          aria-label="Son rakamı sil"
+        >
+          <span class="material-symbols-outlined text-xl">backspace</span>
+        </button>
+
+        <!-- Digit 0 -->
+        <button
+          type="button"
+          (click)="appendDigit('0')"
+          [disabled]="isVerifying() || screenLock.lockoutRemainingSeconds() > 0"
+          class="h-14 sm:h-15 rounded-2xl bg-slate-800/60 hover:bg-indigo-600/20 hover:border-indigo-500/40 active:scale-95 text-xl font-black text-white border border-slate-700/60 transition-all cursor-pointer flex items-center justify-center shadow-md disabled:opacity-40 disabled:pointer-events-none"
+          aria-label="0"
+        >
+          0
+        </button>
+
+        <!-- Clear Button -->
+        <button
+          type="button"
+          (click)="clearPin()"
+          [disabled]="isVerifying() || enteredPin().length === 0"
+          class="h-14 sm:h-15 rounded-2xl bg-slate-800/40 hover:bg-slate-700/60 active:scale-95 text-slate-400 hover:text-white border border-slate-700/50 transition-all cursor-pointer flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:pointer-events-none"
+          title="Temizle"
+          aria-label="Tümünü temizle"
+        >
+          Temizle
+        </button>
+      </div>
+
+      <!-- Bottom Card Action Links -->
+      <div class="flex items-center justify-between w-full pt-2 border-t border-slate-800/80 text-xs">
+        <button
+          type="button"
+          (click)="onLogout()"
+          class="flex items-center gap-1.5 text-slate-400 hover:text-rose-400 bg-transparent border-0 cursor-pointer font-bold transition-colors py-1 px-2 rounded-lg hover:bg-rose-500/10"
+        >
+          <span class="material-symbols-outlined text-sm">logout</span>
+          <span>Oturumu Kapat</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="openChangePinModal()"
+          class="flex items-center gap-1.5 text-slate-400 hover:text-indigo-400 bg-transparent border-0 cursor-pointer font-bold transition-colors py-1 px-2 rounded-lg hover:bg-indigo-500/10"
+        >
+          <span class="material-symbols-outlined text-sm">key</span>
+          <span>PIN Değiştir</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- PIN SETUP / CHANGE MODAL -->
+@if (screenLock.isSetupModalOpen()) {
+  <div
+    class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md select-none overflow-y-auto"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="screenLock.setupMode() === 'initial' ? 'PIN Belirle' : 'PIN Değiştir'"
+  >
+    <div class="relative w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-800 p-6 sm:p-7 shadow-2xl flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+            <span class="material-symbols-outlined text-xl">shield_person</span>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white m-0">
+              {{ screenLock.setupMode() === 'initial' ? 'Güvenlik PIN Kodu Belirle' : 'PIN Kodunu Değiştir' }}
+            </h3>
+            <span class="text-[11px] text-slate-400 block">4 haneli ekran kilidi parolası</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="screenLock.closeSetup()"
+          class="w-8 h-8 rounded-lg bg-transparent hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border-0 cursor-pointer transition-colors"
+          aria-label="Kapat"
+        >
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Description -->
+      <p class="text-xs text-slate-300 mt-4 mb-4 leading-relaxed">
+        {{
+          screenLock.setupMode() === 'initial'
+            ? 'Masadan ayrıldığınızda veya mola verdiğinizde ekranınızı hızlıca kilitleyip açmak için 4 haneli sayısal bir PIN oluşturun.'
+            : 'Mevcut PIN kodunuzu doğrulayarak yeni bir 4 haneli PIN belirleyin.'
+        }}
+      </p>
+
+      <!-- Form Inputs -->
+      <form (submit)="$event.preventDefault(); submitPinSetup()" class="space-y-3.5">
+        @if (screenLock.setupMode() === 'change') {
+          <div>
+            <label for="currentPin" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              Mevcut PIN Kodunuz
+            </label>
+            <input
+              id="currentPin"
+              type="password"
+              inputmode="numeric"
+              maxlength="4"
+              pattern="[0-9]*"
+              [value]="currentPinInput()"
+              (input)="currentPinInput.set($any($event.target).value)"
+              placeholder="••••"
+              class="w-full text-center tracking-widest text-lg font-bold py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+        }
+
+        <div>
+          <label for="newPin" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            {{ screenLock.setupMode() === 'initial' ? '4 Haneli PIN Kodunuz' : 'Yeni 4 Haneli PIN' }}
+          </label>
+          <input
+            id="newPin"
+            type="password"
+            inputmode="numeric"
+            maxlength="4"
+            pattern="[0-9]*"
+            [value]="newPinInput()"
+            (input)="newPinInput.set($any($event.target).value)"
+            placeholder="••••"
+            class="w-full text-center tracking-widest text-lg font-bold py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+          />
+        </div>
+
+        <div>
+          <label for="confirmPin" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            PIN Kodunu Doğrulayın
+          </label>
+          <input
+            id="confirmPin"
+            type="password"
+            inputmode="numeric"
+            maxlength="4"
+            pattern="[0-9]*"
+            [value]="confirmPinInput()"
+            (input)="confirmPinInput.set($any($event.target).value)"
+            placeholder="••••"
+            class="w-full text-center tracking-widest text-lg font-bold py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+          />
+        </div>
+
+        <!-- Setup Error message -->
+        @if (setupError()) {
+          <div class="px-3 py-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-bold">
+            {{ setupError() }}
+          </div>
+        }
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end gap-2.5 pt-3">
+          <button
+            type="button"
+            (click)="screenLock.closeSetup()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border-0 cursor-pointer transition-colors"
+          >
+            Vazgeç
+          </button>
+          <button
+            type="submit"
+            [disabled]="isSaving() || newPinInput().length !== 4 || confirmPinInput().length !== 4"
+            class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-95 text-white text-xs font-bold border-0 cursor-pointer transition-all shadow-md shadow-indigo-500/20 disabled:opacity-40 disabled:pointer-events-none"
+          >
+            {{
+              isSaving()
+                ? 'Kaydediliyor…'
+                : screenLock.setupMode() === 'initial'
+                  ? 'PIN Kaydet ve Kilitle'
+                  : 'PIN Kodunu Güncelle'
+            }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

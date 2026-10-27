@@ -12,6 +12,8 @@ import { LanguageSelector } from '../../shared/language-selector/language-select
 
 import { VersionService } from '../../core/version/version.service';
 import { SubscriptionService } from '../../core/subscription/subscription.service';
+import { ScreenLock } from '../../shared/components/screen-lock/screen-lock';
+import { ScreenLockService } from '../../core/screen-lock/screen-lock.service';
 
 interface CollapsibleNavSection {
   key: string;
@@ -19,7 +21,17 @@ interface CollapsibleNavSection {
 }
 
 @Component({
-  imports: [LanguageSelector, RouterLink, RouterLinkActive, RouterOutlet, TranslatePipe],
+  host: {
+    '(window:keydown)': 'onGlobalKeyDown($event)',
+  },
+  imports: [
+    LanguageSelector,
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    ScreenLock,
+    TranslatePipe,
+  ],
   selector: 'app-shell',
   styleUrl: './shell.css',
   templateUrl: './shell.html',
@@ -29,6 +41,7 @@ export class Shell {
   private readonly router = inject(Router);
   protected readonly auth = inject(Auth);
   protected readonly theme = inject(Theme);
+  protected readonly screenLock = inject(ScreenLockService);
   protected readonly i18n = inject(I18nStore);
   protected readonly branchService = inject(BranchService);
   protected readonly version = inject(VersionService);
@@ -36,6 +49,13 @@ export class Shell {
   protected readonly menuOpen = signal(false);
   protected readonly activeBranchId = signal('');
   protected readonly menuSearch = signal('');
+
+  protected onGlobalKeyDown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.altKey) && (event.key === 'l' || event.key === 'L')) {
+      event.preventDefault();
+      this.screenLock.lock();
+    }
+  }
 
   // Collapsible menu groups state: mapping section label -> boolean
   protected readonly expandedSections = signal<Record<string, boolean>>({

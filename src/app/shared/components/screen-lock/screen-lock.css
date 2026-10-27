@@ -1,0 +1,29 @@
+@keyframes lock-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.animate-lock-shake {
+  animation: lock-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes lock-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.5), inset 0 0 10px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.8), inset 0 0 15px rgba(168, 85, 247, 0.6);
+  }
+}
+
+.pin-dot-active {
+  animation: lock-pulse-glow 1.5s infinite;
+}
+
+.screen-lock-overlay {
+  background-color: rgba(2, 6, 23, 0.94);
+  backdrop-filter: blur(48px) saturate(160%);
+  -webkit-backdrop-filter: blur(48px) saturate(160%);
+}
+

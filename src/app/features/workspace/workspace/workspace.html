@@ -39,9 +39,9 @@
           <span class="material-symbols-outlined icon-size-4 text-amber-600 dark:text-amber-400">support_agent</span>
           <span>{{ seedingDemoConsultations() ? 'Yükleniyor…' : '10 Örnek Ön Görüşme Yükle' }}</span>
         </button>
-        <button type="button" (click)="openCustomerCreateModal()" class="odv-btn-primary">
-          <span class="material-symbols-outlined icon-size-4">person_add</span>
-          <span>Yeni Ön Görüşme / Aday Müşteri</span>
+        <button type="button" (click)="openCreate()" class="odv-btn-primary">
+          <span class="material-symbols-outlined icon-size-4">add_comment</span>
+          <span>Yeni Ön Görüşme / Bilgi Talebi</span>
         </button>
       } @else {
         <button type="button" (click)="openCreate()" class="odv-btn-primary">
@@ -109,6 +109,238 @@
       </div>
       <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
         <span class="material-symbols-outlined icon-size-5">verified</span>
+      </div>
+    </div>
+  </section>
+} @else if (isHealthWorkspace()) {
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5" aria-label="Sağlık ve Kontrendikasyon Özeti">
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Kayıtlı Sağlık Beyanı
+        </span>
+        <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+          {{ rows().length }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">health_and_safety</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Yüksek Riskli Danışan
+        </span>
+        <strong class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5 block">
+          ⚠️ {{ highRiskHealthCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">warning</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Özel Durum / Takip
+        </span>
+        <strong class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">
+          ⚡ {{ specialConditionHealthCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">medical_information</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Tıbbi Döküman & Rapor
+        </span>
+        <strong class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+          📄 {{ totalHealthDocumentsCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">attach_file</span>
+      </div>
+    </div>
+  </section>
+} @else if (isConsentWorkspace()) {
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5" aria-label="Onam ve KVKK Rıza Özeti">
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Toplam Onam Formu
+        </span>
+        <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+          {{ rows().length }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">assignment</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Geçerli / İmzalı Onamlar
+        </span>
+        <strong class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+          ✍️ {{ validSignedConsentCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">verified</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          İmza Bekleyen Formlar
+        </span>
+        <strong class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">
+          ⏳ {{ pendingConsentCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">pending_actions</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Lazer & Medikal Onam
+        </span>
+        <strong class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-0.5 block">
+          ⚡ {{ laserTreatmentConsentCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">clinical_notes</span>
+      </div>
+    </div>
+  </section>
+} @else if (isPackageWorkspace()) {
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5" aria-label="Paket Satışları & Seans Özeti">
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Toplam Paket Satışı
+        </span>
+        <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+          {{ totalPackageSalesCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">inventory_2</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Aktif Paketler
+        </span>
+        <strong class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+          ✨ {{ activePackageCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">verified</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Kalan Seans Havuzu
+        </span>
+        <strong class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">
+          🎯 {{ totalRemainingSessionsCount() }} Seans
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">event_repeat</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Toplam Paket Cirosu
+        </span>
+        <strong class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-0.5 block">
+          ₺{{ totalPackageRevenue() | number:'1.0-0' }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">payments</span>
+      </div>
+    </div>
+  </section>
+} @else if (isSessionWorkspace()) {
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5" aria-label="Klinik Seans ve Uygulama Özeti">
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Toplam Seans Kaydı
+        </span>
+        <strong class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">
+          {{ totalSessionsCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">clinical_notes</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Bugünkü Uygulamalar
+        </span>
+        <strong class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+          ⚡ {{ todaySessionsCount() }} Seans
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">today</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Tamamlanan Seanslar
+        </span>
+        <strong class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">
+          ✅ {{ completedSessionsCount() }}
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">check_circle</span>
+      </div>
+    </div>
+
+    <div class="odv-card p-4 flex items-center justify-between">
+      <div>
+        <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Ortalama Seans Süresi
+        </span>
+        <strong class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-0.5 block">
+          ⏱️ {{ averageSessionDuration() }} dk
+        </strong>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+        <span class="material-symbols-outlined icon-size-5">timer</span>
       </div>
     </div>
   </section>
@@ -297,7 +529,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
-            @for (row of rows(); track row.id) {
+            @for (row of paginatedRows(); track row.id) {
               @let cust = asCustomer(row);
               <tr
                 (click)="openCustomerDetail(row)"
@@ -482,11 +714,11 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
-            @for (row of rows(); track row.id) {
+            @for (row of paginatedRows(); track row.id) {
               <tr
-                (click)="openCustomerDetailFromConsultation(row)"
+                (click)="openEdit(row)"
                 class="hover:bg-amber-50/40 dark:hover:bg-slate-800/80 transition-colors group cursor-pointer"
-                title="Müşteri kartı ve seans ön görüşme detaylarını açmak için tıklayın"
+                title="Ön görüşme detaylarını açmak ve düzenlemek için tıklayın"
               >
                 <!-- Aday Müşteri -->
                 <td class="odv-td">
@@ -686,7 +918,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs sm:text-sm">
-            @for (row of rows(); track row.id) {
+            @for (row of paginatedRows(); track row.id) {
               <tr class="hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 transition-colors group">
                 @for (column of definition.columns; track column.key) {
                   <td class="odv-td">
@@ -801,14 +1033,110 @@
       </table>
     </div>
 
-    <!-- Table Footer with Count -->
+    <!-- Table Footer with Enterprise Pagination -->
     <footer
-      class="p-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400"
+      class="p-4 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400 bg-slate-50/40 dark:bg-slate-900/40"
     >
-      <span
-        >Toplam <strong>{{ rows().length }}</strong> kayıt listeleniyor</span
-      >
-      <span class="text-[11px] font-semibold text-slate-400">MainApi Enterprise Data Model</span>
+      <div class="flex items-center gap-3 flex-wrap">
+        <span class="font-bold text-slate-700 dark:text-slate-300">
+          {{ paginationRangeText() }}
+        </span>
+
+        <span class="text-slate-300 dark:text-slate-700">|</span>
+
+        <!-- Page Size Selector -->
+        <label class="flex items-center gap-1.5 text-xs font-semibold">
+          <span>Sayfa başına:</span>
+          <select
+            [value]="pageSize()"
+            (change)="onPageSizeChange($event)"
+            class="py-1 px-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            aria-label="Sayfa başına kayıt sayısı"
+          >
+            <option [value]="10">10</option>
+            <option [value]="25">25</option>
+            <option [value]="50">50</option>
+            <option [value]="100">100</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Pagination Nav Controls -->
+      @if (totalPages() > 1) {
+        <nav class="flex items-center gap-1 select-none" aria-label="Sayfalama">
+          <!-- First Page -->
+          <button
+            type="button"
+            (click)="setPage(1)"
+            [disabled]="page() === 1"
+            class="w-7 h-7 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="İlk Sayfa"
+            aria-label="İlk sayfa"
+          >
+            <span class="material-symbols-outlined text-sm">first_page</span>
+          </button>
+
+          <!-- Prev Page -->
+          <button
+            type="button"
+            (click)="prevPage()"
+            [disabled]="page() === 1"
+            class="w-7 h-7 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="Önceki Sayfa"
+            aria-label="Önceki sayfa"
+          >
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+
+          <!-- Numbered Page Pills -->
+          @for (p of pagesList(); track p) {
+            <button
+              type="button"
+              (click)="setPage(p)"
+              class="min-w-[28px] h-7 px-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center justify-center"
+              [class.bg-indigo-600]="page() === p"
+              [class.text-white]="page() === p"
+              [class.border-indigo-600]="page() === p"
+              [class.shadow-xs]="page() === p"
+              [class.bg-white]="page() !== p"
+              [class.dark:bg-slate-800]="page() !== p"
+              [class.text-slate-700]="page() !== p"
+              [class.dark:text-slate-300]="page() !== p"
+              [class.border-slate-200]="page() !== p"
+              [class.dark:border-slate-700]="page() !== p"
+              [class.hover:bg-slate-100]="page() !== p"
+              [class.dark:hover:bg-slate-700]="page() !== p"
+              [attr.aria-current]="page() === p ? 'page' : null"
+            >
+              {{ p }}
+            </button>
+          }
+
+          <!-- Next Page -->
+          <button
+            type="button"
+            (click)="nextPage()"
+            [disabled]="page() === totalPages()"
+            class="w-7 h-7 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="Sonraki Sayfa"
+            aria-label="Sonraki sayfa"
+          >
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+
+          <!-- Last Page -->
+          <button
+            type="button"
+            (click)="setPage(totalPages())"
+            [disabled]="page() === totalPages()"
+            class="w-7 h-7 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer transition-colors"
+            title="Son Sayfa"
+            aria-label="Son sayfa"
+          >
+            <span class="material-symbols-outlined text-sm">last_page</span>
+          </button>
+        </nav>
+      }
     </footer>
   }
 </div>
@@ -816,9 +1144,9 @@
 <!-- 5. Slide-Over Edit / Create Drawer -->
 @if (drawerOpen()) {
   <app-slide-over
-    [title]="editingId() ? 'Kaydı Düzenle' : (isWaitlistWorkspace() ? 'Yeni Bekleme Talebi' : definition.primaryAction)"
-    [description]="isWaitlistWorkspace() ? 'Müsaitlik açıldığında veya randevu iptalinde müşteriye hemen teklif gönderin.' : definition.description"
-    [eyebrow]="editingId() ? 'Kayıt Güncelleme' : (isWaitlistWorkspace() ? 'KAPASİTE & TALEP YÖNETİMİ' : 'Yeni Kayıt Oluşturma')"
+    [title]="editingId() ? (isConsultationWorkspace() ? 'Ön Görüşmeyi Düzenle' : isHealthWorkspace() ? 'Sağlık Beyanını Düzenle' : isConsentWorkspace() ? 'Onam Formunu Düzenle' : isPackageWorkspace() ? 'Paket Satışını Düzenle' : isSessionWorkspace() ? 'Seans Uygulama Kaydını Düzenle' : 'Kaydı Düzenle') : (isWaitlistWorkspace() ? 'Yeni Bekleme Talebi' : isConsultationWorkspace() ? 'Yeni Ön Görüşme ve Bilgi Talebi' : isHealthWorkspace() ? 'Yeni Sağlık Beyanı ve Döküman Ekle' : isConsentWorkspace() ? 'Yeni Onam & KVKK Rıza Formu' : isPackageWorkspace() ? 'Yeni Paket Satışı & Seans Tanımlama' : isSessionWorkspace() ? 'Yeni Seans Uygulama Kaydı' : definition.primaryAction)"
+    [description]="isWaitlistWorkspace() ? 'Müsaitlik açıldığında veya randevu iptalinde müşteriye hemen teklif gönderin.' : isConsultationWorkspace() ? 'Aday veya mevcut müşterinin ilgilendiği seans, paket ve verilen fiyat teklifini kaydedin.' : isHealthWorkspace() ? 'Müşterinin kontrendikasyon riskini, alerjilerini, cilt tipini ve tıbbi onay dökümanlarını kaydedin.' : isConsentWorkspace() ? 'Danışanın açık rıza, aydınlatma metni, dijital veya ıslak imzalı onay formunu kaydedin.' : isPackageWorkspace() ? 'Danışana hazır sektör şablonundan veya özel seans paketi satışı yapın, seans haklarını ve tahsilatını belirleyin.' : isSessionWorkspace() ? 'Cihaz parametreleri, enerji (J), atım sayısı, cilt reaksiyonu ve uzman takibiyle klinik seans uygulamasını kaydedin.' : definition.description"
+    [eyebrow]="editingId() ? (isConsultationWorkspace() ? 'ÖN GÖRÜŞME GÜNCELLEME' : isHealthWorkspace() ? 'KLİNİK GÜVENLİK GÜNCELLEME' : isConsentWorkspace() ? 'ONAM FORMU GÜNCELLEME' : isPackageWorkspace() ? 'SEANS VE PAKET SATIŞ GÜNCELLEME' : isSessionWorkspace() ? 'KLİNİK SEANS VE PROTOKOL GÜNCELLEME' : 'Kayıt Güncelleme') : (isWaitlistWorkspace() ? 'KAPASİTE & TALEP YÖNETİMİ' : isConsultationWorkspace() ? 'ADAY MÜŞTERİ & DANIŞMANLIK' : isHealthWorkspace() ? 'ÖZEL NİTELİKLİ VERİ & KLİNİK GÜVENLİK' : isConsentWorkspace() ? 'HUKUKİ VE TIBBİ ONAM YÖNETİMİ' : isPackageWorkspace() ? 'DANIŞAN SEANS VE PAKET SATIŞI' : isSessionWorkspace() ? 'KLİNİK UYGULAMA VE CİHAZ PROTOKOLÜ' : 'Yeni Kayıt Oluşturma')"
     (closed)="closeDrawer()"
   >
     @if (isWaitlistWorkspace()) {
@@ -1229,6 +1557,2773 @@
 
         <button class="hidden" type="submit">Kaydet</button>
       </form>
+    } @else if (isConsultationWorkspace()) {
+      <!-- Specialized Consultation & Inquiry Form -->
+      <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+        @if (feedback()) {
+          <div
+            class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2"
+            role="alert"
+          >
+            <span class="material-symbols-outlined icon-size-4.5 text-rose-600">error</span>
+            <span>{{ feedback() }}</span>
+          </div>
+        }
+
+        <!-- Section 1: Şube & Aday / Müşteri Bilgileri -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-amber-500">person</span>
+              <span>Aday / Müşteri İletişim Bilgileri</span>
+            </span>
+            @if (fieldValue('customerId')) {
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                Mevcut Müşteri
+              </span>
+            }
+          </div>
+
+          @if ((branches.value()?.length ?? 0) > 1) {
+            <div>
+              <app-searchable-select
+                label="Şube"
+                [required]="true"
+                icon="store"
+                placeholder="Şube Seçin"
+                searchPlaceholder="Şubelerde ara…"
+                dropdownWidth="wide"
+                [options]="waitlistBranchOptions()"
+                [value]="asString(fieldValue('branchId')) || (branches.value()?.[0]?.id ?? '')"
+                (valueChange)="setDraftValue('branchId', $event)"
+              />
+            </div>
+          }
+
+          <!-- Opsiyonel: Mevcut Müşterilerden Seç -->
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              Mevcut Müşterilerden Otomatik Doldur (İsteğe Bağlı)
+            </label>
+            <app-customer-combobox
+              [value]="asString(fieldValue('customerId'))"
+              [branchId]="asString(fieldValue('branchId')) || branchFilter()"
+              [preloadedCustomers]="allCustomers()"
+              (customerSelected)="onConsultationCustomerSelected($event)"
+              (valueChange)="setDraftValue('customerId', $event)"
+            />
+          </div>
+
+          <!-- Aday Adı ve Telefon -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-customer-name"
+              >
+                Aday / Müşteri Adı Soyadı <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="cns-customer-name"
+                type="text"
+                required
+                placeholder="Örn: Ayşe Demir"
+                [value]="fieldValue('customerName')"
+                (input)="setDraftValue('customerName', $any($event.target).value)"
+                class="odv-input font-medium"
+              />
+            </div>
+
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-phone"
+              >
+                İletişim Telefonu <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="cns-phone"
+                type="tel"
+                required
+                placeholder="05xx xxx xx xx"
+                [value]="fieldValue('phone')"
+                (input)="setDraftValue('phone', $any($event.target).value)"
+                class="odv-input font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- E-posta & İletişim Kanalı -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-email"
+              >
+                E-Posta Adresi
+              </label>
+              <input
+                id="cns-email"
+                type="email"
+                placeholder="ornek@mail.com"
+                [value]="fieldValue('email')"
+                (input)="setDraftValue('email', $any($event.target).value)"
+                class="odv-input"
+              />
+            </div>
+
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-channel"
+              >
+                İlk İletişim Kanalı
+              </label>
+              <select
+                id="cns-channel"
+                [value]="fieldValue('channel') || 'Yüz Yüze'"
+                (change)="setDraftValue('channel', $any($event.target).value)"
+                class="odv-input font-medium"
+              >
+                <option value="Yüz Yüze">🏢 Yüz Yüze (Merkeze Geldi)</option>
+                <option value="Telefon">📞 Telefon ile Aradı</option>
+                <option value="WhatsApp">💬 WhatsApp Mesajı</option>
+                <option value="Instagram">📸 Instagram DM</option>
+                <option value="Web">🌐 Web / Sosyal Medya Formu</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: İlgilenilen Hizmet & Seans Paketi & Fiyat Teklifi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-4 text-indigo-500">spa</span>
+            <span>İlgilenilen Seans & Fiyat Teklifi</span>
+          </span>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-category"
+              >
+                Hizmet Kategorisi <span class="text-rose-500">*</span>
+              </label>
+              <select
+                id="cns-category"
+                required
+                [value]="fieldValue('serviceCategory') || 'Lazer Epilasyon'"
+                (change)="setDraftValue('serviceCategory', $any($event.target).value)"
+                class="odv-input font-semibold"
+              >
+                <option value="Lazer Epilasyon">Lazer Epilasyon</option>
+                <option value="Medikal Cilt Bakımı">Medikal Cilt Bakımı</option>
+                <option value="Bölgesel İncelme">Bölgesel İncelme</option>
+                <option value="Tırnak & El-Ayak">Tırnak & El-Ayak</option>
+                <option value="Spa & Masaj">Spa & Masaj</option>
+                <option value="Kalıcı Makyaj">Kalıcı Makyaj</option>
+                <option value="Diğer">Diğer</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-inquired"
+              >
+                İlgilenilen Seans / Paket Detayı <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="cns-inquired"
+                type="text"
+                required
+                placeholder="Örn: Buz Lazer Tüm Vücut 8 Seans"
+                [value]="fieldValue('inquiredSession')"
+                (input)="setDraftValue('inquiredSession', $any($event.target).value)"
+                class="odv-input font-semibold"
+              />
+            </div>
+          </div>
+
+          <!-- Quick Service Suggestion Chips -->
+          @if (allServices().length > 0) {
+            <div>
+              <span class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+                Hızlı Hizmet Seçimi:
+              </span>
+              <div class="flex items-center gap-1.5 flex-wrap max-h-24 overflow-y-auto">
+                @for (srv of allServices().slice(0, 6); track srv.id) {
+                  <button
+                    type="button"
+                    (click)="onConsultationQuickServicePick(srv)"
+                    class="px-2 py-1 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+                  >
+                    {{ srv['name'] }}
+                    @if (srv['price']) {
+                      <span class="text-indigo-500 dark:text-indigo-400 font-mono text-[10px] ml-0.5">₺{{ srv['price'] }}</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-target-sessions"
+              >
+                Önerilen Seans Sayısı
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  id="cns-target-sessions"
+                  type="number"
+                  min="1"
+                  step="1"
+                  [value]="fieldValue('targetSessionsCount') || 1"
+                  (input)="setDraftValue('targetSessionsCount', +$any($event.target).value)"
+                  class="odv-input font-bold"
+                />
+                <div class="flex items-center gap-1">
+                  @for (count of [1, 6, 8, 10]; track count) {
+                    <button
+                      type="button"
+                      (click)="setDraftValue('targetSessionsCount', count)"
+                      class="px-2 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer"
+                      [class.bg-indigo-600]="fieldValue('targetSessionsCount') === count"
+                      [class.text-white]="fieldValue('targetSessionsCount') === count"
+                      [class.border-indigo-600]="fieldValue('targetSessionsCount') === count"
+                      [class.bg-white]="fieldValue('targetSessionsCount') !== count"
+                      [class.dark:bg-slate-900]="fieldValue('targetSessionsCount') !== count"
+                      [class.border-slate-200]="fieldValue('targetSessionsCount') !== count"
+                      [class.dark:border-slate-700]="fieldValue('targetSessionsCount') !== count"
+                    >
+                      {{ count }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-price"
+              >
+                Verilen Fiyat Teklifi (₺)
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₺</span>
+                <input
+                  id="cns-price"
+                  type="number"
+                  min="0"
+                  step="100"
+                  placeholder="0.00"
+                  [value]="fieldValue('quotedPrice') || 0"
+                  (input)="setDraftValue('quotedPrice', +$any($event.target).value)"
+                  class="odv-input font-mono font-bold pl-8 text-emerald-600 dark:text-emerald-400"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Görüşen Uzman & Tarihler -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-4 text-blue-500">calendar_month</span>
+            <span>Görüşme ve Takip Planı</span>
+          </span>
+
+          <div>
+            <app-searchable-select
+              label="Görüşmeyi Yapan Uzman"
+              icon="badge"
+              placeholder="Uzman Seçin veya Boş Bırakın"
+              searchPlaceholder="Uzman ara…"
+              dropdownWidth="wide"
+              [options]="waitlistStaffOptions()"
+              [value]="asString(fieldValue('consultantStaffName'))"
+              (valueChange)="onConsultationStaffChange($event)"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-date"
+              >
+                Görüşme Tarihi
+              </label>
+              <input
+                id="cns-date"
+                type="date"
+                [value]="fieldValue('consultationDate')"
+                (input)="setDraftValue('consultationDate', $any($event.target).value)"
+                class="odv-input font-medium"
+              />
+            </div>
+
+            <div>
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+                for="cns-followup"
+              >
+                Sonraki Takip Tarihi
+              </label>
+              <input
+                id="cns-followup"
+                type="date"
+                [value]="fieldValue('nextFollowUpDate')"
+                (input)="setDraftValue('nextFollowUpDate', $any($event.target).value)"
+                class="odv-input font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Quick Follow-up Chips -->
+          <div>
+            <span class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              Hızlı Takip Tarihi Ata:
+            </span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                (click)="setConsultationFollowUpQuickDays(2)"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                +2 Gün Sonra
+              </button>
+              <button
+                type="button"
+                (click)="setConsultationFollowUpQuickDays(5)"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                +5 Gün Sonra
+              </button>
+              <button
+                type="button"
+                (click)="setConsultationFollowUpQuickDays(7)"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                +1 Hafta Sonra
+              </button>
+              <button
+                type="button"
+                (click)="setConsultationFollowUpQuickDays(14)"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 cursor-pointer transition-all"
+              >
+                +2 Hafta Sonra
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: İlgi Düzeyi & Sonuç Durumu -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-4 text-rose-500">local_fire_department</span>
+            <span>Aday Sıcaklığı & Sonuç</span>
+          </span>
+
+          <div>
+            <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              İlgi Düzeyi
+            </span>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                (click)="setDraftValue('interestLevel', 'high')"
+                class="p-2.5 rounded-xl text-xs font-extrabold border text-center flex flex-col items-center gap-1 cursor-pointer transition-all"
+                [class.bg-rose-50]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.border-rose-400]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.text-rose-700]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.dark:bg-rose-950/60]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.dark:text-rose-300]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.border-slate-200]="fieldValue('interestLevel') !== 'high' && !!fieldValue('interestLevel')"
+                [class.dark:border-slate-700]="fieldValue('interestLevel') !== 'high' && !!fieldValue('interestLevel')"
+                [class.bg-white]="fieldValue('interestLevel') !== 'high' && !!fieldValue('interestLevel')"
+                [class.dark:bg-slate-900]="fieldValue('interestLevel') !== 'high' && !!fieldValue('interestLevel')"
+                [class.text-slate-600]="fieldValue('interestLevel') !== 'high' && !!fieldValue('interestLevel')"
+              >
+                <span class="text-base">🔥</span>
+                <span>Yüksek / Sıcak</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setDraftValue('interestLevel', 'medium')"
+                class="p-2.5 rounded-xl text-xs font-extrabold border text-center flex flex-col items-center gap-1 cursor-pointer transition-all"
+                [class.bg-amber-50]="fieldValue('interestLevel') === 'medium'"
+                [class.border-amber-400]="fieldValue('interestLevel') === 'medium'"
+                [class.text-amber-700]="fieldValue('interestLevel') === 'medium'"
+                [class.dark:bg-amber-950/60]="fieldValue('interestLevel') === 'medium'"
+                [class.dark:text-amber-300]="fieldValue('interestLevel') === 'medium'"
+                [class.border-slate-200]="fieldValue('interestLevel') !== 'medium'"
+                [class.dark:border-slate-700]="fieldValue('interestLevel') !== 'medium'"
+                [class.bg-white]="fieldValue('interestLevel') !== 'medium'"
+                [class.dark:bg-slate-900]="fieldValue('interestLevel') !== 'medium'"
+                [class.text-slate-600]="fieldValue('interestLevel') !== 'medium'"
+              >
+                <span class="text-base">⚡</span>
+                <span>Orta / Düşünüyor</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="setDraftValue('interestLevel', 'low')"
+                class="p-2.5 rounded-xl text-xs font-extrabold border text-center flex flex-col items-center gap-1 cursor-pointer transition-all"
+                [class.bg-slate-100]="fieldValue('interestLevel') === 'low'"
+                [class.border-slate-400]="fieldValue('interestLevel') === 'low'"
+                [class.text-slate-700]="fieldValue('interestLevel') === 'low'"
+                [class.dark:bg-slate-800]="fieldValue('interestLevel') === 'low'"
+                [class.dark:text-slate-300]="fieldValue('interestLevel') === 'low'"
+                [class.border-slate-200]="fieldValue('interestLevel') !== 'low'"
+                [class.dark:border-slate-700]="fieldValue('interestLevel') !== 'low'"
+                [class.bg-white]="fieldValue('interestLevel') !== 'low'"
+                [class.dark:bg-slate-900]="fieldValue('interestLevel') !== 'low'"
+                [class.text-slate-600]="fieldValue('interestLevel') !== 'low'"
+              >
+                <span class="text-base">❄️</span>
+                <span>Düşük / Bilgi Aldı</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+              for="cns-status"
+            >
+              Sonuç Durumu
+            </label>
+            <select
+              id="cns-status"
+              [value]="fieldValue('status') || 'inquiry'"
+              (change)="setDraftValue('status', $any($event.target).value)"
+              class="odv-input font-bold"
+            >
+              <option value="inquiry">⏳ Bilgi Aldı / Karar Verecek</option>
+              <option value="scheduled">📅 Deneme Seansı / Randevu Verildi</option>
+              <option value="converted">🏆 Satışa Dönüştü (Paket Satıldı)</option>
+              <option value="cancelled">❌ Vazgeçti / İptal</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section 5: Görüşme Notları -->
+        <div>
+          <label
+            class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5"
+            for="cns-notes"
+          >
+            Danışman / Görüşme Notları
+          </label>
+          <textarea
+            id="cns-notes"
+            rows="2"
+            [value]="fieldValue('notes')"
+            (input)="setDraftValue('notes', $any($event.target).value)"
+            placeholder="Adayın beklentileri, özel sağlık/cilt durumu, bütçe veya indirim talebi…"
+            class="odv-input text-xs sm:text-sm"
+          ></textarea>
+        </div>
+
+        <!-- Section 6: Canlı Ön Görüşme & Teklif Özeti Kartı -->
+        @if (fieldValue('customerName') || fieldValue('inquiredSession')) {
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-50/70 via-white to-orange-50/40 dark:from-amber-950/40 dark:via-slate-900 dark:to-slate-900 border border-amber-200/80 dark:border-amber-900/60 shadow-xs">
+            <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-amber-100 dark:border-amber-900/60">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                <span class="material-symbols-outlined icon-size-4">support_agent</span>
+                <span>Ön Görüşme Özeti</span>
+              </span>
+              <span
+                class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
+                [class.bg-rose-100]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.text-rose-700]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.dark:bg-rose-950]="fieldValue('interestLevel') === 'high' || !fieldValue('interestLevel')"
+                [class.bg-amber-100]="fieldValue('interestLevel') === 'medium'"
+                [class.text-amber-700]="fieldValue('interestLevel') === 'medium'"
+                [class.dark:bg-amber-950]="fieldValue('interestLevel') === 'medium'"
+                [class.bg-slate-100]="fieldValue('interestLevel') === 'low'"
+                [class.text-slate-700]="fieldValue('interestLevel') === 'low'"
+                [class.dark:bg-slate-800]="fieldValue('interestLevel') === 'low'"
+              >
+                {{ fieldValue('interestLevel') === 'low' ? '❄️ Düşük İlgi' : fieldValue('interestLevel') === 'medium' ? '⚡ Düşünüyor' : '🔥 Sıcak Aday' }}
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+              @if (fieldValue('customerName')) {
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium">Aday Müşteri:</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-200">
+                    {{ fieldValue('customerName') }}
+                    @if (fieldValue('phone')) {
+                      <span class="text-[11px] font-mono text-slate-400">({{ fieldValue('phone') }})</span>
+                    }
+                  </span>
+                </div>
+              }
+
+              @if (fieldValue('inquiredSession')) {
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium">Paket / Seans:</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-200">
+                    {{ fieldValue('inquiredSession') }}
+                    @if (fieldValue('targetSessionsCount')) {
+                      <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-[11px]">({{ fieldValue('targetSessionsCount') }} Seans)</span>
+                    }
+                  </span>
+                </div>
+              }
+
+              @if (fieldValue('quotedPrice')) {
+                <div class="flex items-center justify-between pt-1 border-t border-dashed border-amber-200 dark:border-amber-900/60">
+                  <span class="text-slate-400 font-medium">Verilen Teklif:</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-sm">
+                    ₺{{ asNumber(fieldValue('quotedPrice')) | number: '1.2-2' }}
+                  </span>
+                </div>
+              }
+
+              @if (fieldValue('nextFollowUpDate')) {
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium">Takip Tarihi:</span>
+                  <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono text-[11px]">
+                    {{ formatDate(fieldValue('nextFollowUpDate')) }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <button class="hidden" type="submit">Kaydet</button>
+      </form>
+    } @else if (isHealthWorkspace()) {
+      <!-- Specialized Clinical Health & Contraindication Form -->
+      <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+        @if (feedback()) {
+          <div
+            class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2"
+            role="alert"
+          >
+            <span class="material-symbols-outlined icon-size-4.5 text-rose-600">error</span>
+            <span>{{ feedback() }}</span>
+          </div>
+        }
+
+        <!-- Section 1: Danışan / Müşteri Seçimi & Şube -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-emerald-500">person_search</span>
+              <span>Danışan / Müşteri Seçimi</span> <span class="text-rose-500">*</span>
+            </span>
+            @if (healthSelectedCustomer(); as cust) {
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 uppercase">
+                {{ cust['segment'] ? asString(cust['segment']) : 'Kayıtlı Müşteri' }}
+              </span>
+            }
+          </div>
+
+          @if ((branches.value()?.length ?? 0) > 1) {
+            <div>
+              <app-searchable-select
+                label="Şube"
+                [required]="true"
+                icon="store"
+                placeholder="Şube Seçin"
+                searchPlaceholder="Şubelerde ara…"
+                dropdownWidth="wide"
+                [options]="waitlistBranchOptions()"
+                [value]="asString(fieldValue('branchId')) || (branches.value()?.[0]?.id ?? '')"
+                (valueChange)="setDraftValue('branchId', $event)"
+              />
+            </div>
+          }
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
+              Müşteri Ara (İsim, Telefon veya TC Kimlik No ile)
+            </label>
+            <app-customer-combobox
+              [value]="asString(fieldValue('customerId'))"
+              [branchId]="asString(fieldValue('branchId')) || branchFilter()"
+              [preloadedCustomers]="allCustomers()"
+              (customerSelected)="onHealthCustomerSelected($event)"
+              (valueChange)="setDraftValue('customerId', $event)"
+              (createRequested)="openCustomerCreateModal()"
+            />
+          </div>
+
+          @if (healthSelectedCustomer(); as cust) {
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-emerald-200/70 dark:border-emerald-900/50 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold flex items-center justify-center text-xs">
+                  {{ initials(asString(cust['fullName'] || cust['name'])) }}
+                </div>
+                <div>
+                  <span class="font-bold text-slate-800 dark:text-slate-200 block">
+                    {{ cust['fullName'] || cust['name'] }}
+                  </span>
+                  <span class="text-[11px] text-slate-400 font-mono">
+                    {{ cust['phone'] || 'Telefon Yok' }}
+                  </span>
+                </div>
+              </div>
+              @if (computeCustomerAge(asString(cust['birthDate'])); as age) {
+                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                  {{ age }} Yaşında
+                </span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Section 2: Kontrendikasyon Risk Değerlendirmesi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-rose-500">health_and_safety</span>
+              <span>Kontrendikasyon Risk Değerlendirmesi</span>
+            </span>
+            <span class="text-[10px] text-slate-400 font-medium">Prosedür öncesi güvenlik</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              (click)="setDraftValue('contraindicationRisk', 'low')"
+              class="p-3 rounded-xl text-xs font-bold border text-center flex flex-col items-center gap-1 cursor-pointer transition-all"
+              [class.bg-emerald-50]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+              [class.border-emerald-400]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+              [class.text-emerald-700]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+              [class.dark:bg-emerald-950/60]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+              [class.dark:text-emerald-300]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+              [class.border-slate-200]="fieldValue('contraindicationRisk') !== 'low' && !!fieldValue('contraindicationRisk')"
+              [class.dark:border-slate-700]="fieldValue('contraindicationRisk') !== 'low' && !!fieldValue('contraindicationRisk')"
+              [class.bg-white]="fieldValue('contraindicationRisk') !== 'low' && !!fieldValue('contraindicationRisk')"
+              [class.dark:bg-slate-900]="fieldValue('contraindicationRisk') !== 'low' && !!fieldValue('contraindicationRisk')"
+              [class.text-slate-600]="fieldValue('contraindicationRisk') !== 'low' && !!fieldValue('contraindicationRisk')"
+            >
+              <span class="text-lg">🟢</span>
+              <span>Düşük Risk</span>
+              <span class="text-[10px] font-normal opacity-80">Standart Seans</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="setDraftValue('contraindicationRisk', 'medium')"
+              class="p-3 rounded-xl text-xs font-bold border text-center flex flex-col items-center gap-1 cursor-pointer transition-all"
+              [class.bg-amber-50]="fieldValue('contraindicationRisk') === 'medium'"
+              [class.border-amber-400]="fieldValue('contraindicationRisk') === 'medium'"
+              [class.text-amber-700]="fieldValue('contraindicationRisk') === 'medium'"
+              [class.dark:bg-amber-950/60]="fieldValue('contraindicationRisk') === 'medium'"
+              [class.dark:text-amber-300]="fieldValue('contraindicationRisk') === 'medium'"
+              [class.border-slate-200]="fieldValue('contraindicationRisk') !== 'medium'"
+              [class.dark:border-slate-700]="fieldValue('contraindicationRisk') !== 'medium'"
+              [class.bg-white]="fieldValue('contraindicationRisk') !== 'medium'"
+              [class.dark:bg-slate-900]="fieldValue('contraindicationRisk') !== 'medium'"
+              [class.text-slate-600]="fieldValue('contraindicationRisk') !== 'medium'"
+            >
+              <span class="text-lg">🟡</span>
+              <span>Orta Risk</span>
+              <span class="text-[10px] font-normal opacity-80">Dikkatli Uygulama</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="setDraftValue('contraindicationRisk', 'high')"
+              class="p-3 rounded-xl text-xs font-bold border text-center flex flex-col items-center gap-1 cursor-pointer transition-all"
+              [class.bg-rose-50]="fieldValue('contraindicationRisk') === 'high'"
+              [class.border-rose-400]="fieldValue('contraindicationRisk') === 'high'"
+              [class.text-rose-700]="fieldValue('contraindicationRisk') === 'high'"
+              [class.dark:bg-rose-950/60]="fieldValue('contraindicationRisk') === 'high'"
+              [class.dark:text-rose-300]="fieldValue('contraindicationRisk') === 'high'"
+              [class.border-slate-200]="fieldValue('contraindicationRisk') !== 'high'"
+              [class.dark:border-slate-700]="fieldValue('contraindicationRisk') !== 'high'"
+              [class.bg-white]="fieldValue('contraindicationRisk') !== 'high'"
+              [class.dark:bg-slate-900]="fieldValue('contraindicationRisk') !== 'high'"
+              [class.text-slate-600]="fieldValue('contraindicationRisk') !== 'high'"
+            >
+              <span class="text-lg">🔴</span>
+              <span>Yüksek Risk</span>
+              <span class="text-[10px] font-normal opacity-80">Doktor Onayı Şart</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 3: Kritik Klinik Güvenlik Kontrolleri -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-4 text-amber-500">verified_user</span>
+            <span>Özel Klinik Kontroller & Durumlar</span>
+          </span>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <!-- Hamilelik -->
+            <label
+              class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all select-none"
+              [class.bg-purple-50]="fieldValue('isPregnant')"
+              [class.border-purple-300]="fieldValue('isPregnant')"
+              [class.dark:bg-purple-950/40]="fieldValue('isPregnant')"
+              [class.border-slate-200]="!fieldValue('isPregnant')"
+              [class.dark:border-slate-700]="!fieldValue('isPregnant')"
+              [class.bg-white]="!fieldValue('isPregnant')"
+              [class.dark:bg-slate-900]="!fieldValue('isPregnant')"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-base">🤰</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Hamilelik Durumu</span>
+                  <span class="text-[10px] text-slate-400">Gebelik mevcut</span>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                [checked]="fieldValue('isPregnant')"
+                (change)="setDraftValue('isPregnant', $any($event.target).checked)"
+                class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 border-slate-300"
+              />
+            </label>
+
+            <!-- Emzirme -->
+            <label
+              class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all select-none"
+              [class.bg-pink-50]="fieldValue('isNursing')"
+              [class.border-pink-300]="fieldValue('isNursing')"
+              [class.dark:bg-pink-950/40]="fieldValue('isNursing')"
+              [class.border-slate-200]="!fieldValue('isNursing')"
+              [class.dark:border-slate-700]="!fieldValue('isNursing')"
+              [class.bg-white]="!fieldValue('isNursing')"
+              [class.dark:bg-slate-900]="!fieldValue('isNursing')"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-base">🍼</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Emzirme Dönemi</span>
+                  <span class="text-[10px] text-slate-400">Aktif emziriyor</span>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                [checked]="fieldValue('isNursing')"
+                (change)="setDraftValue('isNursing', $any($event.target).checked)"
+                class="w-4 h-4 rounded text-pink-600 focus:ring-pink-500 border-slate-300"
+              />
+            </label>
+
+            <!-- Kalp Pili / Metal İmplant -->
+            <label
+              class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all select-none"
+              [class.bg-rose-50]="fieldValue('hasImplant')"
+              [class.border-rose-300]="fieldValue('hasImplant')"
+              [class.dark:bg-rose-950/40]="fieldValue('hasImplant')"
+              [class.border-slate-200]="!fieldValue('hasImplant')"
+              [class.dark:border-slate-700]="!fieldValue('hasImplant')"
+              [class.bg-white]="!fieldValue('hasImplant')"
+              [class.dark:bg-slate-900]="!fieldValue('hasImplant')"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-base">⚡</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Kalp Pili / İmplant</span>
+                  <span class="text-[10px] text-slate-400">Metal protez, pil</span>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                [checked]="fieldValue('hasImplant')"
+                (change)="setDraftValue('hasImplant', $any($event.target).checked)"
+                class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300"
+              />
+            </label>
+
+            <!-- Kan Sulandırıcı -->
+            <label
+              class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all select-none"
+              [class.bg-red-50]="fieldValue('isBloodThinner')"
+              [class.border-red-300]="fieldValue('isBloodThinner')"
+              [class.dark:bg-red-950/40]="fieldValue('isBloodThinner')"
+              [class.border-slate-200]="!fieldValue('isBloodThinner')"
+              [class.dark:border-slate-700]="!fieldValue('isBloodThinner')"
+              [class.bg-white]="!fieldValue('isBloodThinner')"
+              [class.dark:bg-slate-900]="!fieldValue('isBloodThinner')"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-base">🩸</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Kan Sulandırıcı İlaç</span>
+                  <span class="text-[10px] text-slate-400">Aspirin, Coumadin vb.</span>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                [checked]="fieldValue('isBloodThinner')"
+                (change)="setDraftValue('isBloodThinner', $any($event.target).checked)"
+                class="w-4 h-4 rounded text-red-600 focus:ring-red-500 border-slate-300"
+              />
+            </label>
+
+            <!-- Roaccutane / Retinoid -->
+            <label
+              class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all select-none"
+              [class.bg-amber-50]="fieldValue('isRoaccutane')"
+              [class.border-amber-300]="fieldValue('isRoaccutane')"
+              [class.dark:bg-amber-950/40]="fieldValue('isRoaccutane')"
+              [class.border-slate-200]="!fieldValue('isRoaccutane')"
+              [class.dark:border-slate-700]="!fieldValue('isRoaccutane')"
+              [class.bg-white]="!fieldValue('isRoaccutane')"
+              [class.dark:bg-slate-900]="!fieldValue('isRoaccutane')"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-base">💊</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Roaccutane / Retinoid</span>
+                  <span class="text-[10px] text-slate-400">Son 6 ay içinde</span>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                [checked]="fieldValue('isRoaccutane')"
+                (change)="setDraftValue('isRoaccutane', $any($event.target).checked)"
+                class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+              />
+            </label>
+
+            <!-- Keloid / Skar Eğilimi -->
+            <label
+              class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all select-none"
+              [class.bg-orange-50]="fieldValue('isKeloid')"
+              [class.border-orange-300]="fieldValue('isKeloid')"
+              [class.dark:bg-orange-950/40]="fieldValue('isKeloid')"
+              [class.border-slate-200]="!fieldValue('isKeloid')"
+              [class.dark:border-slate-700]="!fieldValue('isKeloid')"
+              [class.bg-white]="!fieldValue('isKeloid')"
+              [class.dark:bg-slate-900]="!fieldValue('isKeloid')"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-base">🩹</span>
+                <div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Keloid / Skar Eğilimi</span>
+                  <span class="text-[10px] text-slate-400">Hipertrofik iz oluşumu</span>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                [checked]="fieldValue('isKeloid')"
+                (change)="setDraftValue('isKeloid', $any($event.target).checked)"
+                class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-slate-300"
+              />
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 4: Dermatolojik Cilt Özellikleri & Kan Grubu -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-4 text-indigo-500">dermatology</span>
+            <span>Dermatolojik Cilt Özellikleri & Kan Grubu</span>
+          </span>
+
+          <!-- Fitzpatrick Scale Chips -->
+          <div>
+            <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              Fitzpatrick Cilt Tipi Skalası (Lazer & Işık Enerjisi Ayarı)
+            </span>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              @for (fitz of fitzpatrickTypes; track fitz.value) {
+                <button
+                  type="button"
+                  (click)="setDraftValue('fitzpatrick', fitz.value)"
+                  class="p-2 rounded-xl text-xs font-bold border text-left flex items-center gap-2 cursor-pointer transition-all"
+                  [class.ring-2]="fieldValue('fitzpatrick') === fitz.value"
+                  [class.ring-indigo-500]="fieldValue('fitzpatrick') === fitz.value"
+                  [class.border-indigo-500]="fieldValue('fitzpatrick') === fitz.value"
+                  [class.border-slate-200]="fieldValue('fitzpatrick') !== fitz.value"
+                  [class.dark:border-slate-700]="fieldValue('fitzpatrick') !== fitz.value"
+                  [class.bg-white]="fieldValue('fitzpatrick') !== fitz.value"
+                  [class.dark:bg-slate-900]="fieldValue('fitzpatrick') !== fitz.value"
+                >
+                  <span
+                    class="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-600 shrink-0 shadow-xs"
+                    [style.backgroundColor]="fitz.color"
+                  ></span>
+                  <span class="truncate text-[11px] text-slate-800 dark:text-slate-200">{{ fitz.label.split(' - ')[0] }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="hl-skin-type">
+                Cilt Tipi
+              </label>
+              <select
+                id="hl-skin-type"
+                [value]="fieldValue('skinType') || 'normal'"
+                (change)="setDraftValue('skinType', $any($event.target).value)"
+                class="odv-input font-medium"
+              >
+                <option value="normal">✨ Normal Cilt</option>
+                <option value="kuru">🏜️ Kuru Cilt</option>
+                <option value="yagli">💧 Yağlı Cilt</option>
+                <option value="karma">☯️ Karma Cilt</option>
+                <option value="hassas">🌸 Hassas / Reaktif Cilt</option>
+                <option value="akneye-meyilli">🔴 Akneye Meyilli Cilt</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="hl-blood-type">
+                Kan Grubu
+              </label>
+              <select
+                id="hl-blood-type"
+                [value]="fieldValue('bloodType') || 'Bilinmiyor'"
+                (change)="setDraftValue('bloodType', $any($event.target).value)"
+                class="odv-input font-medium"
+              >
+                <option value="Bilinmiyor">Bilinmiyor / Belirtilmedi</option>
+                <option value="A+">A Rh(+)</option>
+                <option value="A-">A Rh(-)</option>
+                <option value="B+">B Rh(+)</option>
+                <option value="B-">B Rh(-)</option>
+                <option value="AB+">AB Rh(+)</option>
+                <option value="AB-">AB Rh(-)</option>
+                <option value="0+">0 Rh(+)</option>
+                <option value="0-">0 Rh(-)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Detaylı Tıbbi Beyan & Notlar -->
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="hl-allergies">
+              Bilinen Alerjiler (İlaç, Lateks, Kozmetik, Anestezi)
+            </label>
+            <textarea
+              id="hl-allergies"
+              rows="2"
+              [value]="fieldValue('allergies')"
+              (input)="setDraftValue('allergies', $any($event.target).value)"
+              placeholder="Örn: Penisilin alerjisi, kına/paraben hassasiyeti, lokal anestezik duyarlılığı…"
+              class="odv-input text-xs sm:text-sm"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="hl-chronic">
+              Kronik Hastalıklar (Diyabet, Epilepsi, Kalp, Tiroid, Tansiyon)
+            </label>
+            <textarea
+              id="hl-chronic"
+              rows="2"
+              [value]="fieldValue('chronicConditions')"
+              (input)="setDraftValue('chronicConditions', $any($event.target).value)"
+              placeholder="Örn: Tip-2 Diyabet, Tiroid (Haşimato), Hipertansiyon…"
+              class="odv-input text-xs sm:text-sm"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="hl-meds">
+              Düzenli Kullanılan İlaçlar
+            </label>
+            <textarea
+              id="hl-meds"
+              rows="2"
+              [value]="fieldValue('medications')"
+              (input)="setDraftValue('medications', $any($event.target).value)"
+              placeholder="Örn: Euthyrox 50mcg, hormon takviyesi, antidepresan…"
+              class="odv-input text-xs sm:text-sm"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="hl-notes">
+              Klinik / Uzman Operasyon Notları
+            </label>
+            <textarea
+              id="hl-notes"
+              rows="2"
+              [value]="fieldValue('notes')"
+              (input)="setDraftValue('notes', $any($event.target).value)"
+              placeholder="Dövme üzeri koruma, seans test atışı sonucu, doktor onayı alındı vb."
+              class="odv-input text-xs sm:text-sm"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Section 6: Tıbbi Döküman & Dosya Ekleme -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/30 dark:from-indigo-950/30 dark:via-slate-900 dark:to-slate-900 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4">attach_file</span>
+              <span>Tıbbi Döküman & Ekli Belgeler ({{ healthDocuments().length }})</span>
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">PDF, PNG, JPG (Maks. 10MB)</span>
+          </div>
+
+          <!-- Document Category Selector for next upload -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1" for="hl-doc-type">
+              Yüklenecek Belge Kategorisi:
+            </label>
+            <select
+              id="hl-doc-type"
+              [value]="pendingDocType()"
+              (change)="pendingDocType.set($any($event.target).value)"
+              class="odv-input font-medium text-xs"
+            >
+              @for (t of healthDocumentTypes; track t.type) {
+                <option [value]="t.type">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Drag & Drop / File Input Drop Zone -->
+          <div class="relative border-2 border-dashed border-indigo-200 dark:border-indigo-800 rounded-xl p-4 text-center hover:border-indigo-400 transition-colors bg-white/60 dark:bg-slate-900/40 cursor-pointer group">
+            <input
+              type="file"
+              multiple
+              accept="image/*,application/pdf,.doc,.docx"
+              (change)="onHealthFilesSelected($event)"
+              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              title="Belge Yüklemek İçin Tıklayın veya Sürükleyin"
+            />
+            <div class="flex flex-col items-center justify-center pointer-events-none">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined icon-size-5">cloud_upload</span>
+              </div>
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                Dosya Seçin veya Buraya Sürükleyin
+              </span>
+              <span class="text-[11px] text-slate-400 mt-0.5">
+                Anamnez formu, doktor onayı, tahlil sonucu veya cilt fotoğrafları
+              </span>
+            </div>
+          </div>
+
+          <!-- Uploaded Documents List -->
+          @if (healthDocuments().length > 0) {
+            <div class="space-y-2 pt-1">
+              <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Eklenen Dosyalar
+              </span>
+              @for (doc of healthDocuments(); track doc.id) {
+                <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div
+                      class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                      [class.bg-emerald-50]="isImageDocument(doc)"
+                      [class.text-emerald-600]="isImageDocument(doc)"
+                      [class.dark:bg-emerald-950/60]="isImageDocument(doc)"
+                      [class.bg-rose-50]="isPdfDocument(doc)"
+                      [class.text-rose-600]="isPdfDocument(doc)"
+                      [class.dark:bg-rose-950/60]="isPdfDocument(doc)"
+                      [class.bg-indigo-50]="!isImageDocument(doc) && !isPdfDocument(doc)"
+                      [class.text-indigo-600]="!isImageDocument(doc) && !isPdfDocument(doc)"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">{{ getDocumentTypeIcon(doc.type) }}</span>
+                    </div>
+                    <div class="min-w-0">
+                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate block max-w-[180px] sm:max-w-[240px]">
+                        {{ doc.name }}
+                      </span>
+                      <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                        <span class="font-mono">{{ formatFileSize(doc.size) }}</span>
+                        <span>•</span>
+                        <span class="text-indigo-600 dark:text-indigo-400 font-medium">{{ getDocumentTypeLabel(doc.type) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      (click)="previewHealthDocument(doc)"
+                      class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 cursor-pointer transition-colors"
+                      title="Önizle"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">visibility</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="removeHealthDocument(doc.id)"
+                      class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer transition-colors"
+                      title="Dosyayı Kaldır"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">delete</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Section 7: Canlı Sağlık & Güvenlik Özeti Kartı -->
+        @if (healthSelectedCustomer() || fieldValue('contraindicationRisk')) {
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-50 via-white to-rose-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                <span class="material-symbols-outlined icon-size-4 text-emerald-500">assignment_turned_in</span>
+                <span>Klinik Güvenlik Özeti</span>
+              </span>
+              <span
+                class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
+                [class.bg-emerald-100]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+                [class.text-emerald-700]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+                [class.dark:bg-emerald-950]="fieldValue('contraindicationRisk') === 'low' || !fieldValue('contraindicationRisk')"
+                [class.bg-amber-100]="fieldValue('contraindicationRisk') === 'medium'"
+                [class.text-amber-700]="fieldValue('contraindicationRisk') === 'medium'"
+                [class.dark:bg-amber-950]="fieldValue('contraindicationRisk') === 'medium'"
+                [class.bg-rose-100]="fieldValue('contraindicationRisk') === 'high'"
+                [class.text-rose-700]="fieldValue('contraindicationRisk') === 'high'"
+                [class.dark:bg-rose-950]="fieldValue('contraindicationRisk') === 'high'"
+              >
+                {{ fieldValue('contraindicationRisk') === 'high' ? '🔴 Yüksek Risk' : fieldValue('contraindicationRisk') === 'medium' ? '🟡 Orta Risk' : '🟢 Düşük Risk' }}
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+              @if (healthSelectedCustomer(); as cust) {
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium">Danışan:</span>
+                  <span class="font-bold text-slate-800 dark:text-slate-200">
+                    {{ cust['fullName'] || cust['name'] }}
+                  </span>
+                </div>
+              }
+
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400 font-medium">Cilt Tipi & Fitzpatrick:</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200 uppercase">
+                  {{ fieldValue('skinType') || 'normal' }} · {{ fieldValue('fitzpatrick') || 'tip-3' }}
+                </span>
+              </div>
+
+              @if (fieldValue('isPregnant') || fieldValue('isNursing') || fieldValue('hasImplant') || fieldValue('isBloodThinner') || fieldValue('isRoaccutane') || fieldValue('isKeloid')) {
+                <div class="pt-1 border-t border-dashed border-slate-200 dark:border-slate-800 flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[10px] text-slate-400 font-bold">Özel Durumlar:</span>
+                  @if (fieldValue('isPregnant')) {
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300">🤰 Hamile</span>
+                  }
+                  @if (fieldValue('isNursing')) {
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300">🍼 Emziriyor</span>
+                  }
+                  @if (fieldValue('hasImplant')) {
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">⚡ İmplant / Pil</span>
+                  }
+                  @if (fieldValue('isBloodThinner')) {
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300">🩸 Kan Sulandırıcı</span>
+                  }
+                  @if (fieldValue('isRoaccutane')) {
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">💊 Roaccutane</span>
+                  }
+                  @if (fieldValue('isKeloid')) {
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300">🩹 Keloid</span>
+                  }
+                </div>
+              }
+
+              <div class="flex items-center justify-between pt-1 border-t border-dashed border-slate-200 dark:border-slate-800">
+                <span class="text-slate-400 font-medium">Ekli Dökümanlar:</span>
+                <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                  📄 {{ healthDocuments().length }} Adet Belge
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <button class="hidden" type="submit">Kaydet</button>
+      </form>
+    } @else if (isConsentWorkspace()) {
+      <!-- Specialized High-End Consent & KVKK Form -->
+      <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+        @if (feedback()) {
+          <div
+            class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2"
+            role="alert"
+          >
+            <span class="material-symbols-outlined icon-size-4.5 text-rose-600">error</span>
+            <span>{{ feedback() }}</span>
+          </div>
+        }
+
+        <!-- Section 1: Danışan & Şube Seçimi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-indigo-500">person</span>
+              <span>Danışan & Şube Bilgisi</span>
+            </span>
+            <span class="text-[10px] font-bold text-rose-500 uppercase tracking-wider">* Zorunlu</span>
+          </div>
+
+          @if ((branches.value()?.length ?? 0) > 1) {
+            <div>
+              <app-searchable-select
+                label="İşlem Şubesi"
+                [required]="true"
+                icon="store"
+                placeholder="Şube Seçin"
+                searchPlaceholder="Şubelerde ara…"
+                dropdownWidth="wide"
+                [options]="waitlistBranchOptions()"
+                [value]="asString(fieldValue('branchId')) || (branches.value()?.[0]?.id ?? '')"
+                (valueChange)="setDraftValue('branchId', $event)"
+              />
+            </div>
+          }
+
+          <div>
+            <app-customer-combobox
+              [value]="asString(fieldValue('customerId'))"
+              [branchId]="asString(fieldValue('branchId')) || branchFilter()"
+              [preloadedCustomers]="allCustomers()"
+              (customerSelected)="onConsentCustomerSelected($event)"
+              (createRequested)="openCustomerCreateModal()"
+            />
+          </div>
+
+          <!-- Customer Identity & Contact Card -->
+          @if (consentSelectedCustomer(); as cust) {
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-950/60 flex items-center justify-between gap-3 shadow-2xs">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold shrink-0 border border-indigo-200 dark:border-indigo-800">
+                  {{ initials(asString(cust['fullName'] || cust['name'])) }}
+                </span>
+                <div class="min-w-0">
+                  <strong class="block text-xs font-bold text-slate-900 dark:text-white truncate">
+                    {{ asString(cust['fullName'] || cust['name']) }}
+                  </strong>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400 block truncate">
+                    {{ cust['phone'] || 'Telefon Yok' }}
+                    @if (cust['identityNumber']) {
+                      · TCKN: {{ cust['identityNumber'] }}
+                    }
+                  </span>
+                </div>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                Doğrulandı
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- Section 2: Onam & Sözleşme Türü Seçimi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-indigo-500">assignment</span>
+              <span>Onam & Aydınlatma Türü</span>
+            </span>
+            <span class="text-[10px] font-mono text-slate-400">
+              Revizyon: {{ selectedConsentTemplate().version }}
+            </span>
+          </div>
+
+          <!-- Type Selection Chips -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            @for (opt of consentTypeOptions; track opt.code) {
+              <button
+                type="button"
+                (click)="onConsentTypeChange(opt.code)"
+                class="p-2.5 rounded-xl border text-left flex items-center gap-2.5 cursor-pointer transition-all"
+                [class.ring-2]="(fieldValue('consentType') || 'kvkk-explicit-consent') === opt.code"
+                [class.ring-indigo-500]="(fieldValue('consentType') || 'kvkk-explicit-consent') === opt.code"
+                [class.border-indigo-500]="(fieldValue('consentType') || 'kvkk-explicit-consent') === opt.code"
+                [class.bg-white]="(fieldValue('consentType') || 'kvkk-explicit-consent') === opt.code"
+                [class.dark:bg-slate-900]="(fieldValue('consentType') || 'kvkk-explicit-consent') === opt.code"
+                [class.border-slate-200]="(fieldValue('consentType') || 'kvkk-explicit-consent') !== opt.code"
+                [class.dark:border-slate-700]="(fieldValue('consentType') || 'kvkk-explicit-consent') !== opt.code"
+                [class.bg-white/60]="(fieldValue('consentType') || 'kvkk-explicit-consent') !== opt.code"
+                [class.dark:bg-slate-900/40]="(fieldValue('consentType') || 'kvkk-explicit-consent') !== opt.code"
+              >
+                <div
+                  class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  [style.backgroundColor]="opt.color + '15'"
+                  [style.color]="opt.color"
+                >
+                  <span class="material-symbols-outlined icon-size-4">{{ opt.icon }}</span>
+                </div>
+                <div class="min-w-0">
+                  <span class="block text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                    {{ opt.label }}
+                  </span>
+                  <span class="text-[10px] text-slate-400 truncate block">
+                    {{ consentTemplates[opt.code].category }}
+                  </span>
+                </div>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Section 3: Yasal & Klinik Metin Şablonu (Akordeon) -->
+        @if (selectedConsentTemplate(); as tmpl) {
+          <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined icon-size-4 text-emerald-500">verified</span>
+                <strong class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  {{ tmpl.title }}
+                </strong>
+              </div>
+              <button
+                type="button"
+                (click)="toggleTemplateExpanded()"
+                class="odv-btn-ghost text-xs py-1 px-2.5 shrink-0 flex items-center gap-1"
+                [title]="templateExpanded() ? 'Metni Daralt' : 'Tam Metni Oku'"
+              >
+                <span class="text-[11px] font-semibold">{{ templateExpanded() ? 'Daralt' : 'Tam Metin' }}</span>
+                <span class="material-symbols-outlined icon-size-3.5 transition-transform" [class.rotate-180]="templateExpanded()">
+                  expand_more
+                </span>
+              </button>
+            </div>
+
+            <p class="text-xs text-slate-600 dark:text-slate-300 italic leading-relaxed">
+              "{{ tmpl.summary }}"
+            </p>
+
+            @if (templateExpanded()) {
+              <div class="mt-2 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-56 overflow-y-auto text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed font-sans shadow-inner">
+                {{ tmpl.body }}
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Section 4: İmza ve Doğrulama Yöntemi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-indigo-500">draw</span>
+              <span>İmza ve Onay Doğrulama Yöntemi</span>
+            </span>
+            <span class="text-[10px] font-semibold text-slate-400">Yasal & Geçerli</span>
+          </div>
+
+          <!-- Method Segmented Selector -->
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-800/80 rounded-xl">
+            <button
+              type="button"
+              (click)="setDraftValue('signatureMethod', 'digital_screen')"
+              class="py-2 px-1 text-center rounded-lg text-xs font-bold transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1"
+              [class.bg-white]="(fieldValue('signatureMethod') || 'digital_screen') === 'digital_screen'"
+              [class.dark:bg-slate-900]="(fieldValue('signatureMethod') || 'digital_screen') === 'digital_screen'"
+              [class.text-indigo-600]="(fieldValue('signatureMethod') || 'digital_screen') === 'digital_screen'"
+              [class.shadow-2xs]="(fieldValue('signatureMethod') || 'digital_screen') === 'digital_screen'"
+              [class.text-slate-600]="(fieldValue('signatureMethod') || 'digital_screen') !== 'digital_screen'"
+              [class.dark:text-slate-400]="(fieldValue('signatureMethod') || 'digital_screen') !== 'digital_screen'"
+            >
+              <span class="material-symbols-outlined icon-size-4">signature</span>
+              <span class="truncate">Ekranda E-İmza</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="setDraftValue('signatureMethod', 'physical_scan')"
+              class="py-2 px-1 text-center rounded-lg text-xs font-bold transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1"
+              [class.bg-white]="fieldValue('signatureMethod') === 'physical_scan'"
+              [class.dark:bg-slate-900]="fieldValue('signatureMethod') === 'physical_scan'"
+              [class.text-indigo-600]="fieldValue('signatureMethod') === 'physical_scan'"
+              [class.shadow-2xs]="fieldValue('signatureMethod') === 'physical_scan'"
+              [class.text-slate-600]="fieldValue('signatureMethod') !== 'physical_scan'"
+              [class.dark:text-slate-400]="fieldValue('signatureMethod') !== 'physical_scan'"
+            >
+              <span class="material-symbols-outlined icon-size-4">upload_file</span>
+              <span class="truncate">Islak İmzalı Belge</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="setDraftValue('signatureMethod', 'sms_otp')"
+              class="py-2 px-1 text-center rounded-lg text-xs font-bold transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-1"
+              [class.bg-white]="fieldValue('signatureMethod') === 'sms_otp'"
+              [class.dark:bg-slate-900]="fieldValue('signatureMethod') === 'sms_otp'"
+              [class.text-indigo-600]="fieldValue('signatureMethod') === 'sms_otp'"
+              [class.shadow-2xs]="fieldValue('signatureMethod') === 'sms_otp'"
+              [class.text-slate-600]="fieldValue('signatureMethod') !== 'sms_otp'"
+              [class.dark:text-slate-400]="fieldValue('signatureMethod') !== 'sms_otp'"
+            >
+              <span class="material-symbols-outlined icon-size-4">sms</span>
+              <span class="truncate">SMS Onay Kodu</span>
+            </button>
+          </div>
+
+          <!-- Content 1: Digital Signature Canvas -->
+          @if ((fieldValue('signatureMethod') || 'digital_screen') === 'digital_screen') {
+            <div class="space-y-2 pt-1">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                  Danışan Dijital İmza Alanı:
+                </span>
+                @if (signatureDataUrl()) {
+                  <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <span class="material-symbols-outlined icon-size-3.5">check_circle</span>
+                    İmza Alındı
+                  </span>
+                } @else {
+                  <span class="text-[10px] text-slate-400">Dokunmatik ekran veya fare ile imzalayın</span>
+                }
+              </div>
+
+              <div class="relative bg-white dark:bg-slate-950 rounded-xl overflow-hidden border-2 border-dashed border-indigo-200 dark:border-indigo-900 shadow-inner">
+                <canvas
+                  #signatureCanvas
+                  width="480"
+                  height="160"
+                  class="w-full h-40 touch-none cursor-crosshair block"
+                  (mousedown)="startDrawing($event)"
+                  (mousemove)="draw($event)"
+                  (mouseup)="stopDrawing()"
+                  (mouseleave)="stopDrawing()"
+                  (touchstart)="startTouchDrawing($event)"
+                  (touchmove)="touchDraw($event)"
+                  (touchend)="stopDrawing()"
+                ></canvas>
+
+                @if (!signatureDataUrl()) {
+                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30 select-none">
+                    <span class="text-sm font-semibold tracking-wide text-slate-400 flex items-center gap-2">
+                      <span class="material-symbols-outlined icon-size-5">draw</span>
+                      Buraya İmzalayınız
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <div class="flex items-center justify-between text-xs pt-1">
+                <span class="text-[11px] text-slate-400 font-mono">
+                  Zaman Damgası: {{ todayIso }}
+                </span>
+                <button
+                  type="button"
+                  (click)="clearSignature()"
+                  class="odv-btn-ghost text-xs py-1 px-2.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                >
+                  <span class="material-symbols-outlined icon-size-3.5">refresh</span>
+                  <span>İmzayı Temizle</span>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Content 2: Physical Document Scan Upload -->
+          @if (fieldValue('signatureMethod') === 'physical_scan') {
+            <div class="space-y-2 pt-1">
+              <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300 block">
+                Islak İmzalı Taranmış Onam Formu veya Fotoğraf:
+              </span>
+
+              <div class="relative border-2 border-dashed border-indigo-200 dark:border-indigo-800 rounded-xl p-4 text-center hover:border-indigo-400 transition-colors bg-white/60 dark:bg-slate-900/40 cursor-pointer group">
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  (change)="onScannedConsentDocSelected($event)"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  title="Islak İmzalı Belge Yükleyin"
+                />
+                <div class="flex flex-col items-center justify-center pointer-events-none">
+                  <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined icon-size-5">upload_file</span>
+                  </div>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                    İmzalı Formu Yüklemek İçin Tıklayın veya Sürükleyin
+                  </span>
+                  <span class="text-[11px] text-slate-400 mt-0.5">
+                    PDF, PNG, JPG (Maksimum 10 MB)
+                  </span>
+                </div>
+              </div>
+
+              @if (scannedConsentDoc(); as doc) {
+                <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined icon-size-4">description</span>
+                    </div>
+                    <div class="min-w-0">
+                      <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate block max-w-[200px] sm:max-w-[260px]">
+                        {{ doc.name }}
+                      </span>
+                      <span class="text-[10px] text-slate-400 font-mono">{{ formatFileSize(doc.size) }} · Islak İmzalı</span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      (click)="previewHealthDocument(doc)"
+                      class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 cursor-pointer transition-colors"
+                      title="Önizle"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">visibility</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="removeScannedConsentDoc()"
+                      class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer transition-colors"
+                      title="Kaldır"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">delete</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Content 3: SMS OTP Verification -->
+          @if (fieldValue('signatureMethod') === 'sms_otp') {
+            <div class="space-y-3 pt-1">
+              <div class="p-3 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-xs">
+                <span class="block text-slate-600 dark:text-slate-300 mb-1">
+                  Danışanın kayıtlı telefon numarasına tek kullanımlık 6 haneli doğrulama kodu gönderilir:
+                </span>
+                <strong class="font-mono text-sm text-indigo-700 dark:text-indigo-300">
+                  {{ asString(fieldValue('phone')) || asString(consentSelectedCustomer()?.['phone']) || 'Telefon Numarası Belirtilmemiş' }}
+                </strong>
+              </div>
+
+              @if (smsVerified()) {
+                <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+                  <span class="material-symbols-outlined icon-size-5 text-emerald-600">verified</span>
+                  <span>SMS Onay Kodu Başarıyla Doğrulandı. İşlem hukuken kayıt altına alındı.</span>
+                </div>
+              } @else {
+                <div class="flex items-center gap-2">
+                  @if (!smsCodeSent()) {
+                    <button
+                      type="button"
+                      (click)="sendConsentSmsCode()"
+                      class="odv-btn-primary text-xs w-full justify-center"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">send_to_mobile</span>
+                      <span>SMS Onay Kodu Gönder</span>
+                    </button>
+                  } @else {
+                    <div class="flex-1">
+                      <input
+                        type="text"
+                        maxlength="6"
+                        [value]="smsInputCode()"
+                        (input)="smsInputCode.set($any($event.target).value)"
+                        placeholder="6 Haneli Kod (Örn: 482915)"
+                        class="odv-input font-mono tracking-widest text-center text-sm font-bold"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      (click)="verifyConsentSmsCode()"
+                      class="odv-btn-primary text-xs shrink-0"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">check</span>
+                      <span>Doğrula</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="sendConsentSmsCode()"
+                      class="odv-btn-ghost text-xs shrink-0"
+                      title="Tekrar Kod Gönder"
+                    >
+                      <span class="material-symbols-outlined icon-size-4">sync</span>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Section 5: Hukuki & Klinik Beyan Onay Kutuları -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <span class="material-symbols-outlined icon-size-4 text-emerald-500">checklist</span>
+            <span>Hukuki & Klinik Beyan Onayları</span>
+          </span>
+
+          <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-indigo-300 transition-colors">
+            <input
+              type="checkbox"
+              class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              [checked]="fieldValue('confirmOralExplanation') ?? true"
+              (change)="setDraftValue('confirmOralExplanation', $any($event.target).checked)"
+            />
+            <span class="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+              <strong>Sözlü Aydınlatma Yapıldı:</strong> Danışana uygulanacak seans, işlem riskleri, olası yan etkiler ve seans sonrası evde bakım talimatları sözlü olarak detaylıca aktarılmıştır.
+            </span>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-indigo-300 transition-colors">
+            <input
+              type="checkbox"
+              class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              [checked]="fieldValue('confirmTruthfulness') ?? true"
+              (change)="setDraftValue('confirmTruthfulness', $any($event.target).checked)"
+            />
+            <span class="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+              <strong>Gerçeğe Uygun Beyan Teyidi:</strong> Danışan, sağlık geçmişi, kronik hastalıkları, hamilelik/emzirme durumu ve kullandığı ilaçlar hakkında eksiksiz bilgi verdiğini kabul etmiştir.
+            </span>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-indigo-300 transition-colors">
+            <input
+              type="checkbox"
+              class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              [checked]="fieldValue('confirmReadAndAgreed') ?? true"
+              (change)="setDraftValue('confirmReadAndAgreed', $any($event.target).checked)"
+            />
+            <span class="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+              <strong>Metin Okundu ve Onaylandı:</strong> Yukarıda yer alan aydınlatma ve açık rıza metninin tamamını okudum, anladım ve serbest iradem ile onaylıyorum.
+            </span>
+          </label>
+        </div>
+
+        <!-- Section 6: Durum & Dahili Notlar -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="cs-status">
+              Onam Durumu
+            </label>
+            <select
+              id="cs-status"
+              [value]="fieldValue('status') || 'signed'"
+              (change)="setDraftValue('status', $any($event.target).value)"
+              class="odv-input font-medium"
+            >
+              <option value="signed">✅ İmzalandı / Aktif</option>
+              <option value="pending">⏳ İmza Bekliyor</option>
+              <option value="revoked">🚫 İptal / Rıza Geri Çekildi</option>
+              <option value="expired">⌛ Süresi Dolmuş</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="cs-version">
+              Sözleşme Sürümü
+            </label>
+            <input
+              id="cs-version"
+              type="text"
+              readonly
+              [value]="fieldValue('documentVersion') || selectedConsentTemplate().version || 'v2.4 (2026)'"
+              class="odv-input bg-slate-100 dark:bg-slate-800 font-mono text-xs cursor-not-allowed"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5" for="cs-notes">
+            Dahili Notlar & Açıklama (İsteğe Bağlı)
+          </label>
+          <textarea
+            id="cs-notes"
+            rows="2"
+            [value]="fieldValue('notes')"
+            (input)="setDraftValue('notes', $any($event.target).value)"
+            placeholder="Örn: Danışana seans öncesi yüz yüze imzalatıldı, bilgilendirme broşürü teslim edildi…"
+            class="odv-input text-xs sm:text-sm"
+          ></textarea>
+        </div>
+
+        <!-- Section 7: Canlı Onam & Hukuki Uyumluluk Özeti -->
+        @if (consentSelectedCustomer() || fieldValue('customerId')) {
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                <span class="material-symbols-outlined icon-size-4 text-emerald-500">verified_user</span>
+                <span>Hukuki Uyum & Onam Özeti</span>
+              </span>
+              <span
+                class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
+                [class.bg-emerald-100]="fieldValue('status') === 'signed' || !fieldValue('status')"
+                [class.text-emerald-700]="fieldValue('status') === 'signed' || !fieldValue('status')"
+                [class.dark:bg-emerald-950]="fieldValue('status') === 'signed' || !fieldValue('status')"
+                [class.bg-amber-100]="fieldValue('status') === 'pending'"
+                [class.text-amber-700]="fieldValue('status') === 'pending'"
+                [class.dark:bg-amber-950]="fieldValue('status') === 'pending'"
+                [class.bg-rose-100]="fieldValue('status') === 'revoked' || fieldValue('status') === 'expired'"
+                [class.text-rose-700]="fieldValue('status') === 'revoked' || fieldValue('status') === 'expired'"
+                [class.dark:bg-rose-950]="fieldValue('status') === 'revoked' || fieldValue('status') === 'expired'"
+              >
+                {{ fieldValue('status') === 'pending' ? 'İmza Bekleniyor' : fieldValue('status') === 'revoked' ? 'Rıza İptal Edildi' : 'Onam Geçerli' }}
+              </span>
+            </div>
+
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Danışan:</span>
+                <strong class="text-slate-800 dark:text-slate-200">
+                  {{ asString(fieldValue('customerName')) || asString(consentSelectedCustomer()?.['fullName']) || 'Seçilmedi' }}
+                </strong>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Form Şablonu:</span>
+                <span class="font-semibold text-slate-700 dark:text-slate-300">
+                  {{ getConsentTypeLabel(asString(fieldValue('consentType'))) }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">İmza Türü:</span>
+                <span class="font-semibold text-indigo-600 dark:text-indigo-400">
+                  {{ fieldValue('signatureMethod') === 'physical_scan' ? '📄 Islak İmzalı Belge' : fieldValue('signatureMethod') === 'sms_otp' ? '📱 SMS Onay Kodu' : '✍️ Dijital E-İmza' }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between pt-1 border-t border-dashed border-slate-200 dark:border-slate-800">
+                <span class="text-slate-400">Sözleşme Revizyonu:</span>
+                <span class="font-mono text-[11px] text-slate-500">
+                  {{ fieldValue('documentVersion') || selectedConsentTemplate().version || 'v2.4 (2026)' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <button class="hidden" type="submit">Kaydet</button>
+      </form>
+    } @else if (isPackageWorkspace()) {
+      <!-- Specialized High-End Package Sales Form -->
+      <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+        @if (feedback()) {
+          <div
+            class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2"
+            role="alert"
+          >
+            <span class="material-symbols-outlined icon-size-4.5 text-rose-600">error</span>
+            <span>{{ feedback() }}</span>
+          </div>
+        }
+
+        <!-- Section 1: Danışan & Şube Seçimi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-indigo-500">person</span>
+              <span>Danışan & Şube Seçimi</span>
+            </span>
+            <span class="text-[11px] font-semibold text-rose-500">* Zorunlu</span>
+          </div>
+
+          <div>
+            <app-customer-combobox
+              [value]="asString(fieldValue('customerId'))"
+              placeholder="Danışan adı, telefon veya TCKN ile ara..."
+              (customerSelected)="onPackageCustomerSelected($event)"
+              (createRequested)="openCustomerCreateModal()"
+            />
+          </div>
+
+          <!-- Danışan Detay Rozet Kartı -->
+          @if (packageSelectedCustomer(); as cust) {
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-between gap-3 shadow-sm">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
+                  {{ asString(cust['fullName'] || cust['name'] || 'D').slice(0, 2).toUpperCase() }}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate flex items-center gap-1.5">
+                    <span>{{ cust['fullName'] || cust['name'] }}</span>
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                      Doğrulanmış Danışan
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                    @if (cust['phone']) {
+                      <span class="flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[12px]">phone</span>
+                        <span>{{ cust['phone'] }}</span>
+                      </span>
+                    }
+                    @if (packageSelectedCustomerPackagesCount() > 0) {
+                      <span class="text-indigo-600 dark:text-indigo-400 font-medium">
+                        • {{ packageSelectedCustomerPackagesCount() }} Aktif Paket
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                (click)="openCustomerDetailFromPackage(cust)"
+                class="px-2.5 py-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 rounded-lg shrink-0 transition-colors"
+              >
+                Geçmiş Paketler
+              </button>
+            </div>
+          }
+
+          <!-- Şube Seçimi -->
+          @if (definition.branchRequired && (branches.value()?.length ?? 0) > 0) {
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-branch">
+                Hizmet Şubesi <span class="text-rose-500">*</span>
+              </label>
+              <select
+                id="package-branch"
+                required
+                [value]="fieldValue('branchId') || branches.value()?.[0]?.id || ''"
+                (change)="updateField({ key: 'branchId', label: 'Şube', type: 'select' }, $event)"
+                class="odv-input text-xs"
+              >
+                @for (branch of branches.value() ?? []; track branch.id) {
+                  <option [value]="branch.id">{{ branch.name }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        <!-- Section 2: Hazır Paket Şablonları & Özel Paket Tanımlama -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-purple-500">auto_awesome</span>
+              <span>Hazır Paket Şablonları & Katalog</span>
+            </span>
+            <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Tek tıkla otomatik doldurur</span>
+          </div>
+
+          <!-- Sektörel Hazır Paket Şablon Kartları (Grid) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            @for (preset of packagePresets; track preset.id) {
+              <button
+                type="button"
+                (click)="applyPackagePreset(preset)"
+                class="p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between"
+                [class.border-indigo-500]="selectedPackagePresetId() === preset.id"
+                [class.bg-indigo-50/80]="selectedPackagePresetId() === preset.id"
+                [class.dark:bg-indigo-950/40]="selectedPackagePresetId() === preset.id"
+                [class.border-slate-200]="selectedPackagePresetId() !== preset.id"
+                [class.dark:border-slate-700]="selectedPackagePresetId() !== preset.id"
+                [class.bg-white]="selectedPackagePresetId() !== preset.id"
+                [class.dark:bg-slate-900/60]="selectedPackagePresetId() !== preset.id"
+                [class.hover:border-indigo-300]="selectedPackagePresetId() !== preset.id"
+              >
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1.5">
+                    <div
+                      class="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                      [style.background-color]="preset.color + '20'"
+                      [style.color]="preset.color"
+                    >
+                      <span class="material-symbols-outlined text-[14px]">{{ preset.icon }}</span>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">
+                      {{ preset.category }}
+                    </span>
+                  </div>
+                  <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-1">
+                    {{ preset.name }}
+                  </h4>
+                  <div class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5">
+                    {{ preset.totalSessions }} Seans · {{ preset.sessionIntervalDays }} Gün Ara
+                  </div>
+                </div>
+
+                <div class="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                  <span class="text-[10px] text-slate-400">{{ preset.validityMonths }} Ay Geçerli</span>
+                  <span class="text-xs font-black text-indigo-600 dark:text-indigo-400">
+                    ₺{{ preset.price | number:'1.0-0' }}
+                  </span>
+                </div>
+              </button>
+            }
+          </div>
+
+          <!-- Veya Mevcut Paket Kataloğundan Seç -->
+          <div class="pt-1">
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              Veya Tanımlı Paket Kataloğundan Seç
+            </label>
+            <app-searchable-select
+              [options]="packageCatalogOptions()"
+              [value]="asString(fieldValue('packageId'))"
+              placeholder="Katalogdaki paket şablonunu seçin..."
+              (selectionChange)="onPackageCatalogSelect($event)"
+            />
+          </div>
+
+          <!-- Özel Paket Adı Girişi -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-name">
+              Paket Adı <span class="text-rose-500">*</span>
+            </label>
+            <input
+              id="package-name"
+              type="text"
+              required
+              [value]="fieldValue('packageName')"
+              (input)="setDraftValue('packageName', $any($event.target).value)"
+              placeholder="Örn: 8 Seans Tüm Vücut Buz Lazer Epilasyon"
+              class="odv-input text-xs"
+            />
+          </div>
+        </div>
+
+        <!-- Section 3: Seans & Geçerlilik Ayarları -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-emerald-500">event_repeat</span>
+              <span>Seans Sayısı & Geçerlilik Süresi</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="total-sessions">
+                Toplam Seans <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="total-sessions"
+                type="number"
+                min="1"
+                required
+                [value]="fieldValue('totalSessions')"
+                (input)="setDraftValue('totalSessions', +$any($event.target).value)"
+                class="odv-input text-xs font-semibold"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="remaining-sessions">
+                Kalan Seans
+              </label>
+              <input
+                id="remaining-sessions"
+                type="number"
+                min="0"
+                [value]="fieldValue('remainingSessions')"
+                (input)="setDraftValue('remainingSessions', +$any($event.target).value)"
+                class="odv-input text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="session-interval">
+                Seans Aralığı (Gün)
+              </label>
+              <input
+                id="session-interval"
+                type="number"
+                min="1"
+                [value]="fieldValue('sessionIntervalDays') || 21"
+                (input)="setDraftValue('sessionIntervalDays', +$any($event.target).value)"
+                placeholder="Örn: 21, 30 gün"
+                class="odv-input text-xs"
+              />
+            </div>
+          </div>
+
+          <!-- Başlangıç & Bitiş Tarihleri -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-start-date">
+                Paket Başlangıç Tarihi
+              </label>
+              <input
+                id="package-start-date"
+                type="date"
+                [value]="fieldValue('startDate') || todayIso"
+                (input)="setDraftValue('startDate', $any($event.target).value)"
+                class="odv-input text-xs"
+              />
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300" for="package-expiry-date">
+                  Son Geçerlilik Tarihi <span class="text-rose-500">*</span>
+                </label>
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    (click)="onPackageQuickExpiry(3)"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200 dark:bg-slate-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:text-indigo-600 transition-colors"
+                  >
+                    +3 Ay
+                  </button>
+                  <button
+                    type="button"
+                    (click)="onPackageQuickExpiry(6)"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200 dark:bg-slate-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:text-indigo-600 transition-colors"
+                  >
+                    +6 Ay
+                  </button>
+                  <button
+                    type="button"
+                    (click)="onPackageQuickExpiry(12)"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200 dark:bg-slate-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 hover:text-indigo-600 transition-colors"
+                  >
+                    +12 Ay
+                  </button>
+                </div>
+              </div>
+              <input
+                id="package-expiry-date"
+                type="date"
+                required
+                [value]="fieldValue('expiresAt')"
+                (input)="setDraftValue('expiresAt', $any($event.target).value)"
+                class="odv-input text-xs"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Fiyatlandırma, Tahsilat & Satışı Yapan Uzman -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-amber-500">payments</span>
+              <span>Fiyatlandırma & Tahsilat Bilgisi</span>
+            </span>
+            @if (computePackageUnitPrice() > 0) {
+              <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">
+                ₺{{ computePackageUnitPrice() | number:'1.0-0' }} / Seans
+              </span>
+            }
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-price">
+                Paket Fiyatı (₺) <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="package-price"
+                type="number"
+                min="0"
+                step="50"
+                required
+                [value]="fieldValue('price')"
+                (input)="setDraftValue('price', +$any($event.target).value)"
+                class="odv-input text-xs font-bold text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-paid-amount">
+                Tahsil Edilen (₺)
+              </label>
+              <input
+                id="package-paid-amount"
+                type="number"
+                min="0"
+                step="50"
+                [value]="fieldValue('paidAmount')"
+                (input)="onPackagePaidAmountChange(+$any($event.target).value)"
+                class="odv-input text-xs font-bold text-emerald-600 dark:text-emerald-400"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-payment-status">
+                Ödeme Durumu
+              </label>
+              <select
+                id="package-payment-status"
+                [value]="fieldValue('paymentStatus') || 'paid'"
+                (change)="setDraftValue('paymentStatus', $any($event.target).value)"
+                class="odv-input text-xs font-semibold"
+              >
+                <option value="paid">✅ Ödendi / Peşin</option>
+                <option value="partial">⏳ Kısmi Ödeme</option>
+                <option value="unpaid">❌ Ödeme Bekliyor / Açık Hesap</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Kalan Borç Göstergesi -->
+          @if (computePackageRemainingDebt() > 0) {
+            <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60 flex items-center justify-between text-xs text-amber-800 dark:text-amber-200">
+              <span class="flex items-center gap-1.5 font-medium">
+                <span class="material-symbols-outlined text-[16px] text-amber-600">info</span>
+                Kalan Tahsilat Borcu (Danışan Bakiyesine Eklenecektir):
+              </span>
+              <strong class="text-sm font-black text-amber-700 dark:text-amber-300">
+                ₺{{ computePackageRemainingDebt() | number:'1.0-0' }}
+              </strong>
+            </div>
+          }
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-payment-method">
+                Ödeme Yöntemi
+              </label>
+              <select
+                id="package-payment-method"
+                [value]="fieldValue('paymentMethod') || 'credit_card'"
+                (change)="setDraftValue('paymentMethod', $any($event.target).value)"
+                class="odv-input text-xs"
+              >
+                <option value="credit_card">💳 Kredi Kartı / POS</option>
+                <option value="cash">💵 Nakit</option>
+                <option value="bank_transfer">🏦 Banka Havalesi / EFT</option>
+                <option value="split">🔄 Parçalı Ödeme (Kart + Nakit)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                Satışı Yapan Uzman / Temsilci
+              </label>
+              <app-searchable-select
+                [options]="packageStaffOptions()"
+                [value]="asString(fieldValue('staffId'))"
+                placeholder="Uzman veya prim hak edişi seçin..."
+                (selectionChange)="onPackageStaffSelect($event)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Paket Durumu & Dahili Notlar -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-cyan-500">settings</span>
+              <span>Paket Durumu & Dahili Notlar</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-status">
+                Paket Kullanım Durumu
+              </label>
+              <select
+                id="package-status"
+                [value]="fieldValue('status') || 'active'"
+                (change)="setDraftValue('status', $any($event.target).value)"
+                class="odv-input text-xs font-semibold"
+              >
+                <option value="active">🟢 Aktif / Kullanımda</option>
+                <option value="frozen">❄️ Donduruldu (Seans Durduruldu)</option>
+                <option value="completed">✅ Tamamlandı (Tüm Seanslar Bitti)</option>
+                <option value="cancelled">🚫 İptal Edildi / İade</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-freeze-days">
+                Azami Dondurma Süresi (Gün)
+              </label>
+              <input
+                id="package-freeze-days"
+                type="number"
+                min="0"
+                [value]="fieldValue('maxFreezeDays') || 30"
+                (input)="setDraftValue('maxFreezeDays', +$any($event.target).value)"
+                placeholder="Örn: 30 gün"
+                class="odv-input text-xs"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="package-notes">
+              Operasyonel Notlar & Özel Şartlar
+            </label>
+            <textarea
+              id="package-notes"
+              rows="2"
+              [value]="fieldValue('notes')"
+              (input)="setDraftValue('notes', $any($event.target).value)"
+              placeholder="Örn: Müşteri gebelik durumunda dondurma hakkı talep etti. Yanık garantili başlık kullanılacaktır."
+              class="odv-input text-xs"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Section 6: Canlı Paket Satış & Seans Maliyet Özeti Kartı -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 text-white shadow-lg space-y-3">
+          <div class="flex items-center justify-between text-indigo-200 border-b border-indigo-800/80 pb-2">
+            <span class="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-amber-400">verified</span>
+              Paket Satış Özeti & Hak Ediş
+            </span>
+            <span class="text-[11px] font-semibold text-indigo-300">
+              {{ fieldValue('startDate') || todayIso }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Danışan:</span>
+              <strong class="font-bold text-white truncate block">
+                {{ packageSelectedCustomer() ? (packageSelectedCustomer()!['fullName'] || packageSelectedCustomer()!['name']) : 'Danışan Seçilmedi' }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Paket:</span>
+              <strong class="font-bold text-white truncate block">
+                {{ fieldValue('packageName') || 'Paket Adı Girilmedi' }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Seans & Aralık:</span>
+              <strong class="font-bold text-emerald-400 block">
+                {{ fieldValue('totalSessions') || 0 }} Seans (Her {{ fieldValue('sessionIntervalDays') || 21 }} günde bir)
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Seans Başı Maliyet:</span>
+              <strong class="font-bold text-amber-300 block">
+                ₺{{ computePackageUnitPrice() | number:'1.0-0' }} / Seans
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Toplam Fiyat & Tahsilat:</span>
+              <span class="font-bold text-white">
+                ₺{{ computePackageTotal() | number:'1.0-0' }}
+                <span class="text-xs font-normal text-emerald-300">
+                  (₺{{ computePackagePaid() | number:'1.0-0' }} ödendi)
+                </span>
+              </span>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Kalan Borç / Durum:</span>
+              <strong
+                class="font-bold block"
+                [class.text-rose-400]="computePackageRemainingDebt() > 0"
+                [class.text-emerald-400]="computePackageRemainingDebt() === 0"
+              >
+                {{ computePackageRemainingDebt() > 0 ? ('₺' + (computePackageRemainingDebt() | number:'1.0-0') + ' Açık Hesap') : 'Tamamı Ödendi' }}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <button class="hidden" type="submit">Kaydet</button>
+      </form>
+    } @else if (isSessionWorkspace()) {
+      <!-- Specialized Clinical Session Form -->
+      <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
+        @if (feedback()) {
+          <div
+            class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2"
+            role="alert"
+          >
+            <span class="material-symbols-outlined icon-size-4.5 text-rose-600">error</span>
+            <span>{{ feedback() }}</span>
+          </div>
+        }
+
+        <!-- Section 1: Danışan & Paket Seçimi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-indigo-500">person_search</span>
+              <span>Danışan & Seans Paketi</span>
+            </span>
+            <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Danışanın seans hakkından düşer</span>
+          </div>
+
+          <!-- Canlı Danışan Arama Combobox -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              Danışan Seçimi <span class="text-rose-500">*</span>
+            </label>
+            <app-customer-combobox
+              [value]="asString(fieldValue('customerId'))"
+              [branchId]="asString(fieldValue('branchId')) || branchFilter()"
+              [preloadedCustomers]="allCustomers()"
+              (customerSelected)="onSessionCustomerSelected($event)"
+              (valueChange)="setDraftValue('customerId', $event)"
+              (createRequested)="openCustomerCreateModal()"
+            />
+          </div>
+
+          <!-- Seçili Danışanın Sağlık & Kontrendikasyon Uyarısı -->
+          @if (sessionCustomerHealthAlert(); as healthAlert) {
+            <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-[18px] text-rose-600 dark:text-rose-400 shrink-0 mt-0.5">warning</span>
+              <div>
+                <strong class="font-bold text-rose-800 dark:text-rose-200 block">Klinik Dikkat / Kontrendikasyon Uyarısı!</strong>
+                <p class="text-rose-700 dark:text-rose-300 mt-0.5 leading-relaxed font-medium">
+                  {{ healthAlert }}
+                </p>
+              </div>
+            </div>
+          }
+
+          <!-- Seçili Danışan Profil Özeti -->
+          @if (sessionSelectedCustomer(); as cust) {
+            <div class="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  {{ initials(asString(cust['fullName'] || cust['name'])) }}
+                </div>
+                <div class="min-w-0">
+                  <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                    {{ cust['fullName'] || cust['name'] }}
+                  </h4>
+                  <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                    <span>{{ cust['phone'] }}</span>
+                    @if (cust['identityNumber']) {
+                      <span>· TC: {{ cust['identityNumber'] }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                (click)="openCustomerDetailFromSession(cust)"
+                class="px-2.5 py-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 rounded-lg shrink-0 transition-colors"
+              >
+                Danışan Detayı
+              </button>
+            </div>
+          }
+
+          <!-- Danışanın Paketlerinden Seç veya Münferit Seans -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="session-package-select">
+                Danışanın Tanımlı Paketi
+              </label>
+              <select
+                id="session-package-select"
+                [value]="fieldValue('customerPackageId')"
+                (change)="onSessionPackageSelect($any($event.target).value)"
+                class="odv-input text-xs font-semibold"
+              >
+                <option value="">Paket Dışı / Münferit Seans</option>
+                @for (pkg of sessionCustomerPackages(); track pkg.id) {
+                  <option [value]="pkg.id">
+                    📦 {{ pkg.packageName }} (Kalan: {{ pkg.remainingSessions }} Seans)
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="session-number">
+                Seans Sıra No <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  id="session-number"
+                  type="number"
+                  min="1"
+                  required
+                  [value]="fieldValue('sessionNumber') || 1"
+                  (input)="setDraftValue('sessionNumber', +$any($event.target).value)"
+                  class="odv-input text-xs font-black pr-10"
+                />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">. Seans</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Münferit Seans İse Hizmet Türü Seçimi -->
+          @if (!fieldValue('customerPackageId')) {
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                Hizmet / Uygulama Adı
+              </label>
+              <app-searchable-select
+                [options]="sessionServiceOptions()"
+                [value]="asString(fieldValue('serviceId'))"
+                placeholder="Uygulanan hizmeti seçin..."
+                (selectionChange)="onSessionServiceSelect($event)"
+              />
+            </div>
+          }
+        </div>
+
+        <!-- Section 2: Uygulama & Operasyon Bilgileri -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-emerald-500">precision_manufacturing</span>
+              <span>Uygulama Zamanı, Cihaz & Uzman</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="session-date">
+                Uygulama Tarihi & Saati <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="session-date"
+                type="datetime-local"
+                required
+                [value]="fieldValue('performedAt')"
+                (input)="setDraftValue('performedAt', $any($event.target).value)"
+                class="odv-input text-xs font-medium"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                Uygulayan Uzman / Estetisyen
+              </label>
+              <app-searchable-select
+                [options]="sessionStaffOptions()"
+                [value]="asString(fieldValue('staffId'))"
+                placeholder="İşlemi yapan uzmanı seçin..."
+                (selectionChange)="onSessionStaffSelect($event)"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                Kullanılan Cihaz
+              </label>
+              <app-searchable-select
+                [options]="sessionDeviceOptions()"
+                [value]="asString(fieldValue('deviceId'))"
+                placeholder="Uygulama cihazını seçin..."
+                (selectionChange)="onSessionDeviceSelect($event)"
+              />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                İşlem Kabini / Oda
+              </label>
+              <app-searchable-select
+                [options]="sessionRoomOptions()"
+                [value]="asString(fieldValue('roomId'))"
+                placeholder="Oda / kabin seçin..."
+                (selectionChange)="onSessionRoomSelect($event)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Uygulama Bölgesi -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-purple-500">accessibility_new</span>
+              <span>Uygulama Bölgesi</span>
+            </span>
+            <span class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+              {{ fieldValue('bodyZone') || 'Bölge Seçilmedi' }}
+            </span>
+          </div>
+
+          <!-- 8 Hızlı Bölge Seçim Butonu -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            @for (zone of commonBodyZones; track zone.code) {
+              <button
+                type="button"
+                (click)="onSessionBodyZoneSelect(zone.name)"
+                class="p-2 rounded-xl border text-left transition-all flex items-center gap-2 cursor-pointer"
+                [class.bg-indigo-600]="fieldValue('bodyZone') === zone.name"
+                [class.text-white]="fieldValue('bodyZone') === zone.name"
+                [class.border-indigo-600]="fieldValue('bodyZone') === zone.name"
+                [class.bg-white]="fieldValue('bodyZone') !== zone.name"
+                [class.dark:bg-slate-900]="fieldValue('bodyZone') !== zone.name"
+                [class.text-slate-700]="fieldValue('bodyZone') !== zone.name"
+                [class.dark:text-slate-300]="fieldValue('bodyZone') !== zone.name"
+                [class.border-slate-200]="fieldValue('bodyZone') !== zone.name"
+                [class.dark:border-slate-700]="fieldValue('bodyZone') !== zone.name"
+              >
+                <span class="material-symbols-outlined text-[16px] shrink-0">{{ zone.icon }}</span>
+                <span class="text-xs font-bold truncate">{{ zone.name }}</span>
+              </button>
+            }
+          </div>
+
+          <!-- Özel Bölge Girişi -->
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1" for="session-custom-zone">
+              Veya Özel Bölge Tanımlayın
+            </label>
+            <input
+              id="session-custom-zone"
+              type="text"
+              [value]="fieldValue('bodyZone')"
+              (input)="setDraftValue('bodyZone', $any($event.target).value)"
+              placeholder="Örn: Ense & Boyun, Çene & Bıyık, Göbek Çizgisi..."
+              class="odv-input text-xs"
+            />
+          </div>
+        </div>
+
+        <!-- Section 4: Klinik Parametreler & Cihaz Ayarları -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-amber-500">tune</span>
+              <span>Klinik Parametreler & Cihaz Ayarları</span>
+            </span>
+            <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Protokol ve atım değerleri</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Enerji (Joule/cm2) -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">⚡ Enerji</span>
+                <span class="text-xs font-black text-amber-600 dark:text-amber-400">{{ fieldValue('energyJcm2') || 18 }} J/cm²</span>
+              </div>
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                [value]="fieldValue('energyJcm2') || 18"
+                (input)="setDraftValue('energyJcm2', +$any($event.target).value)"
+                class="odv-input text-xs font-black text-center"
+              />
+              <div class="grid grid-cols-4 gap-1">
+                <button type="button" (click)="adjustSessionEnergy(-1)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">-1</button>
+                <button type="button" (click)="adjustSessionEnergy(-0.5)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">-0.5</button>
+                <button type="button" (click)="adjustSessionEnergy(0.5)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">+0.5</button>
+                <button type="button" (click)="adjustSessionEnergy(1)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">+1</button>
+              </div>
+            </div>
+
+            <!-- Atım Sayısı (Shots) -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">🎯 Atım Sayısı</span>
+                <span class="text-xs font-black text-indigo-600 dark:text-indigo-400">{{ fieldValue('shotCount') || 0 }}</span>
+              </div>
+              <input
+                type="number"
+                min="0"
+                [value]="fieldValue('shotCount') || 2500"
+                (input)="setDraftValue('shotCount', +$any($event.target).value)"
+                class="odv-input text-xs font-black text-center"
+              />
+              <div class="grid grid-cols-3 gap-1">
+                <button type="button" (click)="adjustSessionShots(100)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">+100</button>
+                <button type="button" (click)="adjustSessionShots(500)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">+500</button>
+                <button type="button" (click)="adjustSessionShots(1000)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">+1k</button>
+              </div>
+            </div>
+
+            <!-- Süre (Dakika) -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">⏱️ İşlem Süresi</span>
+                <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">{{ fieldValue('durationMin') || 30 }} dk</span>
+              </div>
+              <input
+                type="number"
+                min="5"
+                [value]="fieldValue('durationMin') || 30"
+                (input)="setDraftValue('durationMin', +$any($event.target).value)"
+                class="odv-input text-xs font-black text-center"
+              />
+              <div class="grid grid-cols-3 gap-1">
+                <button type="button" (click)="setDraftValue('durationMin', 15)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">15dk</button>
+                <button type="button" (click)="setDraftValue('durationMin', 30)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">30dk</button>
+                <button type="button" (click)="setDraftValue('durationMin', 45)" class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200">45dk</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Frekans ve Soğutucu Jel Toggle -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+              <div>
+                <span class="block text-xs font-bold text-slate-800 dark:text-slate-100">Frekans / Atım Hızı</span>
+                <span class="text-[10px] text-slate-400">Tekrar oranı (Hz)</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  [value]="fieldValue('frequencyHz') || 10"
+                  (input)="setDraftValue('frequencyHz', +$any($event.target).value)"
+                  class="w-16 odv-input text-xs font-bold text-center py-1"
+                />
+                <span class="text-xs font-semibold text-slate-500">Hz</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+              <div>
+                <span class="block text-xs font-bold text-slate-800 dark:text-slate-100">❄️ Buz Başlık / Soğutucu Jel</span>
+                <span class="text-[10px] text-slate-400">Cilt konfor koruması</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  [checked]="fieldValue('coolingApplied')"
+                  (change)="setDraftValue('coolingApplied', $any($event.target).checked)"
+                  class="sr-only peer"
+                />
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Cilt Reaksiyonu, Sonraki Randevu & Notlar -->
+        <div class="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span class="material-symbols-outlined icon-size-4 text-rose-500">health_and_safety</span>
+              <span>Cilt Reaksiyonu & Danışan Konforu</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="session-reaction">
+                Cilt Reaksiyon Durumu
+              </label>
+              <select
+                id="session-reaction"
+                [value]="fieldValue('reaction') || 'normal'"
+                (change)="setDraftValue('reaction', $any($event.target).value)"
+                class="odv-input text-xs font-semibold"
+              >
+                <option value="normal">🟢 Normal Reaksiyon (Kızarıklık yok)</option>
+                <option value="mild_erythema">🟡 Hafif Eritem (Doğal Geçici Kızarıklık)</option>
+                <option value="sensitive">🟠 Hassas / Isı Reaksiyonu</option>
+                <option value="edema">🔴 Belirgin Foliküler Ödem (Soğuk kompres uygulandı)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="session-status">
+                Seans Durumu
+              </label>
+              <select
+                id="session-status"
+                [value]="fieldValue('status') || 'completed'"
+                (change)="setDraftValue('status', $any($event.target).value)"
+                class="odv-input text-xs font-semibold"
+              >
+                <option value="completed">✅ Tamamlandı (Uygulama bitti)</option>
+                <option value="in_progress">⚡ Devam Ediyor / Odada</option>
+                <option value="no_show">⚠️ Gelmedi / Randevuya Katılmadı</option>
+                <option value="cancelled">🚫 İptal Edildi</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sonraki Seans Randevu Planlama -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300" for="session-next-date">
+                Önerilen Sonraki Seans Tarihi
+              </label>
+              <div class="flex items-center gap-1">
+                <button type="button" (click)="onSessionQuickNextDate(15)" class="px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-[10px] font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors">+15 Gün</button>
+                <button type="button" (click)="onSessionQuickNextDate(21)" class="px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-[10px] font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors">+21 Gün</button>
+                <button type="button" (click)="onSessionQuickNextDate(30)" class="px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-[10px] font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors">+30 Gün</button>
+                <button type="button" (click)="onSessionQuickNextDate(45)" class="px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-[10px] font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors">+45 Gün</button>
+              </div>
+            </div>
+            <input
+              id="session-next-date"
+              type="date"
+              [value]="fieldValue('nextSessionDate')"
+              (input)="setDraftValue('nextSessionDate', $any($event.target).value)"
+              class="odv-input text-xs font-semibold"
+            />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1" for="session-notes">
+              Uzman Klinik Notları & Gözlemler
+            </label>
+            <textarea
+              id="session-notes"
+              rows="2"
+              [value]="fieldValue('notes')"
+              (input)="setDraftValue('notes', $any($event.target).value)"
+              placeholder="Örn: Bölge jel ile soğutuldu, 18 Joule enerjide sorunsuz tamamlandı. 21 gün sonrasına kontrol önerildi."
+              class="odv-input text-xs"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Section 6: Canlı Klinik Seans Protokol Özeti Kartı -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 text-white shadow-lg space-y-3">
+          <div class="flex items-center justify-between text-indigo-200 border-b border-indigo-800/80 pb-2">
+            <span class="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-amber-400">verified</span>
+              Klinik Seans Protokol Özeti
+            </span>
+            <span class="text-[11px] font-semibold text-indigo-300">
+              {{ fieldValue('performedAt') || todayIso }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Danışan:</span>
+              <strong class="font-bold text-white truncate block">
+                {{ sessionSelectedCustomer() ? (sessionSelectedCustomer()!['fullName'] || sessionSelectedCustomer()!['name']) : 'Danışan Seçilmedi' }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Seans No & Paket:</span>
+              <strong class="font-bold text-emerald-400 truncate block">
+                {{ fieldValue('sessionNumber') || 1 }}. Seans · {{ sessionSelectedPackage() ? sessionSelectedPackage()!.packageName : (fieldValue('packageName') || 'Münferit Seans') }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Bölge:</span>
+              <strong class="font-bold text-white truncate block">
+                {{ fieldValue('bodyZone') || 'Tüm Vücut' }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Uygulanan Parametre:</span>
+              <strong class="font-bold text-amber-300 block">
+                {{ fieldValue('energyJcm2') || 18 }} J/cm² · {{ fieldValue('shotCount') || 0 }} Atım · {{ fieldValue('durationMin') || 30 }} dk
+              </strong>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Uygulayan Uzman:</span>
+              <span class="font-semibold text-white truncate block">
+                {{ fieldValue('staffName') || 'Uzman Belirtilmedi' }}
+              </span>
+            </div>
+
+            <div>
+              <span class="text-indigo-300 text-[11px] block">Sonraki Randevu Önerisi:</span>
+              <strong class="font-bold text-indigo-200 block">
+                {{ fieldValue('nextSessionDate') ? (fieldValue('nextSessionDate') + ' Planlandı') : 'Tarih Seçilmedi' }}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <button class="hidden" type="submit">Kaydet</button>
+      </form>
     } @else {
       <!-- Generic Workspace Form -->
       <form class="space-y-4" [attr.aria-busy]="saving()" (submit)="save(); $event.preventDefault()">
@@ -1335,7 +4430,7 @@
           class="odv-btn-primary"
         >
           <span class="material-symbols-outlined icon-size-4">save</span>
-          <span>{{ saving() ? 'Kaydediliyor…' : editingId() ? 'Güncelle' : (isWaitlistWorkspace() ? 'Talebi Kaydet' : 'Kaydet') }}</span>
+          <span>{{ saving() ? 'Kaydediliyor…' : editingId() ? 'Güncelle' : (isWaitlistWorkspace() ? 'Talebi Kaydet' : isConsultationWorkspace() ? 'Ön Görüşmeyi Kaydet' : isHealthWorkspace() ? 'Sağlık Beyanını Kaydet' : isConsentWorkspace() ? 'Onam Formunu Kaydet' : isPackageWorkspace() ? 'Paket Satışını Kaydet' : isSessionWorkspace() ? 'Seans Kaydını Tamamla' : 'Kaydet') }}</span>
         </button>
       </div>
     </div>
@@ -1350,7 +4445,7 @@
   />
 }
 
-@if ((isCustomerWorkspace() || isConsultationWorkspace()) && customerDetailOpen() && selectedCustomer(); as cust) {
+@if ((isCustomerWorkspace() || isConsultationWorkspace() || isPackageWorkspace() || isSessionWorkspace()) && customerDetailOpen() && selectedCustomer(); as cust) {
   <app-customer-detail-modal
     [customer]="cust"
     [open]="customerDetailOpen()"
@@ -1360,10 +4455,92 @@
   />
 }
 
-@if ((isCustomerWorkspace() || isConsultationWorkspace() || isWaitlistWorkspace()) && customerFormOpen()) {
+@if ((isCustomerWorkspace() || isConsultationWorkspace() || isWaitlistWorkspace() || isHealthWorkspace() || isConsentWorkspace() || isPackageWorkspace() || isSessionWorkspace()) && customerFormOpen()) {
   <app-customer-form-modal
     [open]="customerFormOpen()"
     (close)="closeCustomerCreateModal()"
     (saved)="onCustomerCreated()"
   />
+}
+
+<!-- Document Preview Lightbox Modal -->
+@if (previewingDocument(); as previewDoc) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in"
+    (click)="closeDocumentPreview()"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="relative max-w-3xl w-full max-h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <span class="material-symbols-outlined icon-size-4">{{ getDocumentTypeIcon(previewDoc.type) }}</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[260px] sm:max-w-md">
+              {{ previewDoc.name }}
+            </h3>
+            <span class="text-[11px] text-slate-400">
+              {{ getDocumentTypeLabel(previewDoc.type) }} · {{ formatFileSize(previewDoc.size) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a
+            [href]="previewDoc.dataUrl"
+            [download]="previewDoc.name"
+            class="odv-btn-secondary text-xs"
+            title="İndir"
+          >
+            <span class="material-symbols-outlined icon-size-4">download</span>
+            <span>İndir</span>
+          </a>
+          <button
+            type="button"
+            (click)="closeDocumentPreview()"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            title="Kapat"
+          >
+            <span class="material-symbols-outlined icon-size-5">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 overflow-auto flex items-center justify-center bg-slate-100 dark:bg-slate-950/50 min-h-[300px]">
+        @if (isImageDocument(previewDoc)) {
+          <img
+            [src]="previewDoc.dataUrl"
+            [alt]="previewDoc.name"
+            class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
+          />
+        } @else if (isPdfDocument(previewDoc)) {
+          <iframe
+            [src]="previewDoc.dataUrl"
+            class="w-full h-[65vh] rounded-lg border border-slate-200 dark:border-slate-800"
+            title="PDF Önizleme"
+          ></iframe>
+        } @else {
+          <div class="text-center py-12">
+            <span class="material-symbols-outlined icon-size-12 text-slate-400 mb-2">description</span>
+            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Bu dosya türü doğrudan önizlenemiyor.
+            </p>
+            <a
+              [href]="previewDoc.dataUrl"
+              [download]="previewDoc.name"
+              class="odv-btn-primary mt-3 inline-flex text-xs"
+            >
+              <span class="material-symbols-outlined icon-size-4">download</span>
+              <span>Dosyayı İndir</span>
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
 }

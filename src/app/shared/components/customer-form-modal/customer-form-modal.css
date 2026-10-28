@@ -41,6 +41,22 @@ html.dark .form-tab-btn-active {
   border-bottom-color: #818cf8 !important;
 }
 
+/* CDK Drag & Drop styles */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  opacity: 0.95;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.4;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -55,3 +71,4 @@ html.dark .form-tab-btn-active {
 .animate-fadeIn {
   animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+

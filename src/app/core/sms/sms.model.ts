@@ -10,6 +10,8 @@ export type SmsLogStatus = 'delivered' | 'pending' | 'failed';
 
 export interface SmsProvider {
   id: SmsProviderId;
+  firestoreDocId?: string;
+  providerId?: string;
   name: string;
   tagline: string;
   badge?: string;
@@ -33,6 +35,7 @@ export type SmsTemplateCategory = 'appointment' | 'payment' | 'care' | 'marketin
 
 export interface SmsTemplate {
   id: string;
+  firestoreDocId?: string;
   key: string;
   title: string;
   description: string;
@@ -46,15 +49,21 @@ export interface SmsTemplate {
 
 export interface SmsLog {
   id: string;
+  firestoreDocId?: string;
   recipientPhone: string;
   recipientName: string;
   messageContent: string;
+  providerId?: string;
   providerName: string;
   senderTitle: string;
   sentAt: string;
   status: SmsLogStatus;
   smsCount: number;
   templateTitle?: string;
+  templateKey?: string;
+  branchId?: string;
+  customerId?: string;
+  appointmentId?: string;
 }
 
 export interface SmsStats {

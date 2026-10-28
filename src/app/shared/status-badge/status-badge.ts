@@ -9,16 +9,16 @@ export class StatusBadge {
 
   protected readonly badgeClass = computed(() => {
     const s = this.status().toLowerCase();
-    if (['active', 'paid', 'completed', 'healthy', 'configured', 'available', 'vip'].includes(s)) {
+    if (['active', 'paid', 'completed', 'done', 'healthy', 'configured', 'available', 'vip', 'low', 'dusuk', 'signed'].includes(s)) {
       return 'badge-emerald odv-badge';
     }
-    if (['critical', 'refunded', 'cancelled', 'maintenance', 'error'].includes(s)) {
+    if (['critical', 'refunded', 'cancelled', 'maintenance', 'error', 'high', 'yuksek', 'revoked', 'expired', 'unpaid', 'no_show', 'no-show'].includes(s)) {
       return 'badge-rose odv-badge';
     }
-    if (['draft', 'partial', 'due', 'review', 'processing', 'pending', 'waiting'].includes(s)) {
+    if (['draft', 'partial', 'due', 'review', 'processing', 'pending', 'waiting', 'medium', 'orta'].includes(s)) {
       return 'badge-amber odv-badge';
     }
-    if (['scheduled', 'in-progress', 'confirmed', 'ready'].includes(s)) {
+    if (['scheduled', 'in-progress', 'in_progress', 'confirmed', 'ready', 'frozen'].includes(s)) {
       return 'badge-sky odv-badge';
     }
     if (['premium', 'campaign'].includes(s)) {
@@ -29,16 +29,16 @@ export class StatusBadge {
 
   protected readonly dotClass = computed(() => {
     const s = this.status().toLowerCase();
-    if (['active', 'paid', 'completed', 'healthy', 'configured', 'available', 'vip'].includes(s)) {
+    if (['active', 'paid', 'completed', 'done', 'healthy', 'configured', 'available', 'vip', 'low', 'dusuk', 'signed'].includes(s)) {
       return 'bg-emerald-500';
     }
-    if (['critical', 'refunded', 'cancelled', 'maintenance', 'error'].includes(s)) {
+    if (['critical', 'refunded', 'cancelled', 'maintenance', 'error', 'high', 'yuksek', 'revoked', 'expired', 'unpaid', 'no_show', 'no-show'].includes(s)) {
       return 'bg-rose-500';
     }
-    if (['draft', 'partial', 'due', 'review', 'processing', 'pending', 'waiting'].includes(s)) {
+    if (['draft', 'partial', 'due', 'review', 'processing', 'pending', 'waiting', 'medium', 'orta'].includes(s)) {
       return 'bg-amber-500';
     }
-    if (['scheduled', 'in-progress', 'confirmed', 'ready'].includes(s)) {
+    if (['scheduled', 'in-progress', 'in_progress', 'confirmed', 'ready', 'frozen'].includes(s)) {
       return 'bg-sky-500';
     }
     if (['premium', 'campaign'].includes(s)) {
@@ -53,11 +53,18 @@ export class StatusBadge {
       active: 'Aktif',
       paid: 'Ödendi',
       completed: 'Tamamlandı',
+      done: 'Tamamlandı',
       ready: 'Hazır',
       healthy: 'Sağlıklı',
       configured: 'Yapılandırıldı',
       available: 'Müsait',
       vip: 'VIP',
+      low: 'Düşük Risk',
+      dusuk: 'Düşük Risk',
+      medium: 'Orta Risk',
+      orta: 'Orta Risk',
+      high: 'Yüksek Risk',
+      yuksek: 'Yüksek Risk',
       critical: 'Kritik',
       refunded: 'İade Edildi',
       cancelled: 'İptal',
@@ -72,8 +79,16 @@ export class StatusBadge {
       waiting: 'Beklemede',
       scheduled: 'Planlandı',
       'in-progress': 'Sürüyor',
+      in_progress: 'Uygulanıyor',
       'not-configured': 'Yapılandırılmadı',
       inactive: 'Pasif',
+      signed: 'İmzalandı',
+      revoked: 'Geri Çekildi / İptal',
+      expired: 'Süresi Doldu',
+      frozen: 'Donduruldu',
+      unpaid: 'Ödenmedi',
+      no_show: 'Gelmedi',
+      'no-show': 'Gelmedi',
     };
     return map[s.toLowerCase()] || s;
   });

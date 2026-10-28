@@ -6,32 +6,74 @@
     aria-labelledby="customer-form-title"
   >
     <div
-      class="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden"
+      cdkDrag
+      [cdkDragDisabled]="isMaximized()"
+      class="bg-white dark:bg-slate-900 shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden transition-all duration-200"
+      [class.fixed]="isMaximized()"
+      [class.inset-0]="isMaximized()"
+      [class.w-screen]="isMaximized()"
+      [class.h-screen]="isMaximized()"
+      [class.max-w-none]="isMaximized()"
+      [class.max-h-none]="isMaximized()"
+      [class.rounded-none]="isMaximized()"
+      [class.m-0]="isMaximized()"
+      [class.relative]="!isMaximized()"
+      [class.w-full]="!isMaximized()"
+      [class.max-w-4xl]="!isMaximized()"
+      [class.lg:max-w-5xl]="!isMaximized()"
+      [class.rounded-3xl]="!isMaximized()"
+      [class.max-h-[92vh]]="!isMaximized()"
     >
-      <!-- Header -->
-      <header class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-slate-50 to-indigo-50/30 dark:from-slate-900 dark:to-slate-800/80">
+      <!-- Header with Drag Handle & Window Controls -->
+      <header
+        cdkDragHandle
+        class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-slate-50 via-indigo-50/20 to-slate-50 dark:from-slate-900 dark:via-slate-800/80 dark:to-slate-900 cursor-grab active:cursor-grabbing select-none"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20">
+          <div
+            class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 flex-shrink-0"
+          >
             <span class="material-symbols-outlined icon-size-5">person_add</span>
           </div>
           <div>
-            <h2 id="customer-form-title" class="text-lg font-black text-slate-900 dark:text-white m-0">
-              Yeni Müşteri Kaydı
-            </h2>
+            <div class="flex items-center gap-2">
+              <h2 id="customer-form-title" class="text-base sm:text-lg font-black text-slate-900 dark:text-white m-0">
+                Yeni Müşteri Kaydı
+              </h2>
+              <span class="material-symbols-outlined text-slate-400 icon-size-4 opacity-50 pointer-events-none hidden sm:inline-block" title="Pencereyi taşımak için sürükleyin">
+                drag_indicator
+              </span>
+            </div>
             <span class="text-xs text-slate-500 dark:text-slate-400">
               Kimlik, sağlık, iletişim ve cüzdan bilgilerini eksiksiz tanımlayın.
             </span>
           </div>
         </div>
 
-        <button
-          type="button"
-          (click)="close.emit()"
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white border-0 bg-transparent cursor-pointer"
-          aria-label="Kapat"
-        >
-          <span class="material-symbols-outlined icon-size-5">close</span>
-        </button>
+        <div class="flex items-center gap-1">
+          <!-- Maximize / Restore Toggle Button -->
+          <button
+            type="button"
+            (click)="toggleMaximize()"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 border-0 bg-transparent cursor-pointer transition-colors"
+            [title]="isMaximized() ? 'Varsayılan Boyuta Küçült' : 'Tam Ekran Büyüt'"
+            [attr.aria-label]="isMaximized() ? 'Küçült' : 'Büyüt'"
+          >
+            <span class="material-symbols-outlined icon-size-5">
+              {{ isMaximized() ? 'fullscreen_exit' : 'fullscreen' }}
+            </span>
+          </button>
+
+          <!-- Close Button -->
+          <button
+            type="button"
+            (click)="close.emit()"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-0 bg-transparent cursor-pointer transition-colors"
+            aria-label="Kapat"
+          >
+            <span class="material-symbols-outlined icon-size-5">close</span>
+          </button>
+        </div>
       </header>
 
       <!-- Error Toast -->
@@ -66,60 +108,68 @@
         }
       </div>
 
-      <!-- Step / Tab Navigation -->
-      <nav class="flex border-b border-slate-200 dark:border-slate-800 px-5 gap-2 bg-slate-50/50 dark:bg-slate-800/30 overflow-x-auto">
-        <button
-          type="button"
-          (click)="setTab('identity')"
-          class="form-tab-btn"
-          [class.form-tab-btn-active]="activeTab() === 'identity'"
-        >
-          <span class="material-symbols-outlined icon-size-4">badge</span>
-          <span>1. Kimlik & Kişisel</span>
-        </button>
+      <!-- Stepper Progress Bar -->
+      <div class="w-full bg-slate-100 dark:bg-slate-800 h-1 overflow-hidden">
+        <div
+          class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300"
+          [style.width.%]="stepProgress()"
+        ></div>
+      </div>
 
-        <button
-          type="button"
-          (click)="setTab('contact')"
-          class="form-tab-btn"
-          [class.form-tab-btn-active]="activeTab() === 'contact'"
-        >
-          <span class="material-symbols-outlined icon-size-4">call</span>
-          <span>2. İletişim & Adres</span>
-        </button>
+      <!-- Visual Step Wizard Navigation -->
+      <nav class="px-4 sm:px-6 py-2.5 bg-slate-50/70 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto custom-scroll" aria-label="Kayıt Adımları">
+        @for (step of steps; track step.id) {
+          <button
+            type="button"
+            (click)="setTab(step.id)"
+            class="flex-1 min-w-[125px] sm:min-w-0 p-2 sm:p-2.5 rounded-2xl flex items-center gap-2.5 transition-all text-left border-0 cursor-pointer"
+            [class.bg-indigo-500/10]="activeTab() === step.id"
+            [class.dark:bg-indigo-500/20]="activeTab() === step.id"
+            [class.border]="activeTab() === step.id"
+            [class.border-indigo-500/40]="activeTab() === step.id"
+            [class.shadow-xs]="activeTab() === step.id"
+            [class.bg-transparent]="activeTab() !== step.id"
+            [class.hover:bg-slate-100]="activeTab() !== step.id"
+            [class.dark:hover:bg-slate-800/60]="activeTab() !== step.id"
+          >
+            <!-- Step Circle (Number or Check) -->
+            <div
+              class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all flex-shrink-0"
+              [class.bg-gradient-to-tr]="activeTab() === step.id"
+              [class.from-indigo-600]="activeTab() === step.id"
+              [class.to-purple-600]="activeTab() === step.id"
+              [class.text-white]="activeTab() === step.id"
+              [class.shadow-md]="activeTab() === step.id"
+              [class.shadow-indigo-500/30]="activeTab() === step.id"
+              [class.bg-emerald-500]="activeTab() !== step.id && isStepCompleted(step.id)"
+              [class.text-white]="activeTab() !== step.id && isStepCompleted(step.id)"
+              [class.bg-slate-200]="activeTab() !== step.id && !isStepCompleted(step.id)"
+              [class.dark:bg-slate-800]="activeTab() !== step.id && !isStepCompleted(step.id)"
+              [class.text-slate-500]="activeTab() !== step.id && !isStepCompleted(step.id)"
+            >
+              @if (activeTab() !== step.id && isStepCompleted(step.id)) {
+                <span class="material-symbols-outlined text-sm font-bold">check</span>
+              } @else {
+                <span>{{ step.number }}</span>
+              }
+            </div>
 
-        <button
-          type="button"
-          (click)="setTab('health')"
-          class="form-tab-btn"
-          [class.form-tab-btn-active]="activeTab() === 'health'"
-        >
-          <span class="material-symbols-outlined icon-size-4">medical_services</span>
-          <span>3. Sağlık & Cilt</span>
-        </button>
-
-        <button
-          type="button"
-          (click)="setTab('finance_crm')"
-          class="form-tab-btn"
-          [class.form-tab-btn-active]="activeTab() === 'finance_crm'"
-        >
-          <span class="material-symbols-outlined icon-size-4">account_balance_wallet</span>
-          <span>4. CRM & Cüzdan</span>
-        </button>
-
-        <button
-          type="button"
-          (click)="setTab('consultation')"
-          class="form-tab-btn"
-          [class.form-tab-btn-active]="activeTab() === 'consultation'"
-        >
-          <span class="material-symbols-outlined icon-size-4 text-amber-500">support_agent</span>
-          <span>5. Ön Görüşme & Seans</span>
-          @if (consultationInquiredSession().trim()) {
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          }
-        </button>
+            <div class="min-w-0">
+              <span
+                class="block text-xs font-bold truncate leading-tight"
+                [class.text-indigo-600]="activeTab() === step.id"
+                [class.dark:text-indigo-400]="activeTab() === step.id"
+                [class.text-slate-700]="activeTab() !== step.id"
+                [class.dark:text-slate-300]="activeTab() !== step.id"
+              >
+                {{ step.title }}
+              </span>
+              <span class="block text-[10px] text-slate-400 truncate mt-0.5 font-medium hidden sm:block">
+                {{ step.subtitle }}
+              </span>
+            </div>
+          </button>
+        }
       </nav>
 
       <!-- Form Body -->
@@ -143,17 +193,22 @@
                 />
               </div>
 
-              <!-- TCKN with Live Check -->
+              <!-- TCKN with Live Check & Duplicate Alert -->
               <div>
                 <div class="flex items-center justify-between mb-1">
                   <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     T.C. Kimlik Numarası
                   </label>
                   @if (identityNumber().trim()) {
-                    @if (isTcknValid()) {
+                    @if (existingCustomerWithTckn()) {
+                      <span class="text-[10px] font-bold text-rose-500 flex items-center gap-0.5 animate-pulse">
+                        <span class="material-symbols-outlined icon-size-3">warning</span>
+                        Sistemde Kayıtlı!
+                      </span>
+                    } @else if (isTcknValid()) {
                       <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
                         <span class="material-symbols-outlined icon-size-3">verified</span>
-                        Geçerli TCKN
+                        Geçerli & Benzersiz
                       </span>
                     } @else {
                       <span class="text-[10px] font-bold text-rose-500 flex items-center gap-0.5">
@@ -169,8 +224,21 @@
                   [value]="identityNumber()"
                   (input)="identityNumber.set($any($event.target).value)"
                   class="odv-input font-mono"
+                  [class.border-rose-500]="existingCustomerWithTckn()"
+                  [class.focus:border-rose-500]="existingCustomerWithTckn()"
                   placeholder="11 Haneli Kimlik No"
                 />
+
+                @if (existingCustomerWithTckn(); as dup) {
+                  <div class="mt-2 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                    <span class="material-symbols-outlined icon-size-4 text-rose-500 flex-shrink-0">report</span>
+                    <span class="leading-tight">
+                      Bu T.C. Kimlik no sistemde zaten kayıtlı:
+                      <strong>{{ dup['fullName'] || dup['name'] }}</strong>
+                      ({{ dup['phone'] || dup.id }})
+                    </span>
+                  </div>
+                }
               </div>
 
               <!-- Doğum Tarihi & Live Age Calculation -->
@@ -712,23 +780,24 @@
         </button>
 
         <div class="flex items-center gap-2">
-          @if (activeTab() !== 'identity') {
+          @if (currentStepIndex() > 0) {
             <button
               type="button"
-              (click)="setTab(activeTab() === 'consultation' ? 'finance_crm' : activeTab() === 'finance_crm' ? 'health' : activeTab() === 'health' ? 'contact' : 'identity')"
-              class="odv-btn-ghost text-xs"
+              (click)="prevTab()"
+              class="odv-btn-ghost text-xs flex items-center gap-1.5"
             >
-              Geri
+              <span class="material-symbols-outlined icon-size-4">arrow_back</span>
+              <span>Geri: {{ steps[currentStepIndex() - 1].title }}</span>
             </button>
           }
 
-          @if (activeTab() !== 'consultation') {
+          @if (currentStepIndex() < steps.length - 1) {
             <button
               type="button"
-              (click)="setTab(activeTab() === 'identity' ? 'contact' : activeTab() === 'contact' ? 'health' : activeTab() === 'health' ? 'finance_crm' : 'consultation')"
-              class="odv-btn-secondary text-xs"
+              (click)="nextTab()"
+              class="odv-btn-secondary text-xs flex items-center gap-1.5"
             >
-              <span>İleri</span>
+              <span>İleri: {{ steps[currentStepIndex() + 1].title }}</span>
               <span class="material-symbols-outlined icon-size-4">arrow_forward</span>
             </button>
           }
@@ -737,7 +806,7 @@
             type="button"
             [disabled]="saving()"
             (click)="submit()"
-            class="odv-btn-primary text-xs"
+            class="odv-btn-primary text-xs flex items-center gap-1.5"
           >
             <span class="material-symbols-outlined icon-size-4">
               {{ saving() ? 'sync' : 'person_add' }}

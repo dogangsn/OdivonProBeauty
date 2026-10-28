@@ -1,21 +1,14 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { EntityLookupService } from '../../core/entity-lookup.service';
+import { SmsService } from '../../core/sms/sms.service';
 import {
-  INITIAL_SMS_LOGS,
-  INITIAL_SMS_PROVIDERS,
-  INITIAL_SMS_STATS,
-  INITIAL_SMS_TEMPLATES,
-} from '../../core/sms/sms-demo-data';
-import {
-  SmsLog,
   SmsLogStatus,
   SmsProvider,
   SmsProviderId,
-  SmsStats,
   SmsTemplate,
 } from '../../core/sms/sms.model';
-
 import { PageHeader } from '../../shared/page-header/page-header';
 
 @Component({
@@ -24,7 +17,10 @@ import { PageHeader } from '../../shared/page-header/page-header';
   styleUrl: './sms-settings.css',
   templateUrl: './sms-settings.html',
 })
-export class SmsSettings {
+export class SmsSettings implements OnInit {
+  private readonly smsService = inject(SmsService);
+  private readonly entityLookup = inject(EntityLookupService);
+
   readonly placeholderList = [
     'musteri_adi',
     'randevu_tarihi',
@@ -43,11 +39,22 @@ export class SmsSettings {
   // Navigation tabs
   protected readonly activeTab = signal<'providers' | 'templates' | 'logs' | 'direct'>('providers');
 
-  // Core state signals
-  protected readonly providers = signal<SmsProvider[]>(INITIAL_SMS_PROVIDERS);
-  protected readonly templates = signal<SmsTemplate[]>(INITIAL_SMS_TEMPLATES);
-  protected readonly logs = signal<SmsLog[]>(INITIAL_SMS_LOGS);
-  protected readonly stats = signal<SmsStats>(INITIAL_SMS_STATS);
+  // Sync & Loading State from SmsService
+  protected readonly loading = this.smsService.loading;
+  protected readonly isSyncing = this.smsService.isSyncing;
+  protected readonly lastSyncedAt = this.smsService.lastSyncedAt;
+
+  // Real data signals from SmsService
+  protected readonly providers = this.smsService.providers;
+  protected readonly templates = this.smsService.templates;
+  protected readonly logs = this.smsService.logs;
+  protected readonly stats = this.smsService.stats;
+  protected readonly defaultProvider = this.smsService.defaultProvider;
+
+  // Registered customers for Direct SMS selector
+  protected readonly registeredCustomers = computed(() => {
+    return this.entityLookup.getRecords('customers');
+  });
 
   // Search & Filters for Logs
   protected readonly logSearchQuery = signal('');
@@ -84,6 +91,7 @@ export class SmsSettings {
   protected readonly templateSenderTitle = signal('ODIVONPRO');
 
   // Direct Sender Form
+  protected readonly directCustomerId = signal('');
   protected readonly directPhone = signal('');
   protected readonly directName = signal('');
   protected readonly directMessage = signal('');
@@ -91,10 +99,14 @@ export class SmsSettings {
   protected readonly directSending = signal(false);
   protected readonly directFeedback = signal<string | null>(null);
 
-  // Computed: Default active provider
-  protected readonly defaultProvider = computed(() => {
-    return this.providers().find((p) => p.isDefault) ?? this.providers()[0];
-  });
+  ngOnInit(): void {
+    void this.entityLookup.ensure('customers');
+  }
+
+  // Refresh data from MainApi
+  protected async refreshData(): Promise<void> {
+    await this.smsService.syncRemote();
+  }
 
   // Computed: Filtered Logs
   protected readonly filteredLogs = computed(() => {
@@ -163,71 +175,37 @@ export class SmsSettings {
     this.testingConnection.set(true);
     this.testConnectionSuccess.set(null);
 
-    // Simulate API test ping
-    await new Promise((r) => setTimeout(r, 800));
+    const success = await this.smsService.testProviderConnection(provider.id);
 
     this.testingConnection.set(false);
-    this.testConnectionSuccess.set(true);
-
-    // Update tested provider info
-    this.providers.update((list) =>
-      list.map((p) =>
-        p.id === provider.id
-          ? {
-              ...p,
-              lastTestedAt: new Date().toISOString(),
-              lastTestStatus: 'success',
-              balance: p.balance > 0 ? p.balance : 1500,
-            }
-          : p
-      )
-    );
+    this.testConnectionSuccess.set(success);
   }
 
-  protected saveProviderConfig(): void {
+  protected async saveProviderConfig(): Promise<void> {
     const provider = this.selectedProvider();
     if (!provider) return;
 
-    this.providers.update((list) =>
-      list.map((p) =>
-        p.id === provider.id
-          ? {
-              ...p,
-              originator: this.configOriginator().trim() || p.originator,
-              credentials: {
-                username: this.configUsername().trim() || undefined,
-                password: this.configPassword().trim() || undefined,
-                apiKey: this.configApiKey().trim() || undefined,
-                apiSecret: this.configApiSecret().trim() || undefined,
-                accountSid: this.configAccountSid().trim() || undefined,
-                authToken: this.configAuthToken().trim() || undefined,
-              },
-            }
-          : p
-      )
-    );
+    await this.smsService.saveProviderConfig(provider.id, {
+      originator: this.configOriginator().trim() || provider.originator,
+      credentials: {
+        username: this.configUsername().trim() || undefined,
+        password: this.configPassword().trim() || undefined,
+        apiKey: this.configApiKey().trim() || undefined,
+        apiSecret: this.configApiSecret().trim() || undefined,
+        accountSid: this.configAccountSid().trim() || undefined,
+        authToken: this.configAuthToken().trim() || undefined,
+      },
+    });
 
     this.closeConfigModal();
   }
 
   protected setDefaultProvider(providerId: SmsProviderId): void {
-    this.providers.update((list) =>
-      list.map((p) => ({
-        ...p,
-        isDefault: p.id === providerId,
-        isActive: p.id === providerId ? true : p.isActive,
-      }))
-    );
+    void this.smsService.setDefaultProvider(providerId);
   }
 
   protected toggleProviderActive(provider: SmsProvider): void {
-    if (provider.isDefault && provider.isActive) {
-      return; // Cannot deactivate current default provider
-    }
-
-    this.providers.update((list) =>
-      list.map((p) => (p.id === provider.id ? { ...p, isActive: !p.isActive } : p))
-    );
+    void this.smsService.toggleProviderActive(provider.id);
   }
 
   // --- Test SMS Operations ---
@@ -250,36 +228,20 @@ export class SmsSettings {
     this.sendingTestSms.set(true);
     this.testSmsFeedback.set(null);
 
-    await new Promise((r) => setTimeout(r, 700));
-
-    this.sendingTestSms.set(false);
-    this.testSmsFeedback.set(`${this.testSmsPhone()} numarasına test SMS’i başarıyla iletildi.`);
-
-    // Decrement balance
-    this.providers.update((list) =>
-      list.map((p) => (p.id === provider.id ? { ...p, balance: Math.max(0, p.balance - 1) } : p))
-    );
-
-    // Add to delivery log
-    const newLog: SmsLog = {
-      id: `log-${Date.now()}`,
-      recipientPhone: this.testSmsPhone(),
-      recipientName: 'Test Alıcısı',
-      messageContent: this.testSmsMessage(),
-      providerName: provider.name,
-      senderTitle: provider.originator,
-      sentAt: new Date().toISOString(),
-      status: 'delivered',
-      smsCount: 1,
-      templateTitle: 'Bağlantı Test Mesajı',
-    };
-
-    this.logs.update((l) => [newLog, ...l]);
-    this.stats.update((st) => ({
-      ...st,
-      totalSentThisMonth: st.totalSentThisMonth + 1,
-      totalCreditsRemaining: Math.max(0, st.totalCreditsRemaining - 1),
-    }));
+    try {
+      await this.smsService.sendTestSms(
+        provider.id,
+        this.testSmsPhone(),
+        this.testSmsMessage(),
+      );
+      this.testSmsFeedback.set(
+        `${this.testSmsPhone()} numarasına test SMS’i başarıyla iletildi.`,
+      );
+    } catch {
+      this.testSmsFeedback.set('SMS iletilirken bir hata oluştu.');
+    } finally {
+      this.sendingTestSms.set(false);
+    }
   }
 
   // --- Template Operations ---
@@ -303,34 +265,57 @@ export class SmsSettings {
     this.templateContent.update((c) => c + ` {{${token}}}`);
   }
 
-  protected saveTemplate(): void {
+  protected async saveTemplate(): Promise<void> {
     const tmpl = this.selectedTemplate();
     if (!tmpl) return;
 
-    this.templates.update((list) =>
-      list.map((t) =>
-        t.id === tmpl.id
-          ? {
-              ...t,
-              title: this.templateTitle().trim() || t.title,
-              content: this.templateContent().trim() || t.content,
-              isAutoSend: this.templateAutoSend(),
-              defaultSenderTitle: this.templateSenderTitle().trim() || 'ODIVONPRO',
-            }
-          : t
-      )
-    );
+    await this.smsService.saveTemplate(tmpl.id, {
+      title: this.templateTitle().trim() || tmpl.title,
+      content: this.templateContent().trim() || tmpl.content,
+      isAutoSend: this.templateAutoSend(),
+      defaultSenderTitle: this.templateSenderTitle().trim() || 'ODIVONPRO',
+    });
 
     this.closeTemplateModal();
   }
 
   protected toggleTemplateAutoSend(tmpl: SmsTemplate): void {
-    this.templates.update((list) =>
-      list.map((t) => (t.id === tmpl.id ? { ...t, isAutoSend: !t.isAutoSend } : t))
-    );
+    void this.smsService.toggleTemplateAutoSend(tmpl.id);
   }
 
   // --- Direct SMS Operations ---
+
+  protected onDirectCustomerChange(customerId: string): void {
+    this.directCustomerId.set(customerId);
+    if (!customerId) return;
+
+    const customers = this.registeredCustomers();
+    const cust = customers.find((c) => c.id === customerId);
+    if (cust) {
+      const name = (cust['fullName'] as string) || (cust['name'] as string) || '';
+      const phone = (cust['phone'] as string) || '';
+      this.directName.set(name);
+      this.directPhone.set(phone);
+
+      // If a template is currently selected, re-interpolate with customer name
+      if (this.directSelectedTemplateId()) {
+        const tmpl = this.templates().find((t) => t.id === this.directSelectedTemplateId());
+        if (tmpl) {
+          let content = tmpl.content;
+          if (name) {
+            content = content.replace(/\{\{musteri_adi\}\}/g, name);
+          }
+          this.directMessage.set(content);
+        }
+      }
+    }
+  }
+
+  protected clearSelectedCustomer(): void {
+    this.directCustomerId.set('');
+    this.directName.set('');
+    this.directPhone.set('');
+  }
 
   protected onDirectTemplateChange(templateId: string): void {
     this.directSelectedTemplateId.set(templateId);
@@ -350,46 +335,32 @@ export class SmsSettings {
     this.directSending.set(true);
     this.directFeedback.set(null);
 
-    await new Promise((r) => setTimeout(r, 600));
-
-    const prov = this.defaultProvider();
     const smsCount = this.directMessageSmsCount().smsCount;
+    const phone = this.directPhone();
 
-    // Add log
-    const newLog: SmsLog = {
-      id: `log-${Date.now()}`,
-      recipientPhone: this.directPhone(),
-      recipientName: this.directName().trim() || 'Doğrudan Alıcı',
-      messageContent: this.directMessage().trim(),
-      providerName: prov.name,
-      senderTitle: prov.originator,
-      sentAt: new Date().toISOString(),
-      status: 'delivered',
-      smsCount,
-      templateTitle: 'Doğrudan Gönderim',
-    };
+    try {
+      await this.smsService.sendDirectSms({
+        phone: this.directPhone(),
+        name: this.directName().trim() || 'Doğrudan Alıcı',
+        message: this.directMessage().trim(),
+        templateKey: this.directSelectedTemplateId() || undefined,
+        customerId: this.directCustomerId() || undefined,
+        smsCount,
+      });
 
-    this.logs.update((l) => [newLog, ...l]);
+      this.directFeedback.set(
+        `${phone} numarasına ${smsCount} adet SMS başarıyla iletildi.`,
+      );
 
-    // Decrement provider balance
-    this.providers.update((list) =>
-      list.map((p) => (p.id === prov.id ? { ...p, balance: Math.max(0, p.balance - smsCount) } : p))
-    );
-
-    this.stats.update((st) => ({
-      ...st,
-      totalSentThisMonth: st.totalSentThisMonth + smsCount,
-      totalCreditsRemaining: Math.max(0, st.totalCreditsRemaining - smsCount),
-    }));
-
-    this.directSending.set(false);
-    this.directFeedback.set(
-      `${this.directPhone()} numarasına ${smsCount} adet SMS başarıyla iletildi.`
-    );
-
-    // Reset inputs
-    this.directPhone.set('');
-    this.directName.set('');
-    this.directMessage.set('');
+      // Reset form
+      this.directPhone.set('');
+      this.directName.set('');
+      this.directCustomerId.set('');
+      this.directMessage.set('');
+    } catch {
+      this.directFeedback.set('SMS gönderimi sırasında bir hata oluştu.');
+    } finally {
+      this.directSending.set(false);
+    }
   }
 }

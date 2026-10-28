@@ -7,6 +7,25 @@
     description="Netgsm, İleti Merkezi, Mutlucell ve Twilio entegrasyonlarıyla randevu onayları, hatırlatmalar ve kapora linklerini otomatik iletin."
   >
     <div actions class="flex items-center gap-2">
+      <!-- Sync / Refresh Button -->
+      <button
+        type="button"
+        (click)="refreshData()"
+        [disabled]="loading() || isSyncing()"
+        title="MainApi verilerini yeniden senkronize et"
+        class="p-2.5 px-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-800 flex items-center gap-2 shadow-xs cursor-pointer text-xs font-bold transition-all disabled:opacity-60"
+      >
+        <span
+          class="material-symbols-outlined icon-size-4 text-indigo-500"
+          [class.animate-spin]="loading() || isSyncing()"
+        >
+          sync
+        </span>
+        <span class="hidden sm:inline">
+          {{ loading() || isSyncing() ? 'Senkronize Ediliyor...' : 'Yenile' }}
+        </span>
+      </button>
+
       <div class="p-2.5 px-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 shadow-xs">
         <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
           <span class="material-symbols-outlined icon-size-4">send</span>
@@ -483,6 +502,38 @@
       }
 
       <div class="space-y-4 text-xs">
+        <!-- Customer Quick Select -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="directCustomerSelect" class="block font-bold text-slate-700 dark:text-slate-300">
+              Kayıtlı Müşteri Seç (Opsiyonel)
+            </label>
+            @if (directCustomerId()) {
+              <button
+                type="button"
+                (click)="clearSelectedCustomer()"
+                class="text-[11px] font-bold text-rose-500 hover:text-rose-600 bg-transparent border-0 cursor-pointer flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined icon-size-3.5">close</span>
+                <span>Seçimi Temizle</span>
+              </button>
+            }
+          </div>
+          <select
+            id="directCustomerSelect"
+            [ngModel]="directCustomerId()"
+            (ngModelChange)="onDirectCustomerChange($event)"
+            class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          >
+            <option value="">-- Kayıtlı Müşteri Listesinden Seçin veya Aşağıya Serbest Yazın --</option>
+            @for (cust of registeredCustomers(); track cust.id) {
+              <option [value]="cust.id">
+                {{ cust['fullName'] || cust['name'] || 'İsimsiz Müşteri' }} — {{ cust['phone'] || 'Telefonsuz' }}
+              </option>
+            }
+          </select>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label for="directPhone" class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Alıcı Telefon No</label>

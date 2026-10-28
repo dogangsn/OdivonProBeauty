@@ -288,7 +288,7 @@
         }
 
         @if (listLoading() && !list().length) {
-          <p class="m-0 py-8 text-center text-sm text-slate-500">Talepler yükleniyor…</p>
+          <app-skeleton [rows]="4" label="Talepler yükleniyor" />
         } @else if (!filtered().length) {
           <div class="py-10 text-center">
             <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 icon-size-8"

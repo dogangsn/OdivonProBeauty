@@ -5,11 +5,13 @@ import { BeautyRecord } from '../../../core/beauty.model';
 import { BranchService } from '../../../core/branch.service';
 import { BookingLink, OnlineBookingApi, errorMessage } from '../../../core/booking/online-booking.service';
 import { PageHeader } from '../../../shared/page-header/page-header';
+import { Loader } from '../../../shared/loader/loader';
+import { Skeleton } from '../../../shared/loader/skeleton';
 
 /** Salon settings page for the shareable online booking link ("Randevu linki"). */
 @Component({
   selector: 'app-booking-link',
-  imports: [PageHeader],
+  imports: [Skeleton, Loader, PageHeader],
   templateUrl: './booking-link.html',
 })
 export class BookingLinkPage {

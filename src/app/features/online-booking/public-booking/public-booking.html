@@ -29,7 +29,7 @@
 
   <main class="booking-wrap py-6 sm:py-10">
     @if (info.isLoading()) {
-      <div class="state-card" role="status">Randevu sayfası yükleniyor…</div>
+      <div class="state-card"><app-loader size="lg" label="Randevu sayfası yükleniyor…" /></div>
     } @else if (info.error()) {
       <section class="state-card">
         <span class="material-symbols-outlined text-4xl text-slate-400" aria-hidden="true"
@@ -89,7 +89,7 @@
         </div>
       </section>
     } @else if (existing.isLoading()) {
-      <div class="state-card" role="status">Randevunuz yükleniyor…</div>
+      <div class="state-card"><app-loader size="lg" label="Randevunuz yükleniyor…" /></div>
     } @else if (info.hasValue()) {
       @let salon = info.value();
       <section class="mb-6">
@@ -118,7 +118,7 @@
           <section class="step-card" aria-labelledby="step-service">
             <h2 id="step-service" class="step-title"><span>1</span> Hizmet seçin</h2>
             @if (services.isLoading()) {
-              <p class="muted">Hizmetler yükleniyor…</p>
+              <app-skeleton [rows]="3" [avatar]="false" label="Hizmetler yükleniyor" />
             } @else if (services.error()) {
               <p class="error-text">{{ errorText(services.error()) }}</p>
             } @else if (services.hasValue() && services.value().length === 0) {
@@ -151,7 +151,7 @@
             <section class="step-card" aria-labelledby="step-staff">
               <h2 id="step-staff" class="step-title"><span>2</span> Uzman seçin</h2>
               @if (staff.isLoading()) {
-                <p class="muted">Uzmanlar yükleniyor…</p>
+                <app-loader size="sm" [inline]="true" label="Uzmanlar yükleniyor…" />
               } @else if (staff.hasValue()) {
                 <div class="flex flex-wrap gap-2">
                   <button
@@ -212,7 +212,7 @@
 
               <div class="mt-4">
                 @if (slots.isLoading()) {
-                  <p class="muted" role="status">Uygun saatler aranıyor…</p>
+                  <app-loader size="sm" [inline]="true" label="Uygun saatler aranıyor…" />
                 } @else if (slots.error()) {
                   <p class="error-text">{{ errorText(slots.error()) }}</p>
                 } @else if (slots.hasValue()) {

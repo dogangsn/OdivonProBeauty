@@ -15,12 +15,13 @@ import {
 } from '../../core/support/support-ticket.model';
 import { SupportTicketService } from '../../core/support/support-ticket.service';
 import { PageHeader } from '../../shared/page-header/page-header';
+import { Skeleton } from '../../shared/loader/skeleton';
 
 type StatusFilter = 'all' | 'open' | 'closed';
 
 /** Müşterinin destek talebi açtığı ve taleplerinin durumunu izlediği ekran. */
 @Component({
-  imports: [DatePipe, NgTemplateOutlet, PageHeader, ReactiveFormsModule],
+  imports: [Skeleton, DatePipe, NgTemplateOutlet, PageHeader, ReactiveFormsModule],
   selector: 'app-support',
   templateUrl: './support.html',
 })

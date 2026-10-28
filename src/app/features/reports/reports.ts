@@ -11,6 +11,7 @@ import {
   InstallmentScheduleItem,
 } from '../../core/customer/customer.model';
 import { PageHeader } from '../../shared/page-header/page-header';
+import { Skeleton } from '../../shared/loader/skeleton';
 
 export type ReportTab =
   | 'financial'
@@ -94,7 +95,7 @@ export interface InstallmentAgingItem {
 
 @Component({
   selector: 'app-reports',
-  imports: [DecimalPipe, PageHeader],
+  imports: [Skeleton, DecimalPipe, PageHeader],
   templateUrl: './reports.html',
   styleUrl: './reports.css',
 })

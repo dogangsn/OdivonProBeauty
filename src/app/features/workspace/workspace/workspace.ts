@@ -28,6 +28,7 @@ import {
 import { CustomerConsultation, CustomerHealth, CustomerPackage, CustomerProfile, CustomerSessionItem, calculateAge } from '../../../core/customer/customer.model';
 import { DEMO_CUSTOMERS } from '../../../core/customer/customer-demo-data';
 import { DEMO_CONSULTATIONS } from '../../../core/customer/consultation-demo-data';
+import { Skeleton } from '../../../shared/loader/skeleton';
 
 export interface HealthDocumentAttachment {
   id: string;
@@ -201,7 +202,7 @@ type DraftValue = string | number | boolean | unknown[] | Record<string, unknown
 type Draft = Record<string, DraftValue>;
 
 @Component({
-  imports: [
+  imports: [Skeleton, 
     CustomerCombobox,
     CustomerDetailModal,
     CustomerFormModal,

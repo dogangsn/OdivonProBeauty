@@ -148,6 +148,20 @@
     </div>
   </section>
 
+  @if (reportData.isLoading() && !reportData.hasValue()) {
+    <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5" aria-hidden="true">
+      @for (card of [1, 2, 3, 4, 5]; track card) {
+        <div class="odv-card p-4 grid gap-3">
+          <span class="odv-skeleton h-3 w-2/3"></span>
+          <span class="odv-skeleton h-7 w-1/2 rounded-lg"></span>
+          <span class="odv-skeleton h-2.5 w-3/4"></span>
+        </div>
+      }
+    </section>
+    <div class="odv-card overflow-hidden">
+      <app-skeleton variant="table" [rows]="6" [cols]="5" label="Rapor verileri yükleniyor" />
+    </div>
+  } @else {
   <!-- 3. Top Executive KPI Summary Strip (5 Cards) -->
   <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5" aria-label="Yönetici Finansal ve Operasyonel Özet">
     <div class="odv-card p-4 relative overflow-hidden flex flex-col justify-between">
@@ -957,5 +971,6 @@
         </div>
       </div>
     </section>
+  }
   }
 </div>

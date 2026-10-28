@@ -11,4 +11,6 @@ export class KpiCard {
   readonly detail = input.required<string>();
   readonly tone = input<'indigo' | 'emerald' | 'amber' | 'rose' | 'hero'>('indigo');
   readonly icon = input<string>('');
+  /** Shows a shimmer in place of the number while the metric loads. */
+  readonly loading = input(false);
 }

@@ -511,6 +511,8 @@
         <span>Tekrar Dene</span>
       </button>
     </div>
+  } @else if (remote.isLoading() && !remote.hasValue()) {
+    <app-skeleton variant="table" [rows]="6" [cols]="5" label="Kayıtlar yükleniyor" />
   } @else {
     <div class="overflow-x-auto custom-scroll">
       <table class="w-full text-left border-collapse">

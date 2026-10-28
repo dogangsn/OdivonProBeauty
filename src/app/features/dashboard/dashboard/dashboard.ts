@@ -9,6 +9,7 @@ import { KpiCard } from '../../../shared/kpi-card/kpi-card';
 import { LiveRadar } from '../../../shared/live-radar/live-radar';
 import { PageHeader } from '../../../shared/page-header/page-header';
 import { StatusBadge } from '../../../shared/status-badge/status-badge';
+import { Skeleton } from '../../../shared/loader/skeleton';
 
 interface DashboardSummary {
   appointments: number;
@@ -18,7 +19,7 @@ interface DashboardSummary {
 }
 
 @Component({
-  imports: [BaseChartDirective, KpiCard, LiveRadar, PageHeader, RouterLink, StatusBadge],
+  imports: [Skeleton, BaseChartDirective, KpiCard, LiveRadar, PageHeader, RouterLink, StatusBadge],
   selector: 'app-dashboard',
   styleUrl: './dashboard.css',
   templateUrl: './dashboard.html',

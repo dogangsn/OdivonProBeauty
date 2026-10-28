@@ -11,7 +11,15 @@
       </div>
     </div>
     <div class="kpi-hero-card__body">
-      <strong class="kpi-hero-card__value">{{ value() }}</strong>
+      @if (loading()) {
+        <span
+          class="odv-skeleton odv-skeleton--on-color h-10 w-24 rounded-xl"
+          aria-hidden="true"
+        ></span>
+        <span class="sr-only" role="status">{{ label() }} yükleniyor</span>
+      } @else {
+        <strong class="kpi-hero-card__value">{{ value() }}</strong>
+      }
       <span class="kpi-hero-card__sub">{{ detail() }}</span>
     </div>
     <footer class="kpi-hero-card__footer">
@@ -48,11 +56,16 @@
         </div>
       </div>
       <div class="mt-4">
-        <strong
-          class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none block"
-        >
-          {{ value() }}
-        </strong>
+        @if (loading()) {
+          <span class="odv-skeleton h-9 w-28 rounded-xl" aria-hidden="true"></span>
+          <span class="sr-only" role="status">{{ label() }} yükleniyor</span>
+        } @else {
+          <strong
+            class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none block"
+          >
+            {{ value() }}
+          </strong>
+        }
         <div
           class="text-xs font-semibold mt-1.5"
           [class.text-emerald-600]="tone() === 'emerald'"

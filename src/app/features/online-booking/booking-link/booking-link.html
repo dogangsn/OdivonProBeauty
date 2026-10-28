@@ -37,7 +37,7 @@
     Randevu linki oluşturmak için önce bir şube tanımlayın.
   </section>
 } @else if (loading() && !link()) {
-  <section class="odv-card p-8 text-center text-slate-500" role="status">Yükleniyor…</section>
+  <section class="odv-card"><app-loader size="lg" label="Randevu linki yükleniyor…" /></section>
 } @else if (loadError()) {
   <section class="odv-card p-8 text-center text-rose-700">{{ loadError() }}</section>
 } @else if (link(); as current) {
@@ -136,7 +136,7 @@
           Bu linkler randevu sayfasını ilgili uzman seçili olarak açar.
         </p>
         @if (staff.isLoading()) {
-          <p class="text-sm text-slate-500">Yükleniyor…</p>
+          <app-skeleton [rows]="3" label="Uzmanlar yükleniyor" />
         } @else if (staff.hasValue() && staff.value().length === 0) {
           <p class="text-sm text-slate-500">Bu şubede aktif uzman yok.</p>
         } @else if (staff.hasValue()) {

@@ -5,9 +5,10 @@ import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api-client';
 import { Auth } from '../../../core/auth';
 import { BeautyRecord } from '../../../core/beauty.model';
+import { Loader } from '../../../shared/loader/loader';
 
 @Component({
-  imports: [RouterLink],
+  imports: [Loader, RouterLink],
   selector: 'app-portal',
   styleUrl: './portal.css',
   templateUrl: './portal.html',

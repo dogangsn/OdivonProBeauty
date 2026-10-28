@@ -19,6 +19,7 @@ import {
 } from '../../../shared/components/searchable-select/searchable-select';
 import { PageHeader } from '../../../shared/page-header/page-header';
 import { SlideOver } from '../../../shared/slide-over/slide-over';
+import { Loader } from '../../../shared/loader/loader';
 
 interface AppointmentForm {
   branchId: string;
@@ -33,7 +34,7 @@ interface AppointmentForm {
 }
 
 @Component({
-  imports: [
+  imports: [Loader, 
     CustomerCombobox,
     CustomerFormModal,
     FormField,

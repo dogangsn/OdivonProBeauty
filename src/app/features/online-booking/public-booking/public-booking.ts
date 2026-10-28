@@ -7,6 +7,8 @@ import {
   PublicBookingSlot,
   errorMessage,
 } from '../../../core/booking/online-booking.service';
+import { Loader } from '../../../shared/loader/loader';
+import { Skeleton } from '../../../shared/loader/skeleton';
 
 interface DayOption {
   value: string;
@@ -20,7 +22,7 @@ const ANY_STAFF = '';
 /** Public "randevu linki" page: a guest picks service, specialist, day and time, then books. */
 @Component({
   selector: 'app-public-booking',
-  imports: [RouterLink],
+  imports: [Skeleton, Loader, RouterLink],
   templateUrl: './public-booking.html',
   styleUrl: './public-booking.css',
 })

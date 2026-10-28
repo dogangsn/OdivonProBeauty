@@ -127,7 +127,7 @@
 </section>
 
 <!-- 4. Calendar Card -->
-<section class="odv-card p-5 overflow-hidden beauty-calendar">
+<section class="odv-card p-5 overflow-hidden beauty-calendar relative">
   @if (appointments.error()) {
     <div class="p-12 flex flex-col items-center justify-center text-center">
       <span class="material-symbols-outlined text-rose-500 icon-size-8">error</span>
@@ -142,6 +142,13 @@
     </div>
   } @else {
     <full-calendar [options]="options()" />
+    @if (appointments.isLoading()) {
+      <div
+        class="absolute inset-0 z-10 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-[2px] rounded-[inherit]"
+      >
+        <app-loader label="Randevular yükleniyor…" />
+      </div>
+    }
   }
 </section>
 

@@ -59,6 +59,10 @@
           <p>{{ records.error() }}</p>
           <button type="button" (click)="records.reload()">Tekrar dene</button>
         </section>
+      } @else if (records.isLoading() && !records.hasValue()) {
+        <section class="state">
+          <app-loader size="lg" label="Randevu ve paketleriniz yükleniyor…" />
+        </section>
       } @else {
         <section class="portal-grid">
           <article>
